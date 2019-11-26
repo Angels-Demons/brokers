@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 .idea/
-broker/migrations
+accounts/migrations
+brokers/local_settings
 __pycache__/
 *.py[cod]
 *$py.class

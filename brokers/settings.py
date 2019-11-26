@@ -141,3 +141,7 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 log_direction = '/var/log/django/'
+try:
+    from .local_settings import *
+except ImportError:
+    pass
