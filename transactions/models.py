@@ -2,6 +2,8 @@ from enum import Enum
 
 from django.db import models
 
+from accounts.models import Broker
+
 
 class ChargeType(Enum):
     MOSTAGHIM = 1001
@@ -24,6 +26,22 @@ class ChargeType(Enum):
             return "بانوان"
 
 
+class TopUpState(Enum):
+    INITIAL = 1
+    CALLED = 2
+    CALL_ERROR = 3
+    EXE_REQ = 4
+    EXECUTED = 5
+    EXECUTE_ERROR = 6
+
+    # @staticmethod
+    # def farsi(value):
+    #     if value == 1:
+    #         return "مستقیم"
+    #     elif value == 2:
+    #         return "دلخواه"
+
+
 class Choices:
     charge_type_choices = (
         (ChargeType.MOSTAGHIM.value, ChargeType.farsi(ChargeType.MOSTAGHIM.value)),
@@ -33,10 +51,82 @@ class Choices:
         (ChargeType.BANOVAN.value, ChargeType.farsi(ChargeType.BANOVAN.value)),
     )
 
+    top_up_states = (
+        (TopUpState.INITIAL.value, TopUpState.INITIAL.name),
+        (TopUpState.EXECUTED.value, TopUpState.EXECUTED.name),
+    )
+
+    bank_codes = (
+
+    )
+
+    card_types = (
+
+    )
+
 
 class TopUp(models.Model):
-    tell_num = models.BigIntegerField()
-    tell_charger = models.BigIntegerField()
-    amount = models.PositiveIntegerField()
-    charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices)
+    broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False, editable=False)
+    tell_num = models.BigIntegerField(blank=False, null=False, editable=False)
+    state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value, editable=False)
+    tell_charger = models.BigIntegerField(blank=False, null=False, editable=False)
+    amount = models.PositiveIntegerField(blank=False, null=False, editable=False)
+    charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False, editable=False)
+    call_response_type = models.SmallIntegerField(null=True, editable=False)
+    call_response_description = models.CharField(max_length=1023, null=True, editable=False)
+    exe_response_type = models.SmallIntegerField(null=True, editable=False)
+    exe_response_description = models.CharField(max_length=1023, null=True, editable=False)
+    provider_id = models.CharField(max_length=255, null=True, editable=False)
+    # modify RG: bank_codes enum
+    bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, editable=False)
+    card_number = models.CharField(max_length=255, null=True, editable=False)
+    # modify RG: card_types enum
+    card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, editable=False)
 
+    @staticmethod
+    def create(broker, tell_num, tell_charger, amount, charge_type):
+        top_up = TopUp(
+            broker=broker,
+            tell_num=tell_num,
+            # state =
+            tell_charger=tell_charger,
+            amount=amount,
+            charge_type=charge_type,
+            # call_response_type =
+            # call_response_description =
+            # exe_response_type =
+            # exe_response_description =
+            # provider_id =
+            # bank_code =
+            # card_number =
+            # card_type =
+        )
+        top_up.save()
+        return top_up
+
+    def after_call(self, call_response_type, call_response_description):
+        # modify RG: .SUCCESS.VALUE
+        if call_response_type == 0:
+            self.provider_id = call_response_description
+            self.state = TopUpState.CALLED.value
+        else:
+            self.state = TopUpState.CALL_ERROR.value
+
+        self.call_response_type = call_response_type
+        self.call_response_description = call_response_description
+        self.save()
+
+    def before_execute(self, bank_code, card_number, card_type):
+        self.state = TopUpState.EXE_REQ
+        self.bank_code = bank_code
+        self.card_number = card_number
+        self.card_type = card_type
+
+    def after_execute(self, exe_response_type, exe_response_description):
+        if exe_response_type == 0:
+            self.state = TopUpState.EXECUTED.value
+        else:
+            self.state = TopUpState.EXECUTE_ERROR.value
+        self.exe_response_type = exe_response_type
+        self.exe_response_description = exe_response_description
+        self.save()
