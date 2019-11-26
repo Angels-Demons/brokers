@@ -46,7 +46,7 @@ class BrokerAdmin(admin.ModelAdmin):
 
 
 class BalanceIncreaseAdmin(admin.ModelAdmin):
-    list_display = ['broker', 'creator', 'amount', 'comment', 'success', 'time_jalali','timestamp']
+    list_display = ['broker', 'creator', 'amount', 'comment', 'success', 'timestamp']
 
     def save_model(self, request, obj, form, change):
         obj.creator = request.user
