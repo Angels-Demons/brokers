@@ -4,3 +4,4 @@ djangorestframework==3.10.3
 jdatetime==3.6.2
 pytz==2019.3
 sqlparse==0.3.0
+django-jet==1.0.8
