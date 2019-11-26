@@ -9,6 +9,7 @@ behsa_username = ''
 behsa_password = ''
 behsa_password_upper=''
 MCI_token = ''
+broker_id = ''
 
 
 
@@ -26,17 +27,20 @@ class MCI():
             return False
 
     @staticmethod
-    def call_sale(TelNum,TelCharger,Amount,ChargeType,BrokerId):
+    def call_sale(TelNum,TelCharger,Amount,ChargeType):
         headers = {'Content-type': 'application/json', 'Accept': '*/*'}
         data = {
             'TelNum':TelNum,
             'TelCharger':TelCharger,
             'Amount':Amount,
             'ChargeType':ChargeType,
-            'BrokerId':BrokerId
+            'BrokerId':broker_id
         }
         response = requests.post(url=url_behsa+'Topup/CallSaleProvider',data=data,auth = HTTPBasicAuth(behsa_username,Create_behsa_pass()),headers=headers)
-        return json.loads(response.text)
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        response_description = res['ResponseDesc']
+        return response_type, response_description
 
 
     @staticmethod
@@ -49,8 +53,10 @@ class MCI():
             'CardType':CardType
         }
         response = requests.post(url=url_behsa+'Topup/ExecSaleProvider',data=data,auth = HTTPBasicAuth(behsa_username,Create_behsa_pass()),headers=headers)
-        return json.loads(response.text)
-
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        response_description = res['ResponseDesc']
+        return response_type, response_description
 
     @staticmethod
     def charge_status(BrokerId,TelNum,ProviderId,Bank):
@@ -62,8 +68,10 @@ class MCI():
             'Bank':Bank
         }
         response = requests.post(url=url_behsa+'Topup/ChargeStatusInquery',data=data,auth = HTTPBasicAuth(behsa_username,Create_behsa_pass()),headers=headers)
-        return json.loads(response.text)
-
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        response_description = res['ResponseDesc']
+        return response_type, response_description
 
 
 
