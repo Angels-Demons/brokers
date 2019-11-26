@@ -1,7 +1,8 @@
+from datetime import datetime
 from enum import Enum
 
 from django.db import models
-
+from django_jalali.db import models as jmodels
 from accounts.models import Broker
 
 
@@ -497,6 +498,7 @@ class Choices:
 
 class TopUp(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False, editable=False)
+    timestamp = jmodels.jDateTimeField(auto_now_add=True)
     tell_num = models.BigIntegerField(blank=False, null=False, editable=False)
     state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value, editable=False)
     tell_charger = models.BigIntegerField(blank=False, null=False, editable=False)
@@ -504,13 +506,14 @@ class TopUp(models.Model):
     charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False, editable=False)
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices,null=True, editable=False)
     call_response_description = models.CharField(max_length=1023, null=True, editable=False)
+    execution_time = jmodels.jDateTimeField(null=True, editable=False)
     exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices,null=True, editable=False)
+    execution_time = jmodels.jDateTimeField(null=True, editable=False)
+    exe_response_type = models.SmallIntegerField(null=True, editable=False)
     exe_response_description = models.CharField(max_length=1023, null=True, editable=False)
     provider_id = models.CharField(max_length=255, null=True, editable=False)
-    # modify RG: bank_codes enum
     bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, editable=False)
     card_number = models.CharField(max_length=255, null=True, editable=False)
-    # modify RG: card_types enum
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, editable=False)
 
     @staticmethod
@@ -535,28 +538,36 @@ class TopUp(models.Model):
         return top_up
 
     def after_call(self, call_response_type, call_response_description):
+        self.call_response_type = call_response_type
+        self.call_response_description = call_response_description
+
         # modify RG: .SUCCESS.VALUE
         if call_response_type == ResponseTypes.SUCCESS.value:
             self.provider_id = call_response_description
             self.state = TopUpState.CALLED.value
+            self.save()
+            return True
         else:
             self.state = TopUpState.CALL_ERROR.value
-
-        self.call_response_type = call_response_type
-        self.call_response_description = call_response_description
-        self.save()
+            self.save()
+            return False
 
     def before_execute(self, bank_code, card_number, card_type):
+        self.execution_time = datetime.now()
         self.state = TopUpState.EXE_REQ
         self.bank_code = bank_code
         self.card_number = card_number
         self.card_type = card_type
+        self.save()
 
     def after_execute(self, exe_response_type, exe_response_description):
-        if exe_response_type == ResponseTypes.SUCCESS.value:
-            self.state = TopUpState.EXECUTED.value
-        else:
-            self.state = TopUpState.EXECUTE_ERROR.value
         self.exe_response_type = exe_response_type
         self.exe_response_description = exe_response_description
         self.save()
+
+        if exe_response_type == ResponseTypes.SUCCESS.value:
+            self.state = TopUpState.EXECUTED.value
+            return True
+        else:
+            self.state = TopUpState.EXECUTE_ERROR.value
+            return False

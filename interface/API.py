@@ -7,20 +7,19 @@ from requests.auth import HTTPBasicAuth
 url_behsa = "http://10.19.252.21:5003/rest/"
 behsa_username = ''
 behsa_password = ''
-behsa_password_upper=''
+behsa_password_upper = ''
 MCI_token = ''
 broker_id = ''
 
 
-
-class MCI():
+class MCI:
     @staticmethod
     def token():
         headers = {'Content-type': 'application/json', 'Accept': '*/*'}
         response = requests.get(url=url_behsa+'Token',headers=headers)
         res = json.loads(response.text)
         try:
-            if(res['ResponseType'] == 0):
+            if res['ResponseType'] == 0:
                 MCI_token = res['TokenID']
                 return True
         except:
