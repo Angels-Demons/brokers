@@ -26,6 +26,7 @@ class MCI:
             if res['ResponseType'] == 0:
                 global MCI_token
                 MCI_token = res['TokenID']
+                print("@@@@@@@@", res['TokenID'])
                 return True
         except:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
