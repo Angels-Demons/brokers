@@ -27,9 +27,9 @@ class CallSaleView(BaseAPIView):
                     tell_charger=tell_charger,
                     charge_type=charge_type
                 )
-            except Exception:
+            except Exception as e:
                 data = {
-                    "message": "error: invalid parameters",
+                    "message": str(e),
                     "message_fa": "خطا: پارامترهای غیر معتبر",
                     "code": -10,
                 }
