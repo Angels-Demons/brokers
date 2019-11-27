@@ -166,6 +166,10 @@ class MCI:
 
     @staticmethod
     def behsa_hash(hash_string):
+        print(hash_string)
+        print(hash_string.encode())
         byte_hash = hash_string.encode()
+        print(hashlib.md5(byte_hash))
+        print(hashlib.md5(byte_hash).digest())
         md5hash = str(hashlib.md5(byte_hash)).replace("-", "").lower()
         return md5hash
