@@ -22,6 +22,7 @@ class MCI:
         header = {'Content-type': 'application/json', 'Accept': '*/*'}
         response = requests.get(url=self.behsa_url + 'Token', headers=header)
         res = json.loads(response.text)
+        print(666666666)
         try:
             if res['ResponseType'] == 0:
                 global MCI_token
