@@ -125,7 +125,7 @@ class PackageCallSaleView(BaseAPIView):
                 broker = Broker.objects.get(user=request.user)
                 tell_num = request.data.get('tell_num')
                 tell_charger = request.data.get('tell_charger')
-                package_type = request.data.get('package_code')
+                package_type = request.data.get('package_type')
                 packageLog = Package.create(
                     amount=amount,
                     broker=broker,
