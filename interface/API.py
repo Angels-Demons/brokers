@@ -47,7 +47,7 @@ class MCI:
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
-        if response_type < 0:
+        if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
             content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
@@ -72,7 +72,7 @@ class MCI:
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
-        if response_type < 0:
+        if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
             content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
@@ -97,7 +97,7 @@ class MCI:
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
-        if response_type < 0:
+        if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
             content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
