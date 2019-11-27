@@ -148,13 +148,16 @@ class MCI:
         }
         response = requests.post(url=self.behsa_url + 'Topup/ChargeStatusInquery', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header, )
-        if response.status_code == 401:
-            self.token()
-            response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
-                                     auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
+        if int(response_type) == -2:
+            self.token()
+            response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
+                                     auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
+            res = json.loads(response.text)
+            response_type = res['ResponseType']
+            response_description = res['ResponseDesc']
         if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
