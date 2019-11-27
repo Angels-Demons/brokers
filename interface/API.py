@@ -1,3 +1,4 @@
+import binascii
 import logging
 
 import requests
@@ -168,10 +169,9 @@ class MCI:
 
     @staticmethod
     def behsa_hash(hash_string):
-        print(hash_string)
-        print(hash_string.encode())
         byte_hash = hash_string.encode()
-        print(hashlib.md5(byte_hash))
-        print(hashlib.md5(byte_hash).digest())
-        md5hash = hashlib.md5(byte_hash).hexdigest().replace("-", "").lower()
-        return md5hash
+        # md5hash = "0x" + hashlib.md5(byte_hash)).replace("-", "").lower()
+        md5hash = hashlib.md5(byte_hash)
+        Finally = binascii.b2a_hex(hashlib.md5(byte_hash).digest())
+        DeviceIdentity = "0x" + Finally.decode('utf-8').replace("-", "")
+        return DeviceIdentity
