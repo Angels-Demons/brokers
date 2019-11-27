@@ -90,8 +90,6 @@ class ResponseTypes(Enum):
     SYSTEMERROR = -25228
     INVALIDINPUT = 19
 
-
-
     @staticmethod
     def farsi(value):
         if value == 0:
@@ -232,8 +230,6 @@ class CardTypes(Enum):
     BANKCARD = 8
     TELEPHONENUMBER = 9
 
-
-
     @staticmethod
     def farsi(value):
         if value == 0:
@@ -256,7 +252,6 @@ class CardTypes(Enum):
             return "شماره کارت بانکي"
         elif value == 9:
             return "شماره تلفن"
-
 
 
 class BankCodes(Enum):
@@ -289,7 +284,6 @@ class BankCodes(Enum):
     HEKMAT = 27
     DEY = 28
     KHAVARMIANE = 29
-
 
     @staticmethod
     def farsi(value):
@@ -353,7 +347,6 @@ class BankCodes(Enum):
             return "بانک خاورميانه"
 
 
-
 class TopUpState(Enum):
     INITIAL = 1
     CALLED = 2
@@ -385,7 +378,7 @@ class Choices:
     )
 
     bank_codes = (
-        (BankCodes.MARKAZI.value ,BankCodes.farsi(BankCodes.MARKAZI.value) ),
+        (BankCodes.MARKAZI.value, BankCodes.farsi(BankCodes.MARKAZI.value)),
         (BankCodes.MELLI.value, BankCodes.farsi(BankCodes.MELLI.value)),
         (BankCodes.SEPAH.value, BankCodes.farsi(BankCodes.SEPAH.value)),
         (BankCodes.TEJARAT.value, BankCodes.farsi(BankCodes.TEJARAT.value)),
@@ -457,14 +450,16 @@ class Choices:
         (ResponseTypes.INVALIDUSERPERCENT.value, BankCodes.farsi(ResponseTypes.INVALIDUSERPERCENT.value)),
         (ResponseTypes.REPEATEDUSER.value, BankCodes.farsi(ResponseTypes.REPEATEDUSER.value)),
         (ResponseTypes.UNGOINGTRANSACTIONID.value, BankCodes.farsi(ResponseTypes.UNGOINGTRANSACTIONID.value)),
-        (ResponseTypes.BROKERCHARGETYPEDENIEDACCESS.value, BankCodes.farsi(ResponseTypes.BROKERCHARGETYPEDENIEDACCESS.value)),
+        (ResponseTypes.BROKERCHARGETYPEDENIEDACCESS.value,
+         BankCodes.farsi(ResponseTypes.BROKERCHARGETYPEDENIEDACCESS.value)),
         (ResponseTypes.NOTENOUGHBROKERBALANCE.value, BankCodes.farsi(ResponseTypes.NOTENOUGHBROKERBALANCE.value)),
         (ResponseTypes.WRONGCHARGETYPE.value, BankCodes.farsi(ResponseTypes.WRONGCHARGETYPE.value)),
         (ResponseTypes.NORESULTFORBROKERREPORT.value, BankCodes.farsi(ResponseTypes.NORESULTFORBROKERREPORT.value)),
         (ResponseTypes.INVALIDJAVANCHARGE.value, BankCodes.farsi(ResponseTypes.INVALIDJAVANCHARGE.value)),
         (ResponseTypes.REPEATEDBROKERNAME.value, BankCodes.farsi(ResponseTypes.REPEATEDBROKERNAME.value)),
         (ResponseTypes.REPEATEDFACTORNUMBER.value, BankCodes.farsi(ResponseTypes.REPEATEDFACTORNUMBER.value)),
-        (ResponseTypes.BANOVANCHARGEISINACCESSABLE.value, BankCodes.farsi(ResponseTypes.BANOVANCHARGEISINACCESSABLE.value)),
+        (ResponseTypes.BANOVANCHARGEISINACCESSABLE.value,
+         BankCodes.farsi(ResponseTypes.BANOVANCHARGEISINACCESSABLE.value)),
         (ResponseTypes.LOYALCHARGEISINACCESSABLE.value, BankCodes.farsi(ResponseTypes.LOYALCHARGEISINACCESSABLE.value)),
         (ResponseTypes.INVALIDCHARGE.value, BankCodes.farsi(ResponseTypes.INVALIDCHARGE.value)),
         (ResponseTypes.PACKAGEISINACCESSABLE.value, BankCodes.farsi(ResponseTypes.PACKAGEISINACCESSABLE.value)),
@@ -489,25 +484,27 @@ class Choices:
         (ResponseTypes.CHANGERESERVEPACKAGEERROR.value, BankCodes.farsi(ResponseTypes.CHANGERESERVEPACKAGEERROR.value)),
         (ResponseTypes.BANOVANINVALIDAMOUNT.value, BankCodes.farsi(ResponseTypes.BANOVANINVALIDAMOUNT.value)),
         (ResponseTypes.PACKAGEERROR.value, BankCodes.farsi(ResponseTypes.PACKAGEERROR.value)),
-        (ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value, BankCodes.farsi(ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value)),
+        (ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value,
+         BankCodes.farsi(ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value)),
         (ResponseTypes.INVALIPACKAGEAMOUNT.value, BankCodes.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value)),
         (ResponseTypes.INVALIDPACKAGETYPE.value, BankCodes.farsi(ResponseTypes.INVALIDPACKAGETYPE.value))
     )
-
 
 
 class TopUp(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False, editable=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
     tell_num = models.BigIntegerField(blank=False, null=False, editable=False)
-    state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value, editable=False)
+    state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value,
+                                             editable=False)
     tell_charger = models.BigIntegerField(blank=False, null=False, editable=False)
     amount = models.PositiveIntegerField(blank=False, null=False, editable=False)
-    charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False, editable=False)
-    call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices,null=True, editable=False)
+    charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False,
+                                                   editable=False)
+    call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, editable=False)
     call_response_description = models.CharField(max_length=1023, null=True, editable=False)
     execution_time = jmodels.jDateTimeField(null=True, editable=False)
-    exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices,null=True, editable=False)
+    exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, editable=False)
     execution_time = jmodels.jDateTimeField(null=True, editable=False)
     exe_response_type = models.SmallIntegerField(null=True, editable=False)
     exe_response_description = models.CharField(max_length=1023, null=True, editable=False)

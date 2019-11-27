@@ -6,6 +6,6 @@ from accounts.views import *
 
 urlpatterns = {
     url(r'^BrokerLogin/$', BrokerLogin.as_view()),
-    url(r'^RefreshToken/', refresh_jwt_token),
+    # url(r'^RefreshToken/', refresh_jwt_token),
 }
 urlpatterns = format_suffix_patterns(urlpatterns)
