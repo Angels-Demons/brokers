@@ -26,7 +26,7 @@ class MCI:
         print(res['ResponseType'])
         print(666666666)
         try:
-            if res['ResponseType'] == 0:
+            if int(res['ResponseType']) == 0:
                 global MCI_token
                 MCI_token = res['TokenID']
                 print("@@@@@@@@", res['TokenID'])
