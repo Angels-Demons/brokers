@@ -23,6 +23,7 @@ class MCI:
         data = {}
         response = requests.post(url=self.behsa_url + 'Token', headers=header, data=data)
         res = json.loads(response.text)
+        print(res['ResponseType'])
         print(666666666)
         try:
             if res['ResponseType'] == 0:
