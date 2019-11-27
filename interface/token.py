@@ -3,8 +3,10 @@ from interface.API import MCI
 WAIT_SECONDS = 240
 
 
-def foo():
+def request_token():
     MCI.token()
-    threading.Timer(WAIT_SECONDS, foo).start()
-
-foo()
+    try:
+        threading.Timer(WAIT_SECONDS, request_token).start()
+    except:
+        pass
+request_token()
