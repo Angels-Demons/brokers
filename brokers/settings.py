@@ -118,7 +118,7 @@ REST_FRAMEWORK = {
 
 JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'HHRAA',
-    'JWT_EXPIRATION_DELTA': timezone.timedelta(minutes=10),
+    'JWT_EXPIRATION_DELTA': timezone.timedelta(minutes=30),
     'JWT_ALLOW_REFRESH': False,
     # 'JWT_REFRESH_EXPIRATION_DELTA': timezone.timedelta(days=30),
 }

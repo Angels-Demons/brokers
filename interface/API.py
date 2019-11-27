@@ -12,7 +12,7 @@ class MCI:
     behsa_url = "http://10.19.252.21:5003/rest/"
     behsa_username = '13001053'
     behsa_password = 'E@123456'
-    MCI_token = ''
+    MCI_token = ""
     broker_id = '13001053'
 
     def token(self):
@@ -38,6 +38,7 @@ class MCI:
             'ChargeType': charge_type,
             'BrokerId': self.broker_id
         }
+        print('***', str(self.behsa_generated_pass))
         response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         if response.status_code == 401:
@@ -100,8 +101,6 @@ class MCI:
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
-        print(str(response_type))
-        print(str(response_description))
         if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
@@ -162,6 +161,7 @@ class MCI:
 
     @property
     def behsa_generated_pass(self):
+        print(self.MCI_token)
         return self.behsa_hash(self.behsa_username.upper() + '|' + self.behsa_password + '|' + self.MCI_token)
 
     @staticmethod
