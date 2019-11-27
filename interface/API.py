@@ -45,6 +45,7 @@ class MCI:
         response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         if response.status_code == 401:
+            print('$$$$$$$$')
             self.token()
             response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                      auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
