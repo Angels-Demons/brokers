@@ -38,6 +38,7 @@ class MCI:
             'ChargeType': charge_type,
             'BrokerId': self.broker_id
         }
+        print('***', str(self.behsa_generated_pass))
         response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         if response.status_code == 401:
@@ -100,8 +101,6 @@ class MCI:
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
-        print(str(response_type))
-        print(str(response_description))
         if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
