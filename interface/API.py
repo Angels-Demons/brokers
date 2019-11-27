@@ -10,10 +10,10 @@ from accounts.utils import config_logging
 
 class MCI:
     behsa_url = "http://10.19.252.21:5003/rest/"
-    behsa_username = ''
-    behsa_password = ''
+    behsa_username = '13001053'
+    behsa_password = 'E@123456'
     MCI_token = ''
-    broker_id = ''
+    broker_id = '13001053'
 
     def token(self):
         header = {'Content-type': 'application/json', 'Accept': '*/*'}
