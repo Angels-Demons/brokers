@@ -15,7 +15,7 @@ class MCI:
     behsa_url = "http://10.19.252.21:5003/rest/"
     behsa_username = '13001053'
     behsa_password = 'E@123456'
-    MCI_token = ""
+    MCI_token = "cd583b51ff44f1738b4256a7e3073b43"
     broker_id = '13001053'
 
     def token(self):
