@@ -47,6 +47,8 @@ class MCI:
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
+        print(str(response_type))
+        print(str(response_description))
         if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
