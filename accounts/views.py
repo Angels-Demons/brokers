@@ -7,6 +7,8 @@ from rest_framework_jwt.settings import api_settings
 from django.conf import settings
 from django.core.cache import cache
 
+from accounts.models import Broker
+
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
@@ -68,7 +70,11 @@ class BrokerLogin(BaseAPIView):
 
     @staticmethod
     def post(request):
-        user = request.user
-        token = jwt_encode_handler(jwt_payload_handler(user))
-        response_data = jwt_response_payload_handler(token, user, request)
-        return Response(response_data)
+        broker = Broker.objects.get(user=request.user)
+        if broker.active:
+            user = request.user
+            token = jwt_encode_handler(jwt_payload_handler(user))
+            response_data = jwt_response_payload_handler(token, user, request)
+            return Response(response_data)
+        else:
+            return Response("broker is not active")
