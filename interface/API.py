@@ -171,7 +171,8 @@ class MCI:
     def behsa_hash(hash_string):
         byte_hash = hash_string.encode()
         # md5hash = "0x" + hashlib.md5(byte_hash)).replace("-", "").lower()
-        md5hash = hashlib.md5(byte_hash)
-        Finally = binascii.b2a_hex(hashlib.md5(byte_hash).digest())
-        DeviceIdentity = "0x" + Finally.decode('utf-8').replace("-", "")
-        return DeviceIdentity
+        md5hash = hashlib.md5(byte_hash).hexdigest()
+        return "0x" + md5hash.replace("-", "")
+        # Finally = binascii.b2a_hex(hashlib.md5(byte_hash).digest())
+        # DeviceIdentity = "0x" + Finally.decode('utf-8').replace("-", "")
+        # return DeviceIdentity
