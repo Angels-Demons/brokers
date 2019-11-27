@@ -35,7 +35,7 @@ class CallSaleView(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-            call_response_type, call_response_description = MCI().call_sale(
+            call_response_type, call_response_description = MCI().charge_call_sale(
                 top_up.tell_num,
                 top_up.tell_charger,
                 top_up.amount,
@@ -88,7 +88,7 @@ class ExeSaleView(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-            call_response_type, call_response_description = MCI().call_sale(
+            call_response_type, call_response_description = MCI().charge_call_sale(
                 top_up.tell_num,
                 top_up.tell_charger,
                 top_up.amount,
