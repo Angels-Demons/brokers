@@ -51,6 +51,7 @@ class MCI:
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         res = json.loads(response.text)
         print(response.text)
+        print(response.status_code)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
         print(str(response_type))
