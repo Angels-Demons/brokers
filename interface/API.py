@@ -20,7 +20,7 @@ class MCI:
 
     def token(self):
         header = {'Content-type': 'application/json', 'Accept': '*/*'}
-        response = requests.get(url=self.behsa_url + 'Token', headers=header)
+        response = requests.post(url=self.behsa_url + 'Token', headers=header)
         res = json.loads(response.text)
         print(666666666)
         try:
