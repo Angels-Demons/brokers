@@ -12,7 +12,7 @@ class MCI:
     behsa_url = "http://10.19.252.21:5003/rest/"
     behsa_username = '13001053'
     behsa_password = 'E@123456'
-    MCI_token = ''
+    MCI_token = ""
     broker_id = '13001053'
 
     def token(self):
@@ -161,10 +161,11 @@ class MCI:
 
     @property
     def behsa_generated_pass(self):
+        print(self.MCI_token)
         return self.behsa_hash(self.behsa_username.upper() + '|' + self.behsa_password + '|' + self.MCI_token)
 
     @staticmethod
     def behsa_hash(hash_string):
         byte_hash = hash_string.encode()
-        md5hash = hashlib.md5(byte_hash).digest().decode().replace("-", "").lower()
+        md5hash = str(hashlib.md5(byte_hash)).replace("-", "").lower()
         return md5hash
