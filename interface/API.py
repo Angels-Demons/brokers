@@ -171,5 +171,5 @@ class MCI:
         byte_hash = hash_string.encode()
         print(hashlib.md5(byte_hash))
         print(hashlib.md5(byte_hash).digest())
-        md5hash = str(hashlib.md5(byte_hash)).replace("-", "").lower()
+        md5hash = hashlib.md5(byte_hash).hexdigest().replace("-", "").lower()
         return md5hash
