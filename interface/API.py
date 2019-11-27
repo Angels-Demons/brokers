@@ -7,6 +7,7 @@ from requests.auth import HTTPBasicAuth
 
 from accounts.utils import config_logging
 
+MCI_token = ""
 
 class MCI:
     behsa_url = "http://10.19.252.21:5003/rest/"
@@ -21,7 +22,8 @@ class MCI:
         res = json.loads(response.text)
         try:
             if res['ResponseType'] == 0:
-                self.MCI_token = res['TokenID']
+                global MCI_token
+                MCI_token = res['TokenID']
                 return True
         except:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
@@ -161,7 +163,7 @@ class MCI:
 
     @property
     def behsa_generated_pass(self):
-        print(self.MCI_token)
+        print('######', self.MCI_token)
         return self.behsa_hash(self.behsa_username.upper() + '|' + self.behsa_password + '|' + self.MCI_token)
 
     @staticmethod
