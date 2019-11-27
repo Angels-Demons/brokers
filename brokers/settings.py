@@ -69,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.test'
             ],
         },
     },
@@ -117,10 +118,10 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    'JWT_AUTH_HEADER_PREFIX': 'HHRAA',
-    'JWT_EXPIRATION_DELTA': timezone.timedelta(minutes=30),
-    'JWT_ALLOW_REFRESH': False,
-    # 'JWT_REFRESH_EXPIRATION_DELTA': timezone.timedelta(days=30),
+    'JWT_AUTH_HEADER_PREFIX': 'HHRA',
+    'JWT_EXPIRATION_DELTA': timezone.timedelta(hours=12, days=10),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timezone.timedelta(days=30),
 }
 
 # Internationalization
@@ -153,3 +154,8 @@ try:
     from .local_settings import *
 except ImportError:
     pass
+
+
+JET_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
+JET_APP_INDEX_DASHBOARD = 'dashboard.CustomAppIndexDashboard'
+# ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'dashboard.CustomAppIndexDashboard'
