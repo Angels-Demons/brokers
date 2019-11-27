@@ -10,6 +10,7 @@ from accounts.utils import config_logging
 
 MCI_token = ""
 
+
 class MCI:
     behsa_url = "http://10.19.252.21:5003/rest/"
     behsa_username = '13001053'
@@ -98,13 +99,17 @@ class MCI:
         }
         response = requests.post(url=self.behsa_url + 'Topup/CallSaleProviderPackage', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
-        if response.status_code == 401:
-            self.token()
-            response = requests.post(url=self.behsa_url + 'Topup/CallSaleProviderPackage', data=data,
-                                     auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
+        if int(response_type) == -2:
+            print('$$$$$$$$')
+            self.token()
+            response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
+                                     auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
+            res = json.loads(response.text)
+            response_type = res['ResponseType']
+            response_description = res['ResponseDesc']
         if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
@@ -123,10 +128,6 @@ class MCI:
         }
         response = requests.post(url=self.behsa_url + 'Topup/ExecSaleProviderPackage', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
-        if response.status_code == 401:
-            self.token()
-            response = requests.post(url=self.behsa_url + 'Topup/ExecSaleProviderPackage', data=data,
-                                     auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
@@ -175,5 +176,4 @@ class MCI:
     def behsa_hash(hash_string):
         byte_hash = hash_string.encode()
         md5hash = hashlib.md5(byte_hash).hexdigest()
-        return  md5hash.replace("-", "")
-
+        return md5hash.replace("-", "")
