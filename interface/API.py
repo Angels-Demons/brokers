@@ -139,7 +139,6 @@ class MCI:
             logger.info(content)
         return response_type, response_description
 
-    @property
     def behsa_generated_pass(self,username):
         providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
         return self.behsa_hash(username.upper() + '|' + self.behsa_password + '|' + providerToken.token)

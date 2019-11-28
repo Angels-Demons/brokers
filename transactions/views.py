@@ -280,3 +280,34 @@ class PackageExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
+
+class BrokerCreditView(BaseAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @staticmethod
+    def post(request):
+        try:
+            broker = Broker.objects.get(user=request.user)
+        except Exception:
+            data = {
+                "message": "error: Invalid Broker",
+                "message_fa": "خطا: کارگزار نامعتبر است.",
+                "code": -22,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if broker.active is False:
+            data = {
+                "message": "error: Brokers is deactive",
+                "message_fa": "کارگذار غیرفعال است.",
+                "code": -21,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+
+        data = {
+                "message": "Request successfully executed",
+                "message_fa": "درخواست با موفقیت اجرا شد",
+                "code": 0,
+                "Credit": broker.credit
+        }
+        return Response(data, status=status.HTTP_200_OK)
