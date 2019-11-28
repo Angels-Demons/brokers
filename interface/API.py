@@ -62,9 +62,8 @@ class MCI:
 
             if int(response_type) == -2:
                 self.token()
-                response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
-                                         auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass),
-                                         headers=header)
+                response = requests.post(url=url, headers=header, data=data)
+
                 res = json.loads(response.text)
                 response_type = res['ResponseType']
                 response_description = res['ResponseDesc']
