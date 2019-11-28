@@ -567,7 +567,7 @@ class TopUp(models.Model):
             tell_num=tell_num,
             # state =
             tell_charger=tell_charger,
-            amount=amount,
+            amount=int(amount),
             charge_type=charge_type,
             # call_response_type =
             # call_response_description =
@@ -606,13 +606,14 @@ class TopUp(models.Model):
     def after_execute(self, exe_response_type, exe_response_description):
         self.exe_response_type = exe_response_type
         self.exe_response_description = exe_response_description
-        self.save()
 
         if int(exe_response_type) == ResponseTypes.SUCCESS.value:
             self.state = TopUpState.EXECUTED.value
+            self.save()
             return True
         else:
             self.state = TopUpState.EXECUTE_ERROR.value
+            self.save()
             return False
 
 
@@ -682,11 +683,12 @@ class Package(models.Model):
     def after_execute(self, exe_response_type, exe_response_description):
         self.exe_response_type = exe_response_type
         self.exe_response_description = exe_response_description
-        self.save()
 
         if int(exe_response_type) == ResponseTypes.SUCCESS.value:
             self.state = TopUpState.EXECUTED.value
+            self.save()
             return True
         else:
             self.state = TopUpState.EXECUTE_ERROR.value
+            self.save()
             return False
