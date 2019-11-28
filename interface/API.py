@@ -1,3 +1,4 @@
+import base64
 import binascii
 import logging
 
@@ -40,7 +41,8 @@ class MCI:
     def charge_call_sale(self, tel_num, tel_charger, amount, charge_type):
         try:
             print("******** Start CallSale Request ***** ")
-            header = {'Content-type': 'application/json'}
+            base64Authorization = self.localBasic(self.behsa_username, self.behsa_generated_pass)
+            header = {'Content-type': 'application/json','Authorization':base64Authorization}
             data = {
                 'TelNum': tel_num,
                 'TelCharger': tel_charger,
@@ -50,18 +52,19 @@ class MCI:
             }
             url = self.behsa_url + 'Topup/CallSaleProvider'
             print("******** CallSale Request Sent ***** ")
-            response = requests.post(url=url, data=data, auth = HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass),headers=header)
+            response = requests.post(url=url, data=data, headers=header)
             print("******** CallSale Request Executed ***** ")
             print("******** CallSale Response Text : ***** " + response.text)
             res = json.loads(response.text)
-            print("******************** Behsa Result :"+response.text)
+            print("******************** Behsa Result :" + response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
 
             if int(response_type) == -2:
                 self.token()
                 response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
-                                         auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
+                                         auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass),
+                                         headers=header)
                 res = json.loads(response.text)
                 response_type = res['ResponseType']
                 response_description = res['ResponseDesc']
@@ -188,3 +191,10 @@ class MCI:
         byte_hash = hash_string.encode()
         md5hash = hashlib.md5(byte_hash).hexdigest()
         return md5hash.replace("-", "")
+
+    @staticmethod
+    def localBasic(username, password):
+        userpass = username + ":" + password
+        encodedBytes = base64.b64encode(userpass.encode("utf-8"))
+        encodedStr = "Basic " + str(encodedBytes, "utf-8")
+        return encodedStr
