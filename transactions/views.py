@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from interface.API import MCI
 from accounts.models import Broker
-from transactions.models import TopUp, PackageRecord, TopUpState, Package
+from transactions.models import TopUp, PackageRecord, TopUpState, MCIPackage
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -157,7 +157,7 @@ class PackageCallSaleView(BaseAPIView):
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
             package_type = request.data.get('package_type')
-            package = Package.objects.get(package_type=package_type)
+            package = MCIPackage.objects.get(package_type=package_type)
             package_log = PackageRecord.create(
                 # amount=amount,
                 broker=broker,
