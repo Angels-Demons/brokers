@@ -74,7 +74,7 @@ class MCI:
                     response_description)
                 logger.info(content)
         except Exception as e:
-            print("*********** Exeption :" + e)
+            print("*********** Exeption :" + str(e))
         return response_type, response_description
 
     def charge_exe_sale(self, provider_id, bank_code, card_no, card_type):
