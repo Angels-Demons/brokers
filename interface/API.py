@@ -20,14 +20,15 @@ class MCI:
     broker_id = '13001053'
 
     def token(self):
+        print("******** Start Token Request ***** ")
         header = {'Content-type': 'application/json', 'Accept': '*/*'}
         data = {}
         response = requests.post(url=self.behsa_url + 'Token', headers=header, data=data)
         res = json.loads(response.text)
-        print(res['ResponseType'])
-        print(666666666)
         try:
             if int(res['ResponseType']) == 0:
+                print("******** Token Request : Successfully Get Token ***** ")
+                print("******** Token Request : "+ res['TokenID'] +" ***** ")
                 providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
                 providerToken.token = res['TokenID']
                 providerToken.save()
@@ -47,18 +48,13 @@ class MCI:
             'ChargeType': charge_type,
             'BrokerId': self.broker_id
         }
-        print('***', str(self.behsa_generated_pass))
         response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         res = json.loads(response.text)
-        print(response.text)
-        print(response.status_code)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
-        print(str(response_type))
-        print(str(response_description))
+
         if int(response_type) == -2:
-            print('$$$$$$$$')
             self.token()
             response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                      auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
@@ -113,7 +109,6 @@ class MCI:
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
         if int(response_type) == -2:
-            print('$$$$$$$$')
             self.token()
             response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                      auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
