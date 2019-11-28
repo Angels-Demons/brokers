@@ -608,7 +608,7 @@ class TopUp(models.Model):
         self.exe_response_description = exe_response_description
         self.save()
 
-        if exe_response_type == ResponseTypes.SUCCESS.value:
+        if int(exe_response_type) == ResponseTypes.SUCCESS.value:
             self.state = TopUpState.EXECUTED.value
             return True
         else:
@@ -684,7 +684,7 @@ class Package(models.Model):
         self.exe_response_description = exe_response_description
         self.save()
 
-        if exe_response_type == ResponseTypes.SUCCESS.value:
+        if int(exe_response_type) == ResponseTypes.SUCCESS.value:
             self.state = TopUpState.EXECUTED.value
             return True
         else:
