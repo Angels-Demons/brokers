@@ -38,6 +38,7 @@ class MCI:
             return False
 
     def charge_call_sale(self, tel_num, tel_charger, amount, charge_type):
+        print("******** Start CallSale Request ***** ")
         header = {'Content-type': 'application/json'}
         data = {
             'TelNum': tel_num,
@@ -48,7 +49,10 @@ class MCI:
         }
         # auth = HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass),
         url = self.behsa_url + 'Topup/CallSaleProvider'
+        print("******** CallSale Request Sent ***** ")
         response = requests.post(url=url, data=data, headers=header)
+        print("******** CallSale Request Executed ***** ")
+
         res = json.loads(response.text)
         print("******************** Behsa Result :"+response.text)
         response_type = res['ResponseType']
