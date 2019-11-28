@@ -29,10 +29,10 @@ class MCI:
             if int(res['ResponseType']) == 0:
                 print("******** Token Request : Successfully Get Token ***** ")
                 print("******** Token Request : "+ res['TokenID'] +" ***** ")
-                providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
-                providerToken.token = str(res['TokenID'])
-                providerToken.save()
-                print("******** Token Request : Successfully Saved Token ***** "+providerToken.token)
+                prToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
+                prToken.token = str(res['TokenID'])
+                prToken.save()
+                print("******** Token Request : Successfully Saved Token ***** "+prToken.token)
                 return True
         except Exception as e:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
