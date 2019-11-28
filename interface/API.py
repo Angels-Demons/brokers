@@ -30,6 +30,7 @@ class MCI:
             if int(res['ResponseType']) == 0:
                 providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
                 providerToken.token = res['TokenID']
+                providerToken.save()
                 return True
         except:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
