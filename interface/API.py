@@ -54,7 +54,7 @@ class MCI:
             print("******** CallSale Request Sent ***** ")
             response = requests.post(url=url, headers=header,data=data)
             print("******** CallSale Request Executed ***** ")
-            print("******** CallSale Response Status : ***** " + response.status_code))
+            print("******** CallSale Response Status : ***** " + str(response.status_code))
             print("******** CallSale Response Text : ***** " + response.text)
             res = json.loads(response.text)
             response_type = res['ResponseType']
