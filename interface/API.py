@@ -42,7 +42,7 @@ class MCI:
         try:
             print("******** Start CallSale Request ***** ")
             base64Authorization = self.localBasic(self.behsa_username, self.behsa_generated_pass)
-            header = {'Content-type': 'application/json','Authorization': base64Authorization}
+            header = {'Content-type': 'application/json','Authorization': base64Authorization,'charset':'UTF-8'}
             data = {
                 'TelNum': tel_num,
                 'TelCharger': tel_charger,
