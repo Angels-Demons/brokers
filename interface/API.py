@@ -34,7 +34,8 @@ class MCI:
                 providerToken.save()
                 print("******** Token Request : Successfully Saved Token ***** ")
                 return True
-        except:
+        except Exception as e:
+            print("******** Token Request : " + e + " ***** ")
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
             logger.info('***Exception in refreshing Behsa token***')
