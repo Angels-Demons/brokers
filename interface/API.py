@@ -52,7 +52,7 @@ class MCI:
             }
             url = self.behsa_url + 'Topup/CallSaleProvider'
             print("******** CallSale Request Sent ***** ")
-            response = requests.post(url=url, headers=header)
+            response = requests.post(url=url, headers=header,data=data)
             print("******** CallSale Request Executed ***** ")
             print("******** CallSale Response Text : ***** " + response.text)
             res = json.loads(response.text)
