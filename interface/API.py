@@ -36,45 +36,28 @@ class MCI:
             return False
 
     def charge_call_sale(self, tel_num, tel_charger, amount, charge_type):
-        try:
-            # base64Authorization = self.localBasic(self.behsa_username, self.behsa_generated_pass)
-            # header = {'Content-type': 'application/json','Authorization': base64Authorization,'charset':'UTF-8'}
+        url_charge = self.behsa_url + 'Topup/CallSaleProvider'
+        headers = {'Content-Type': 'application/json',}
+        data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'ChargeType\':' +str(charge_type)+ ',\'BrokerId\':' + self.behsa_charge_username +'}'
+        response = requests.post(url_charge , headers=headers, data=data,
+                                 auth=(self.behsa_charge_username,self.behsa_generated_pass))
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        response_description = res['ResponseDesc']
 
-            # header = {'Content-type': 'application/json','charset':'UTF-8'}
-            # data = {
-            #     'TelNum': tel_num,
-            #     'TelCharger': tel_charger,
-            #     'Amount': amount,
-            #     'ChargeType': charge_type,
-            #     'BrokerId': self.broker_id
-            # }
-            url_charge = self.behsa_url + 'Topup/CallSaleProvider'
-            print("******** CallSale Request Sent ***** ")
-            # response = requests.post(url=url, headers=header,data=data,auth = (self.behsa_username, self.behsa_generated_pass))
-
-            headers = {'Content-Type': 'application/json',}
-            data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'ChargeType\':' +str(charge_type)+ ',\'BrokerId\':' + self.behsa_charge_username +'}'
-            response = requests.post(url_charge , headers=headers, data=data,
-                                     auth=(self.behsa_charge_username,self.behsa_generated_pass))
+        if int(response_type) == -2:
+            self.token()
+            response = requests.post(url_charge, headers=headers, data=data,
+                                     auth=(self.behsa_charge_username, self.behsa_generated_pass))
             res = json.loads(response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
-
-            if int(response_type) == -2:
-                self.token()
-                response = requests.post(url_charge, headers=headers, data=data,
-                                         auth=(self.behsa_charge_username, self.behsa_generated_pass))
-                res = json.loads(response.text)
-                response_type = res['ResponseType']
-                response_description = res['ResponseDesc']
-            if int(response_type) < 0:
-                logger = config_logging(logging.INFO, 'debug.log', 'debug')
-                logger.propagate = False
-                content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
-                    response_description)
-                logger.info(content)
-        except Exception as e:
-            print("*********** Exeption :" + str(e))
+        if int(response_type) < 0:
+            logger = config_logging(logging.INFO, 'debug.log', 'debug')
+            logger.propagate = False
+            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
+                response_description)
+            logger.info(content)
         return response_type, response_description
 
     def charge_exe_sale(self, provider_id, bank_code, card_no, card_type):

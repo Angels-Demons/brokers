@@ -586,7 +586,7 @@ class TopUp(models.Model):
         self.call_response_description = call_response_description
 
         # modify RG: .SUCCESS.VALUE
-        if call_response_type == ResponseTypes.SUCCESS.value:
+        if int(call_response_type) == ResponseTypes.SUCCESS.value:
             self.provider_id = call_response_description
             self.state = TopUpState.CALLED.value
             self.save()
