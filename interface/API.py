@@ -59,17 +59,30 @@ class MCI:
 
             base64Authorization = self.localBasic(self.behsa_username, self.behsa_generated_pass)
             # header = {'Content-type': 'application/json','Authorization': base64Authorization,'charset':'UTF-8'}
-            header = {'Content-type': 'application/json','charset':'UTF-8'}
-            data = {
-                'TelNum': tel_num,
-                'TelCharger': tel_charger,
-                'Amount': amount,
-                'ChargeType': charge_type,
-                'BrokerId': self.broker_id
-            }
-            url = self.behsa_url + 'Topup/CallSaleProvider'
+
+            # header = {'Content-type': 'application/json','charset':'UTF-8'}
+            # data = {
+            #     'TelNum': tel_num,
+            #     'TelCharger': tel_charger,
+            #     'Amount': amount,
+            #     'ChargeType': charge_type,
+            #     'BrokerId': self.broker_id
+            # }
+            # url = self.behsa_url + 'Topup/CallSaleProvider'
             print("******** CallSale Request Sent ***** ")
-            response = requests.post(url=url, headers=header,data=data,auth = (self.behsa_username, self.behsa_generated_pass))
+            # response = requests.post(url=url, headers=header,data=data,auth = (self.behsa_username, self.behsa_generated_pass))
+
+            headers = {
+                'Content-Type': 'application/json',
+            }
+
+            data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'ChargeType\':\'1001\',\'BrokerId\':\'13001053\'}'
+
+            response = requests.post('http://10.19.252.21:5003/Rest/Topup/CallSaleProvider', headers=headers, data=data,
+                                     auth=('13001053',self.behsa_generated_pass))
+
+
+
             print("******** CallSale Request Executed ***** ")
             print("******** CallSale Response Status : ***** " + str(response.status_code))
             print("******** CallSale Response Text : ***** " + response.text)
