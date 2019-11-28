@@ -90,7 +90,7 @@ class MCI:
     def package_call_sale(self, tel_num, tel_charger, amount, packageType):
         url_charge = self.behsa_url + 'Topup/CallSaleProviderPackage'
         headers = {'Content-Type': 'application/json',}
-        data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'PackageType\':' +str(packageType)+ ',\'BrokerId\':' + self.behsa_charge_username +'}'
+        data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'PackageType\':' +str(packageType)+ ',\'BrokerId\':' + self.behsa_package_username +'}'
         response = requests.post(url_charge , headers=headers, data=data,
                                  auth=(self.behsa_package_username,self.behsa_generated_pass(self.behsa_package_username)))
         res = json.loads(response.text)
