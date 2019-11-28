@@ -399,10 +399,10 @@ class Choices:
     )
 
     providers_type = (
-        (ProviderType.MCI.value, ProviderType.farsi(ProviderType.MCI.name)),
-        (ProviderType.MTN.value, ProviderType.farsi(ProviderType.MTN.name)),
-        (ProviderType.RIGHTEL.value, ProviderType.farsi(ProviderType.RIGHTEL.name)),
-        (ProviderType.TALIYA.value, ProviderType.farsi(ProviderType.TALIYA.name)),
+        (ProviderType.MCI.value, ProviderType.farsi(ProviderType.MCI.value)),
+        (ProviderType.MTN.value, ProviderType.farsi(ProviderType.MTN.value)),
+        (ProviderType.RIGHTEL.value, ProviderType.farsi(ProviderType.RIGHTEL.value)),
+        (ProviderType.TALIYA.value, ProviderType.farsi(ProviderType.TALIYA.value)),
     )
 
     bank_codes = (
