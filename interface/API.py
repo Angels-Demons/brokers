@@ -49,7 +49,7 @@ class MCI:
         response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         res = json.loads(response.text)
-        print(response.text)
+        print("******************** Behsa Result :"+response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
 
