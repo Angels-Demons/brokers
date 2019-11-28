@@ -46,7 +46,10 @@ class MCI:
             'ChargeType': charge_type,
             'BrokerId': self.broker_id
         }
-        response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
+        url = self.behsa_url + 'Topup/CallSaleProvider'
+        print("******************** Behsa URL :"+url)
+
+        response = requests.post(url=url, data=data,
                                  auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
         res = json.loads(response.text)
         print("******************** Behsa Result :"+response.text)
