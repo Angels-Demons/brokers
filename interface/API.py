@@ -40,7 +40,7 @@ class MCI:
         headers = {'Content-Type': 'application/json',}
         data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'ChargeType\':' +str(charge_type)+ ',\'BrokerId\':' + self.behsa_charge_username +'}'
         response = requests.post(url_charge , headers=headers, data=data,
-                                 auth=(self.behsa_charge_username,self.behsa_generated_pass))
+                                 auth=(self.behsa_charge_username,self.behsa_generated_pass(self.behsa_charge_username)))
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
@@ -48,7 +48,7 @@ class MCI:
         if int(response_type) == -2:
             self.token()
             response = requests.post(url_charge, headers=headers, data=data,
-                                     auth=(self.behsa_charge_username, self.behsa_generated_pass))
+                                     auth=(self.behsa_charge_username, self.behsa_generated_pass(self.behsa_charge_username)))
             res = json.loads(response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
@@ -66,7 +66,7 @@ class MCI:
         data = '{\'ProviderID\':' + str(provider_id) + ',\'BankCode\':' + str(bank_code) + ',\'CardNo\': ' + str(
             card_no) + ',\'CardType\':' + str(card_type) + '}'
         response = requests.post(url_charge, headers=headers, data=data,
-                                 auth=(self.behsa_charge_username, self.behsa_generated_pass))
+                                 auth=(self.behsa_charge_username, self.behsa_generated_pass(self.behsa_charge_username)))
 
         res = json.loads(response.text)
         response_type = res['ResponseType']
@@ -75,7 +75,7 @@ class MCI:
         if int(response_type) == -2:
             self.token()
             response = requests.post(url_charge, headers=headers, data=data,
-                                     auth=(self.behsa_charge_username, self.behsa_generated_pass))
+                                     auth=(self.behsa_charge_username, self.behsa_generated_pass(self.behsa_charge_username)))
             res = json.loads(response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
@@ -87,24 +87,20 @@ class MCI:
             logger.info(content)
         return response_type, response_description
 
-    def package_call_sale(self, tel_num, tel_charger, amount, package_type):
-        header = {'Content-type': 'application/json', 'Accept': '*/*'}
-        data = {
-            'TelNum': tel_num,
-            'TelCharger': tel_charger,
-            'Amount': amount,
-            'PackageType': package_type,
-            'BrokerId': self.broker_id
-        }
-        response = requests.post(url=self.behsa_url + 'Topup/CallSaleProviderPackage', data=data,
-                                 auth=HTTPBasicAuth(self.behsa_charge_username, self.behsa_generated_pass), headers=header)
+    def package_call_sale(self, tel_num, tel_charger, amount, packageType):
+        url_charge = self.behsa_url + 'Topup/CallSaleProviderPackage'
+        headers = {'Content-Type': 'application/json',}
+        data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'PackageType\':' +str(packageType)+ ',\'BrokerId\':' + self.behsa_charge_username +'}'
+        response = requests.post(url_charge , headers=headers, data=data,
+                                 auth=(self.behsa_package_username,self.behsa_generated_pass(self.behsa_package_username)))
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
+
         if int(response_type) == -2:
             self.token()
-            response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
-                                     auth=HTTPBasicAuth(self.behsa_charge_username, self.behsa_generated_pass), headers=header)
+            response = requests.post(url_charge, headers=headers, data=data,
+                                     auth=(self.behsa_package_username, self.behsa_generated_pass(self.behsa_package_username)))
             res = json.loads(response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
@@ -117,43 +113,21 @@ class MCI:
         return response_type, response_description
 
     def package_exe_sale(self, provider_id, bank_code, card_no, card_type):
-        header = {'Content-type': 'application/json', 'Accept': '*/*'}
-        data = {
-            'ProviderID': provider_id,
-            'BankCode': bank_code,
-            'CardNo': card_no,
-            'CardType': card_type
-        }
-        response = requests.post(url=self.behsa_url + 'Topup/ExecSaleProviderPackage', data=data,
-                                 auth=HTTPBasicAuth(self.behsa_charge_username, self.behsa_generated_pass), headers=header)
-        res = json.loads(response.text)
-        response_type = res['ResponseType']
-        response_description = res['ResponseDesc']
-        if int(response_type) < 0:
-            logger = config_logging(logging.INFO, 'debug.log', 'debug')
-            logger.propagate = False
-            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
-                response_description)
-            logger.info(content)
-        return response_type, response_description
+        url_charge = self.behsa_url + 'Topup/ExecSaleProviderPackage'
+        headers = {'Content-Type': 'application/json', }
+        data = '{\'ProviderID\':' + str(provider_id) + ',\'BankCode\':' + str(bank_code) + ',\'CardNo\': ' + str(
+            card_no) + ',\'CardType\':' + str(card_type) + '}'
+        response = requests.post(url_charge, headers=headers, data=data,
+                                 auth=(self.behsa_package_username, self.behsa_generated_pass(self.behsa_package_username)))
 
-    def charge_status(self, broker_id, tel_num, provider_id, bank):
-        header = {'Content-type': 'application/json', 'Accept': '*/*'}
-        data = {
-            'BrokerId': broker_id,
-            'TelNum': tel_num,
-            'ProviderId': provider_id,
-            'Bank': bank
-        }
-        response = requests.post(url=self.behsa_url + 'Topup/ChargeStatusInquery', data=data,
-                                 auth=HTTPBasicAuth(self.behsa_charge_username, self.behsa_generated_pass), headers=header, )
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
+
         if int(response_type) == -2:
             self.token()
-            response = requests.post(url=self.behsa_url + 'Topup/CallSaleProvider', data=data,
-                                     auth=HTTPBasicAuth(self.behsa_charge_username, self.behsa_generated_pass), headers=header)
+            response = requests.post(url_charge, headers=headers, data=data,
+                                     auth=(self.behsa_package_username, self.behsa_generated_pass(self.behsa_package_username)))
             res = json.loads(response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
@@ -166,9 +140,9 @@ class MCI:
         return response_type, response_description
 
     @property
-    def behsa_generated_pass(self):
+    def behsa_generated_pass(self,username):
         providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
-        return self.behsa_hash(self.behsa_charge_username.upper() + '|' + self.behsa_password + '|' + providerToken.token)
+        return self.behsa_hash(username.upper() + '|' + self.behsa_password + '|' + providerToken.token)
 
     @staticmethod
     def behsa_hash(hash_string):
