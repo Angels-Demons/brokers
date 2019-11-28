@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from interface.API import MCI
 from accounts.models import Broker
-from transactions.models import TopUp, PackageRecord, TopUpState
+from transactions.models import TopUp, PackageRecord, TopUpState, Package
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -151,17 +151,18 @@ class PackageCallSaleView(BaseAPIView):
     @staticmethod
     def post(request):
         try:
-            amount = int(request.data.get('amount'))
+            # amount = int(request.data.get('amount'))
             broker = Broker.objects.get(user=request.user)
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
             package_type = request.data.get('package_type')
+            package = Package.objects.get(package_type=package_type)
             package_log = PackageRecord.create(
-                amount=amount,
+                # amount=amount,
                 broker=broker,
                 tell_num=tell_num,
                 tell_charger=tell_charger,
-                package_type=package_type
+                package_id=package.pk
             )
         except Exception as e:
             data = {
@@ -171,7 +172,7 @@ class PackageCallSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < amount:
+        if broker.credit < package_log.package.amount:
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -182,8 +183,8 @@ class PackageCallSaleView(BaseAPIView):
         call_response_type, call_response_description = MCI().package_call_sale(
             package_log.tell_num,
             package_log.tell_charger,
-            package_log.amount,
-            package_log.package_type,
+            package_log.package.amount,
+            package_log.package.package_type,
         )
         success = package_log.after_call(call_response_type, call_response_description)
         if success:
@@ -239,7 +240,7 @@ class PackageExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < package_log.amount:
+        if broker.credit < package_log.package.amount:
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -247,13 +248,13 @@ class PackageExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
-        if broker.active is False:
-            data = {
-                "message": "error: Brokers is deactive",
-                "message_fa": "کارگذار غیرفعال است.",
-                "code": -21,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+        # if broker.active is False:
+        #     data = {
+        #         "message": "error: Brokers is deactive",
+        #         "message_fa": "کارگذار غیرفعال است.",
+        #         "code": -21,
+        #     }
+        #     return Response(data, status=status.HTTP_200_OK)
 
         exe_response_type, exe_response_description = MCI().package_exe_sale(
             provider_id=package_log.provider_id,
@@ -263,7 +264,7 @@ class PackageExeSaleView(BaseAPIView):
         )
         success = package_log.after_execute(exe_response_type, exe_response_description)
         if success:
-            broker.charge_for_mcci_transaction(package_log.amount)
+            broker.charge_for_mcci_transaction(package_log.package.amount)
             data = {
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",

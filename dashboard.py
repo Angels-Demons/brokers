@@ -281,7 +281,7 @@ class MyRecentActions(modules.RecentActions):
 
     def __init__(self, title=None, limit=10, **kwargs):
         # self.user = user
-        print('salam2')
+        # print('salam2')
         kwargs.update({'limit': limit})
         # kwargs.update({'user': user})
         super(MyRecentActions, self).__init__(title, **kwargs)

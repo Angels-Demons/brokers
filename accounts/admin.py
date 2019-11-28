@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 
 class BrokerAdmin(admin.ModelAdmin):
-    list_display = ['user', 'name', 'username', 'creator', 'credit', 'active', 'timestamp', 'email']
+    list_display = ['id', 'user', 'name', 'username', 'creator', 'credit', 'active', 'timestamp', 'email']
 
     def save_model(self, request, obj, form, change):
         if obj.id:
