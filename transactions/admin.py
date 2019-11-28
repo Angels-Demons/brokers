@@ -49,7 +49,10 @@ class PackageRecordAdmin(admin.ModelAdmin):
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
     def amount(self, obj):
-        return obj.package.amount
+        try:
+            return obj.package.amount
+        except AttributeError:
+            return 0
     amount.allow_tags = True
 
 
