@@ -21,11 +21,12 @@ class Broker(models.Model):
         return self.mcci_discount/100
 
     def charge_for_mcci_transaction(self, price):
-        if self.active is False:
-            return False
+        # if self.active is False:
+        #     return False
+        real_price = price * (1-self.get_mcci_discount())
         with transaction.atomic():
-            if self.credit >= price:
-                self.credit -= price
+            if self.credit >= real_price:
+                self.credit -= real_price
                 self.save()
                 return True
             return False

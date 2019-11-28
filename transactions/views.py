@@ -126,6 +126,7 @@ class ChargeExeSaleView(BaseAPIView):
         )
         success = top_up.after_execute(exe_response_type, exe_response_description)
         if success:
+            # modify change chargin method
             broker.charge_for_mcci_transaction(top_up.amount)
             data = {
                 "message": "Request successfully executed",
