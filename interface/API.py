@@ -12,7 +12,7 @@ MCI_token = ""
 
 
 class MCI:
-    behsa_url = "http://10.19.252.21:5003/rest/"
+    behsa_url = "http://10.19.252.21:5003/Rest/"
     behsa_username = '13001053'
     behsa_password = 'E@123456'
     MCI_token = "cd583b51ff44f1738b4256a7e3073b43"
@@ -38,7 +38,7 @@ class MCI:
             return False
 
     def charge_call_sale(self, tel_num, tel_charger, amount, charge_type):
-        header = {'Content-type': 'application/json', 'Accept': '*/*'}
+        header = {'Content-type': 'application/json'}
         data = {
             'TelNum': tel_num,
             'TelCharger': tel_charger,
