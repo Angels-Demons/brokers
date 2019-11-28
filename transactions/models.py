@@ -532,6 +532,13 @@ class ProvidersToken(models.Model):
         ptoken.save()
         return ptoken
 
+    def update_token(self, token):
+        self.token = token
+        self.save()
+        return True
+
+
+
 
 class TopUp(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False, editable=False)

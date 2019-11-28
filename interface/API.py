@@ -32,8 +32,7 @@ class MCI:
                 prToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
                 print("******** Token Request : Successfully Saved Token ***** "+prToken.token)
                 print("******** Token Request : Successfully Saved Token ***** "+str(res['TokenID']))
-                prToken.token = str(res['TokenID'])
-                prToken.save()
+                prToken.update_token(str(res['TokenID']))
                 return True
         except Exception as e:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
