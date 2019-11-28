@@ -66,7 +66,6 @@ class ChargeExeSaleView(BaseAPIView):
 
     @staticmethod
     def post(request):
-        with transaction.atomic():
             try:
                 # amount = request.data.get('amount')
                 broker = Broker.objects.get(user=request.user)
