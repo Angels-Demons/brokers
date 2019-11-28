@@ -67,12 +67,8 @@ class MCI:
                 'BrokerId': self.broker_id
             }
             url = self.behsa_url + 'Topup/CallSaleProvider'
-            print("******** CallSale Request Sent ***** ")
-            response = requests.post(url=self.behsa_url + 'Topup/ExecSaleProvider', data=data,
+            response = requests.post(url=url, data=data,
                                      auth=HTTPBasicAuth(self.behsa_username, self.behsa_generated_pass), headers=header)
-            print("******** CallSale Request Executed ***** ")
-            print("******** CallSale Response Status : ***** " + str(response.status_code))
-            print("******** CallSale Response Text : ***** " + response.text)
             res = json.loads(response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
