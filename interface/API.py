@@ -30,8 +30,9 @@ class MCI:
                 print("******** Token Request : Successfully Get Token ***** ")
                 print("******** Token Request : "+ res['TokenID'] +" ***** ")
                 providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
-                providerToken.token = res['TokenID']
+                providerToken.token = str(res['TokenID'])
                 providerToken.save()
+                print("******** Token Request : Successfully Saved Token ***** ")
                 return True
         except:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
