@@ -46,7 +46,7 @@ class MCI:
             'ChargeType': charge_type,
             'BrokerId': self.broker_id
         }
-        url = self.behsa_url + 'Topup/CallSaleProvider'
+        url = self.behsa_url + 'Topup/CallSaleProvide'
         print("******************** Behsa URL :"+url)
 
         response = requests.post(url=url, data=data,
