@@ -26,6 +26,7 @@ class ChargeType(Enum):
         elif value == 1005:
             return "بانوان"
 
+
 class ProviderType(Enum):
     MCI = 1001
     MTN = 1002
@@ -518,9 +519,10 @@ class Choices:
         (ResponseTypes.INVALIDPACKAGETYPE.value, BankCodes.farsi(ResponseTypes.INVALIDPACKAGETYPE.value))
     )
 
+
 class ProvidersToken(models.Model):
-    provider = models.SmallIntegerField(choices=Choices.providers_type,null=False,blank=False)
-    token = models.CharField(max_length=150,null=False,blank=False)
+    provider = models.SmallIntegerField(choices=Choices.providers_type, null=False, blank=False)
+    token = models.CharField(max_length=150, null=False, blank=False)
 
     @staticmethod
     def create(provider, token):
@@ -536,8 +538,6 @@ class ProvidersToken(models.Model):
         self.token = token
         self.save()
         return True
-
-
 
 
 class TopUp(models.Model):
@@ -559,6 +559,9 @@ class TopUp(models.Model):
     bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, editable=False)
     card_number = models.CharField(max_length=255, null=True, editable=False)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, editable=False)
+
+    def __str__(self):
+        return "Top_up " + str(self.id)
 
     @staticmethod
     def create(broker, tell_num, tell_charger, amount, charge_type):
@@ -617,7 +620,7 @@ class TopUp(models.Model):
             return False
 
 
-class Package(models.Model):
+class PackageRecord(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False, editable=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
     tell_num = models.BigIntegerField(blank=False, null=False, editable=False)
@@ -636,9 +639,12 @@ class Package(models.Model):
     card_number = models.CharField(max_length=255, null=True, editable=False)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, editable=False)
 
+    def __str__(self):
+        return "Package record " + str(self.id)
+
     @staticmethod
     def create(broker, tell_num, tell_charger, amount, package_type):
-        package = Package(
+        package_record = PackageRecord(
             broker=broker,
             tell_num=tell_num,
             # state =
@@ -654,8 +660,8 @@ class Package(models.Model):
             # card_number =
             # card_type =
         )
-        package.save()
-        return package
+        package_record.save()
+        return package_record
 
     def after_call(self, call_response_type, call_response_description):
         self.call_response_type = call_response_type

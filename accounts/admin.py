@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group
 from django.shortcuts import redirect
 
@@ -13,20 +13,23 @@ class BrokerAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if obj.id:
             super().save_model(request, obj, form, change)
+            obj.user.is_active = obj.active
+            obj.user.save()
             return
 
         (brokers_group, created) = Group.objects.get_or_create(name='brokers')
         if created:
+            # can_fm_list = Permission.objects.get(name='can_fm_list')
+            # newgroup.permissions.add(can_fm_list)
             # Modify: determine the group perms
-            pass  
-        print(created)
-        print(brokers_group)
+            pass
         obj.creator = request.user
         user = User.objects.create_user(
             username=obj.username,
             email=obj.email,
             password=obj.username + "pass",
             is_staff=True,
+            is_active=obj.active
         )
 
         brokers_group.user_set.add(user)

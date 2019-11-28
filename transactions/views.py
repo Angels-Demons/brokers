@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from interface.API import MCI
 from accounts.models import Broker
-from transactions.models import TopUp, Package, TopUpState
+from transactions.models import TopUp, PackageRecord, TopUpState
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -156,7 +156,7 @@ class PackageCallSaleView(BaseAPIView):
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
             package_type = request.data.get('package_type')
-            package_log = Package.create(
+            package_log = PackageRecord.create(
                 amount=amount,
                 broker=broker,
                 tell_num=tell_num,
@@ -216,7 +216,7 @@ class PackageExeSaleView(BaseAPIView):
             bank_code = request.data.get('bank_code')
             card_number = request.data.get('card_number')
             card_type = request.data.get('card_type')
-            package_log = Package.objects.get(provider_id=provider_id,broker=broker)
+            package_log = PackageRecord.objects.get(provider_id=provider_id, broker=broker)
             if package_log.state == TopUpState.CALLED.value:
                 package_log.before_execute(
                     bank_code=bank_code,
