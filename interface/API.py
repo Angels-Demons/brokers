@@ -7,6 +7,7 @@ import hashlib
 from requests.auth import HTTPBasicAuth
 
 from accounts.utils import config_logging
+from transactions.models import ProvidersToken, ProviderType
 
 MCI_token = ""
 
@@ -27,9 +28,8 @@ class MCI:
         print(666666666)
         try:
             if int(res['ResponseType']) == 0:
-                global MCI_token
-                MCI_token = res['TokenID']
-                print("@@@@@@@@", res['TokenID'])
+                providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
+                providerToken.token = res['TokenID']
                 return True
         except:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
@@ -178,8 +178,8 @@ class MCI:
 
     @property
     def behsa_generated_pass(self):
-        print('######', self.MCI_token)
-        return self.behsa_hash(self.behsa_username.upper() + '|' + self.behsa_password + '|' + self.MCI_token)
+        providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
+        return self.behsa_hash(self.behsa_username.upper() + '|' + self.behsa_password + '|' + providerToken.token)
 
     @staticmethod
     def behsa_hash(hash_string):

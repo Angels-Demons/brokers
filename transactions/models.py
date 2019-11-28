@@ -26,6 +26,23 @@ class ChargeType(Enum):
         elif value == 1005:
             return "بانوان"
 
+class ProviderType(Enum):
+    MCI = 1001
+    MTN = 1002
+    RIGHTEL = 1003
+    TALIYA = 1004
+
+    @staticmethod
+    def farsi(value):
+        if value == 1001:
+            return "همراه اول"
+        elif value == 1002:
+            return "ایرانسل"
+        elif value == 1003:
+            return "رایتل"
+        elif value == 1004:
+            return "تالیا"
+
 
 class ResponseTypes(Enum):
     SUCCESS = 0
@@ -381,6 +398,13 @@ class Choices:
         (TopUpState.EXECUTE_ERROR.value, TopUpState.EXECUTE_ERROR.name),
     )
 
+    providers_type = (
+        (ProviderType.MCI.value, ProviderType.farsi(ProviderType.MCI.name)),
+        (ProviderType.MTN.value, ProviderType.farsi(ProviderType.MTN.name)),
+        (ProviderType.RIGHTEL.value, ProviderType.farsi(ProviderType.RIGHTEL.name)),
+        (ProviderType.TALIYA.value, ProviderType.farsi(ProviderType.TALIYA.name)),
+    )
+
     bank_codes = (
         (BankCodes.MARKAZI.value, BankCodes.farsi(BankCodes.MARKAZI.value)),
         (BankCodes.MELLI.value, BankCodes.farsi(BankCodes.MELLI.value)),
@@ -493,6 +517,20 @@ class Choices:
         (ResponseTypes.INVALIPACKAGEAMOUNT.value, BankCodes.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value)),
         (ResponseTypes.INVALIDPACKAGETYPE.value, BankCodes.farsi(ResponseTypes.INVALIDPACKAGETYPE.value))
     )
+
+class ProvidersToken(models.Model):
+    provider = models.SmallIntegerField(choices=Choices.providers_type,null=False,blank=False)
+    token = models.CharField(max_length=150,null=False,blank=False)
+
+    @staticmethod
+    def create(provider, token):
+        ptoken = ProvidersToken(
+            provider=provider,
+            token=token,
+
+        )
+        ptoken.save()
+        return ptoken
 
 
 class TopUp(models.Model):
