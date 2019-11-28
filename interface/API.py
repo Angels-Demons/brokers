@@ -42,7 +42,7 @@ class MCI:
         try:
             print("******** Start CallSale Request ***** ")
             base64Authorization = self.localBasic(self.behsa_username, self.behsa_generated_pass)
-            header = {'Content-type': 'application/json','Authorization':base64Authorization}
+            header = {'Content-type': 'application/json','Authorization': base64Authorization}
             data = {
                 'TelNum': tel_num,
                 'TelCharger': tel_charger,
@@ -52,7 +52,7 @@ class MCI:
             }
             url = self.behsa_url + 'Topup/CallSaleProvider'
             print("******** CallSale Request Sent ***** ")
-            response = requests.post(url=url, data=data, headers=header)
+            response = requests.post(url=url, headers=header)
             print("******** CallSale Request Executed ***** ")
             print("******** CallSale Response Text : ***** " + response.text)
             res = json.loads(response.text)
