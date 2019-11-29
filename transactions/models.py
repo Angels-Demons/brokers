@@ -68,7 +68,7 @@ class TopUp(models.Model):
             # card_number =
             # card_type =
         )
-        top_up.full_clean()
+        top_up.clean_fields()
         top_up.save()
         return top_up
 
