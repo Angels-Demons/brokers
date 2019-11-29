@@ -523,7 +523,7 @@ class Choices:
 
 
 class ProvidersToken(models.Model):
-    provider = models.SmallIntegerField(choices=Choices.providers_type, null=False, blank=False)
+    provider = models.PositiveSmallIntegerField(choices=Choices.providers_type, null=False, blank=False)
     token = models.CharField(max_length=150, null=False, blank=False)
 
     @staticmethod
@@ -620,8 +620,9 @@ class TopUp(models.Model):
             return False
 
 
-class MCIPackage(models.Model):
+class Package(models.Model):
     package_type = models.IntegerField()
+    operator = models.PositiveSmallIntegerField(choices=Choices.providers_type, default=ProviderType.MCI.value)
     name = models.CharField(max_length=255, default='')
     active = models.BooleanField(default=True)
     description = models.CharField(max_length=255, default='')
@@ -641,7 +642,7 @@ class PackageRecord(models.Model):
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     # amount = models.PositiveIntegerField(blank=False, null=False)
     # package_type = models.IntegerField(blank=False, null=False)
-    package = models.ForeignKey(MCIPackage, on_delete=models.SET_NULL, null=True)
+    package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True)
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True)
     call_response_description = models.CharField(max_length=1023, null=True)
     execution_time = jmodels.jDateTimeField(null=True)
