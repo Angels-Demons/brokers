@@ -281,7 +281,6 @@ class MyRecentActions(modules.RecentActions):
 
     def __init__(self, title=None, limit=10, **kwargs):
         # self.user = user
-        print('salam2')
         kwargs.update({'limit': limit})
         # kwargs.update({'user': user})
         super(MyRecentActions, self).__init__(title, **kwargs)
@@ -293,7 +292,6 @@ class MyRecentActions(modules.RecentActions):
     #     self.user = settings.get('user', self.user)
 
     def init_with_context(self, context):
-        print('salam')
 
         def get_qset(list):
             qset = None
@@ -320,9 +318,7 @@ class MyRecentActions(modules.RecentActions):
             return qset
 
         qs = LogEntry.objects
-        print(self.user)
         if self.user:
-            print(self.user)
             qs = qs.filter(
                 user__pk=int(self.user)
             )
@@ -336,57 +332,67 @@ class MyRecentActions(modules.RecentActions):
 
 
 class CustomIndexDashboard(Dashboard):
-    columns = 3
+    columns = 2
 
     def init_with_context(self, context):
         request = context['request']
-        print(context['request'].user.pk)
         # print(context['user'].pk)
 
-        self.available_children.append(modules.LinkList)
-        self.children.append(modules.LinkList(_('Support'),
-                                              children=[
-                                                  {
-                                                      'title': _('Django documentation'),
-                                                      'url': 'http://docs.djangoproject.com/',
-                                                      'external': True,
-                                                  },
-                                                  {
-                                                      'title': _('Django "django-users" mailing list'),
-                                                      'url': 'http://groups.google.com/group/django-users',
-                                                      'external': True,
-                                                  },
-                                                  {
-                                                      'title': _('Django irc channel'),
-                                                      'url': 'irc://irc.freenode.net/django',
-                                                      'external': True,
-                                                  },
-                                              ],
-                                              column=0,
-                                              order=0
-                                              ))
+        # self.available_children.append(modules.LinkList)
+        # self.children.append(modules.LinkList(_('Support'),
+        #                                       children=[
+        #                                           {
+        #                                               'title': _('Django documentation'),
+        #                                               'url': 'http://docs.djangoproject.com/',
+        #                                               'external': True,
+        #                                           },
+        #                                           {
+        #                                               'title': _('Django "django-users" mailing list'),
+        #                                               'url': 'http://groups.google.com/group/django-users',
+        #                                               'external': True,
+        #                                           },
+        #                                           {
+        #                                               'title': _('Django irc channel'),
+        #                                               'url': 'irc://irc.freenode.net/django',
+        #                                               'external': True,
+        #                                           },
+        #                                       ],
+        #                                       column=0,
+        #                                       order=0
+        #                                       ))
         # append an app list module for "Applications"
         self.children.append(MyAppList(
             _('Applications'),
             exclude=('auth.*',),
-            column=1,
-            order=0
+            # draggable=False,
+            # collapsible=False,
+            # deletable=False,
+            column=0,
+            order=0,
+            # enabled=False,
         ))
 
         #         # append an app list module for "Administration"
         self.children.append(MyAppList(
             _('Administration'),
             models=('auth.*',),
-            column=2,
-            order=0
+            column=0,
+            order=1,
+            # draggable=False,
+            # collapsible=False,
+            # deletable=False,
+            # enabled=False,
         ))
 
         self.children.append(MyRecentActions(
-            title=_('Recent sdc sActions'),
+            title=_('Recent Actions'),
             limit=10,
             user=context['request'].user.pk,
-            column=0,
+            column=1,
             order=1,
+            # draggable=False,
+            # collapsible=False,
+            # deletable=False,
 
         ))
 
