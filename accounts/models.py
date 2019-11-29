@@ -7,7 +7,7 @@ class Broker(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name="user", editable=False)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="creator", editable=False)
     name = models.CharField(max_length=255, unique=True)
-    username = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, unique=True)
     email = models.EmailField()
     credit = models.BigIntegerField(default=0, editable=False)
     active = models.BooleanField(default=True)
@@ -21,11 +21,12 @@ class Broker(models.Model):
         return self.mcci_discount/100
 
     def charge_for_mcci_transaction(self, price):
-        if self.active is False:
-            return False
+        # if self.active is False:
+        #     return False
+        real_price = price * (1-self.get_mcci_discount())
         with transaction.atomic():
-            if self.credit >= price:
-                self.credit -= price
+            if self.credit >= real_price:
+                self.credit -= real_price
                 self.save()
                 return True
             return False
@@ -33,10 +34,10 @@ class Broker(models.Model):
 
 class BalanceIncrease(models.Model):
 
-    class Meta:
-        permissions = (
-            ("top_up", "Can top up users"),
-        )
+    # class Meta:
+    #     permissions = (
+    #         ("top_up", "Can top up users"),
+    #     )
 
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
