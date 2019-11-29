@@ -8,7 +8,7 @@ import hashlib
 from requests.auth import HTTPBasicAuth
 
 from accounts.utils import config_logging
-from transactions.models import ProvidersToken, ProviderType
+from transactions.models import ProvidersToken, Operator
 
 MCI_token = ""
 
@@ -26,7 +26,7 @@ class MCI:
         res = json.loads(response.text)
         try:
             if int(res['ResponseType']) == 0:
-                prToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
+                prToken = ProvidersToken.objects.get(provider=Operator.MCI.value)
                 prToken.update_token(str(res['TokenID']))
                 return True
         except Exception as e:
@@ -140,7 +140,7 @@ class MCI:
         return response_type, response_description
 
     def behsa_generated_pass(self,username):
-        providerToken = ProvidersToken.objects.get(provider=ProviderType.MCI.value)
+        providerToken = ProvidersToken.objects.get(provider=Operator.MCI.value)
         return self.behsa_hash(username.upper() + '|' + self.behsa_password + '|' + providerToken.token)
 
     @staticmethod

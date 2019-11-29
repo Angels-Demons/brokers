@@ -22,7 +22,7 @@ class ChargeType(Enum):
             return "بانوان"
 
 
-class ProviderType(Enum):
+class Operator(Enum):
     MCI = 1001
     MTN = 1002
     RIGHTEL = 1003
@@ -394,11 +394,11 @@ class Choices:
         (TopUpState.EXECUTE_ERROR.value, TopUpState.EXECUTE_ERROR.name),
     )
 
-    providers_type = (
-        (ProviderType.MCI.value, ProviderType.farsi(ProviderType.MCI.value)),
-        (ProviderType.MTN.value, ProviderType.farsi(ProviderType.MTN.value)),
-        (ProviderType.RIGHTEL.value, ProviderType.farsi(ProviderType.RIGHTEL.value)),
-        (ProviderType.TALIYA.value, ProviderType.farsi(ProviderType.TALIYA.value)),
+    operators = (
+        (Operator.MCI.value, Operator.farsi(Operator.MCI.value)),
+        (Operator.MTN.value, Operator.farsi(Operator.MTN.value)),
+        (Operator.RIGHTEL.value, Operator.farsi(Operator.RIGHTEL.value)),
+        (Operator.TALIYA.value, Operator.farsi(Operator.TALIYA.value)),
     )
 
     bank_codes = (

@@ -37,7 +37,7 @@ class ChargeCallSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < amount:
+        if broker.credit < top_up.amount:
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
