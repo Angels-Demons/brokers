@@ -23,6 +23,19 @@ class ChargeCallSaleView(BaseAPIView):
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
             charge_type = request.data.get('charge_type')
+            data = {"code": -10, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+            if not amount:
+                data["message"] = "'amount' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not tell_num:
+                data["message"] = "'tell_num' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not tell_charger:
+                data["message"] = "'tell_charger' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not charge_type:
+                data["message"] = "'charge_type' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             top_up = TopUp.create(
                 amount=amount,
                 broker=broker,
@@ -32,7 +45,7 @@ class ChargeCallSaleView(BaseAPIView):
             )
         except ValidationError as e:
             data = {
-                "message": str(e.messages),
+                "message": str(e.messages[0]),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
