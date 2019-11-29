@@ -22,6 +22,7 @@ class ChargeCallSaleView(BaseAPIView):
             amount = request.data.get('amount')
             broker = Broker.objects.get(user=request.user)
             tell_num = request.data.get('tell_num')
+            operator = request.data.get('operator')
             tell_charger = request.data.get('tell_charger')
             charge_type = request.data.get('charge_type')
             data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
@@ -36,6 +37,9 @@ class ChargeCallSaleView(BaseAPIView):
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             if not charge_type:
                 data["message"] = "'charge_type' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not operator:
+                data["message"] = "'operator' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             top_up = TopUp.create(
                 amount=amount,
