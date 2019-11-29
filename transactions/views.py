@@ -180,9 +180,20 @@ class PackageCallSaleView(BaseAPIView):
         try:
             # amount = int(request.data.get('amount'))
             broker = Broker.objects.get(user=request.user)
+            operator = request.data.get('operator')
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
             package_type = request.data.get('package_type')
+            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+            if not tell_num:
+                data["message"] = "'tell_num' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not tell_charger:
+                data["message"] = "'tell_charger' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not operator or operator != 1:
+                data["message"] = "'operator' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             package = Package.objects.get(package_type=package_type)
             package_log = PackageRecord.create(
                 # amount=amount,
