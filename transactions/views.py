@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import transaction
 # from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions, status
@@ -26,9 +27,9 @@ class ChargeCallSaleView(BaseAPIView):
                 tell_charger=tell_charger,
                 charge_type=charge_type
             )
-        except Exception as e:
+        except ValidationError as e:
             data = {
-                "message": str(e),
+                "message": str(e.message),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
@@ -38,7 +39,7 @@ class ChargeCallSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -20,
+                "code": -12,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -81,11 +82,19 @@ class ChargeExeSaleView(BaseAPIView):
             card_type = request.data.get('card_type')
             top_up = TopUp.objects.get(provider_id=provider_id,broker=broker)
             if top_up.state == TopUpState.CALLED.value:
-                top_up.before_execute(
-                    bank_code=bank_code,
-                    card_number=card_number,
-                    card_type=card_type
-                )
+                try:
+                    top_up.before_execute(
+                        bank_code=bank_code,
+                        card_number=card_number,
+                        card_type=card_type
+                    )
+                except ValidationError as e:
+                    data = {
+                        "message": str(e.message),
+                        "message_fa": "خطا: پارامترهای غیر معتبر",
+                        "code": -10,
+                    }
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
                 data = {
                     "message": "error: invalid provider_id: could not find a record with valid call sale",
@@ -106,7 +115,7 @@ class ChargeExeSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -20,
+                "code": -12,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -114,7 +123,7 @@ class ChargeExeSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers is deactive",
                 "message_fa": "کارگذار غیرفعال است.",
-                "code": -21,
+                "code": -13,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -139,7 +148,7 @@ class ChargeExeSaleView(BaseAPIView):
             data = {
                 "message": "error: failed to execute request",
                 "message_fa": "خطا در اجرای درخواست",
-                "code": -18,
+                "code": -14,
                 "exe_response_type": top_up.exe_response_type,
                 "exe_response_description": top_up.exe_response_description
             }
@@ -165,9 +174,9 @@ class PackageCallSaleView(BaseAPIView):
                 tell_charger=tell_charger,
                 package_id=package.pk
             )
-        except Exception as e:
+        except ValidationError as e:
             data = {
-                "message": str(e),
+                "message": str(e.message),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
@@ -177,7 +186,7 @@ class PackageCallSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -20,
+                "code": -12,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -233,9 +242,9 @@ class PackageExeSaleView(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception:
+        except ValidationError as e:
             data = {
-                "message": "error: invalid parameters",
+                "message": str(e.message),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
@@ -245,7 +254,7 @@ class PackageExeSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -20,
+                "code": -12,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -276,7 +285,7 @@ class PackageExeSaleView(BaseAPIView):
             data = {
                 "message": "error: failed to execute request",
                 "message_fa": "خطا در اجرای درخواست",
-                "code": -18,
+                "code": -14,
                 "exe_response_type": package_log.exe_response_type,
                 "exe_response_description": package_log.exe_response_description
             }
@@ -287,22 +296,22 @@ class BrokerCreditView(BaseAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     @staticmethod
-    def post(request):
+    def get(request):
         try:
             broker = Broker.objects.get(user=request.user)
         except Exception:
             data = {
                 "message": "error: Invalid Broker",
                 "message_fa": "خطا: کارگزار نامعتبر است.",
-                "code": -22,
+                "code": -15,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.active is False:
+        if not broker.active:
             data = {
                 "message": "error: Brokers is deactive",
                 "message_fa": "کارگذار غیرفعال است.",
-                "code": -21,
+                "code": -16,
             }
             return Response(data, status=status.HTTP_200_OK)
 
