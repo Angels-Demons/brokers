@@ -32,7 +32,7 @@ class ChargeCallSaleView(BaseAPIView):
             )
         except ValidationError as e:
             data = {
-                "message": str(e.messages[0]),
+                "message": str(e.messages),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
