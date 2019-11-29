@@ -451,7 +451,7 @@ class Choices:
         (ResponseTypes.SUCCESS.value, BankCodes.farsi(ResponseTypes.SUCCESS.value)),
         (ResponseTypes.REFERTODESC.value, BankCodes.farsi(ResponseTypes.REFERTODESC.value)),
         (ResponseTypes.INVALIBROKER.value, BankCodes.farsi(ResponseTypes.INVALIBROKER.value)),
-        (ResponseTypes.DEAVTICEBROKER.value, BankCodes.farsi(ResponseTypes.DEAVTICEBROKER.value)),
+        (ResponseTypes.DEAVTIVEBROKER.value, BankCodes.farsi(ResponseTypes.DEAVTIVEBROKER.value)),
         (ResponseTypes.INVALIDAMOUNT.value, BankCodes.farsi(ResponseTypes.INVALIDAMOUNT.value)),
         (ResponseTypes.EMPTYCHARGE.value, BankCodes.farsi(ResponseTypes.EMPTYCHARGE.value)),
         (ResponseTypes.DAILYLIMIREACHED.value, BankCodes.farsi(ResponseTypes.DAILYLIMIREACHED.value)),
