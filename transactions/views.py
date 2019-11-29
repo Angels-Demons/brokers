@@ -10,6 +10,7 @@ from interface.API import MCI
 from accounts.models import Broker
 from transactions.models import TopUp, PackageRecord, TopUpState, Package
 from transactions.serializers import PackageSerializer
+from transactions.enums import ResponceCodeTypes as codes
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -23,7 +24,7 @@ class ChargeCallSaleView(BaseAPIView):
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
             charge_type = request.data.get('charge_type')
-            data = {"code": -10, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
             if not amount:
                 data["message"] = "'amount' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -47,7 +48,7 @@ class ChargeCallSaleView(BaseAPIView):
             data = {
                 "message": str(e.messages[0]),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
-                "code": -10,
+                "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -55,7 +56,7 @@ class ChargeCallSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -12,
+                "code": codes.insufficient_balance,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -70,17 +71,15 @@ class ChargeCallSaleView(BaseAPIView):
             data = {
                 "message": "Request successfully submitted",
                 "message_fa": "درخواست با موفقیت ثبت شد",
-                "code": 0,
+                "code": codes.successful,
                 "provider_id": top_up.provider_id
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "error: failed to submit request",
-                "message_fa": "خطا در ثبت درخواست",
-                "code": -11,
-                "response_type": top_up.call_response_type,
-                "response_description": top_up.call_response_description
+                "message": "failed to submit request",
+                "message_fa": top_up.call_response_description,
+                "code": top_up.call_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -96,7 +95,7 @@ class ChargeExeSaleView(BaseAPIView):
             bank_code = request.data.get('bank_code')
             card_number = request.data.get('card_number')
             card_type = request.data.get('card_type')
-            top_up = TopUp.objects.get(provider_id=provider_id,broker=broker)
+            top_up = TopUp.objects.get(provider_id=provider_id, broker=broker)
             if top_up.state == TopUpState.CALLED.value:
                 try:
                     top_up.before_execute(
@@ -108,14 +107,14 @@ class ChargeExeSaleView(BaseAPIView):
                     data = {
                         "message": str(e.messages[0]),
                         "message_fa": "خطا: پارامترهای غیر معتبر",
-                        "code": -10,
+                        "code": codes.invalid_parameter,
                     }
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
                 data = {
-                    "message": "error: invalid provider_id: could not find a record with valid call sale",
+                    "message": "error: invalid 'provider_id'",
                     "message_fa": "خطا: پارامتر provider_id غیر معتبر",
-                    "code": -19,
+                    "code": codes.invalid_parameter,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,7 +122,7 @@ class ChargeExeSaleView(BaseAPIView):
             data = {
                 "message": "error: invalid parameters",
                 "message_fa": "خطا: پارامترهای غیر معتبر",
-                "code": -10,
+                "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -131,15 +130,15 @@ class ChargeExeSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -12,
+                "code": codes.insufficient_balance,
             }
             return Response(data, status=status.HTTP_200_OK)
 
         if broker.active is False:
             data = {
-                "message": "error: Brokers is deactive",
+                "message": "error: Brokers is not active",
                 "message_fa": "کارگذار غیرفعال است.",
-                "code": -13,
+                "code": codes.inactive_broker,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -156,17 +155,15 @@ class ChargeExeSaleView(BaseAPIView):
             data = {
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",
-                "code": 0,
+                "code": codes.successful,
                 # "provider_id": top_up.provider_id
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "error: failed to execute request",
-                "message_fa": "خطا در اجرای درخواست",
-                "code": -14,
-                "exe_response_type": top_up.exe_response_type,
-                "exe_response_description": top_up.exe_response_description
+                "message": "failed to execute request",
+                "message_fa": top_up.call_response_description,
+                "code": top_up.call_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -194,7 +191,7 @@ class PackageCallSaleView(BaseAPIView):
             data = {
                 "message": str(e.messages[0]),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
-                "code": -10,
+                "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -202,7 +199,7 @@ class PackageCallSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -12,
+                "code": codes.insufficient_balance,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -217,17 +214,15 @@ class PackageCallSaleView(BaseAPIView):
             data = {
                 "message": "Request successfully submitted",
                 "message_fa": "درخواست با موفقیت ثبت شد",
-                "code": 0,
+                "code": codes.successful,
                 "provider_id": package_log.provider_id
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "error: failed to submit request",
-                "message_fa": "خطا در ثبت درخواست",
-                "code": -11,
-                "response_type": package_log.call_response_type,
-                "response_description": package_log.call_response_description
+                "message": "failed to submit request",
+                "message_fa": package_log.call_response_description,
+                "code": package_log.call_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -254,7 +249,7 @@ class PackageExeSaleView(BaseAPIView):
                 data = {
                     "message": "error: invalid provider_id: could not find a record with valid call sale",
                     "message_fa": "خطا: پارامتر provider_id غیر معتبر",
-                    "code": -19,
+                    "code": codes.invalid_parameter,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -262,7 +257,7 @@ class PackageExeSaleView(BaseAPIView):
             data = {
                 "message": str(e.messages[0]),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
-                "code": -10,
+                "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -270,7 +265,7 @@ class PackageExeSaleView(BaseAPIView):
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": -12,
+                "code": codes.insufficient_balance,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -294,16 +289,14 @@ class PackageExeSaleView(BaseAPIView):
             data = {
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",
-                "code": 0,
+                "code": codes.successful,
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "error: failed to execute request",
-                "message_fa": "خطا در اجرای درخواست",
-                "code": -14,
-                "exe_response_type": package_log.exe_response_type,
-                "exe_response_description": package_log.exe_response_description
+                "message": "failed to execute request",
+                "message_fa": package_log.call_response_description,
+                "code": package_log.call_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -319,32 +312,34 @@ class BrokerCreditView(BaseAPIView):
             data = {
                 "message": "error: Invalid Broker",
                 "message_fa": "خطا: کارگزار نامعتبر است.",
-                "code": -15,
+                "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if not broker.active:
             data = {
-                "message": "error: Brokers is deactive",
+                "message": "error: Brokers is not active",
                 "message_fa": "کارگذار غیرفعال است.",
-                "code": -16,
+                "code": codes.inactive_broker,
             }
             return Response(data, status=status.HTTP_200_OK)
 
         data = {
-                "message": "Request successfully executed",
-                "message_fa": "درخواست با موفقیت اجرا شد",
-                "code": 0,
-                "Credit": broker.credit
+            "message": "Request successfully executed",
+            "message_fa": "درخواست با موفقیت اجرا شد",
+            "code": codes.successful,
+            "credit": broker.credit
         }
         return Response(data, status=status.HTTP_200_OK)
 
 
-@csrf_exempt
 @api_view(["GET"])
 def active_packages(request):
-    actives = PackageSerializer(Package.objects.filter(active=True), many=True).data
-    data = {'message': 'success: active packages',
-            'data': actives
-            }
+    serialized_data = PackageSerializer(Package.objects.filter(active=True), many=True).data
+    data = {
+        "message": "Request successfully executed",
+        "message_fa": "درخواست با موفقیت اجرا شد",
+        "code": codes.successful,
+        "packages": serialized_data
+    }
     return Response(data, status=status.HTTP_200_OK)

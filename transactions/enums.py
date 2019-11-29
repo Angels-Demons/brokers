@@ -44,7 +44,7 @@ class ResponseTypes(Enum):
     SUCCESS = 0
     REFERTODESC = -1
     INVALIBROKER = -1001
-    DEAVTICEBROKER = -1002
+    DEAVTIVEBROKER = -1002
     INVALIDAMOUNT = -1003
     EMPTYCHARGE = -1004
     DAILYLIMIREACHED = -1005
@@ -513,3 +513,11 @@ class Choices:
         (ResponseTypes.INVALIPACKAGEAMOUNT.value, BankCodes.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value)),
         (ResponseTypes.INVALIDPACKAGETYPE.value, BankCodes.farsi(ResponseTypes.INVALIDPACKAGETYPE.value))
     )
+
+
+class ResponceCodeTypes:
+    successful = 0
+    invalid_parameter = -10
+    provider_error = -11
+    insufficient_balance = -12
+    inactive_broker = -13
