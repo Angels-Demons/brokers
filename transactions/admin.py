@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from transactions.models import TopUp, PackageRecord, ProvidersToken, MCIPackage
+from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
 
 
 class TopUpAdmin(admin.ModelAdmin):
@@ -78,4 +78,4 @@ class PackageAdmin(admin.ModelAdmin):
 admin.site.register(TopUp, TopUpAdmin)
 admin.site.register(ProvidersToken)
 admin.site.register(PackageRecord, PackageRecordAdmin)
-admin.site.register(MCIPackage, PackageAdmin)
+admin.site.register(Package, PackageAdmin)

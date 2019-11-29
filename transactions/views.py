@@ -1,12 +1,15 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 # from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions, status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from interface.API import MCI
 from accounts.models import Broker
-from transactions.models import TopUp, PackageRecord, TopUpState, MCIPackage
+from transactions.models import TopUp, PackageRecord, TopUpState, Package
+from transactions.serializers import PackageSerializer
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -35,7 +38,7 @@ class ChargeCallSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < amount:
+        if broker.credit < top_up.amount:
             data = {
                 "message": "error: Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -166,7 +169,7 @@ class PackageCallSaleView(BaseAPIView):
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
             package_type = request.data.get('package_type')
-            package = MCIPackage.objects.get(package_type=package_type)
+            package = Package.objects.get(package_type=package_type)
             package_log = PackageRecord.create(
                 # amount=amount,
                 broker=broker,
@@ -322,3 +325,13 @@ class BrokerCreditView(BaseAPIView):
                 "Credit": broker.credit
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(["GET"])
+def active_packages(request):
+    actives = PackageSerializer(Package.objects.filter(active=True), many=True).data
+    data = {'message': 'success: active packages',
+            'data': actives
+            }
+    return Response(data, status=status.HTTP_200_OK)

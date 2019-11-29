@@ -336,40 +336,40 @@ class MyRecentActions(modules.RecentActions):
 
 
 class CustomIndexDashboard(Dashboard):
-    columns = 3
+    columns = 2
 
     def init_with_context(self, context):
         request = context['request']
         print(context['request'].user.pk)
         # print(context['user'].pk)
 
-        self.available_children.append(modules.LinkList)
-        self.children.append(modules.LinkList(_('Support'),
-                                              children=[
-                                                  {
-                                                      'title': _('Django documentation'),
-                                                      'url': 'http://docs.djangoproject.com/',
-                                                      'external': True,
-                                                  },
-                                                  {
-                                                      'title': _('Django "django-users" mailing list'),
-                                                      'url': 'http://groups.google.com/group/django-users',
-                                                      'external': True,
-                                                  },
-                                                  {
-                                                      'title': _('Django irc channel'),
-                                                      'url': 'irc://irc.freenode.net/django',
-                                                      'external': True,
-                                                  },
-                                              ],
-                                              column=0,
-                                              order=0
-                                              ))
+        # self.available_children.append(modules.LinkList)
+        # self.children.append(modules.LinkList(_('Support'),
+        #                                       children=[
+        #                                           {
+        #                                               'title': _('Django documentation'),
+        #                                               'url': 'http://docs.djangoproject.com/',
+        #                                               'external': True,
+        #                                           },
+        #                                           {
+        #                                               'title': _('Django "django-users" mailing list'),
+        #                                               'url': 'http://groups.google.com/group/django-users',
+        #                                               'external': True,
+        #                                           },
+        #                                           {
+        #                                               'title': _('Django irc channel'),
+        #                                               'url': 'irc://irc.freenode.net/django',
+        #                                               'external': True,
+        #                                           },
+        #                                       ],
+        #                                       column=0,
+        #                                       order=0
+        #                                       ))
         # append an app list module for "Applications"
         self.children.append(MyAppList(
             _('Applications'),
             exclude=('auth.*',),
-            column=1,
+            column=0,
             order=0
         ))
 
@@ -377,16 +377,16 @@ class CustomIndexDashboard(Dashboard):
         self.children.append(MyAppList(
             _('Administration'),
             models=('auth.*',),
-            column=2,
-            order=0
+            column=0,
+            order=1
         ))
 
         self.children.append(MyRecentActions(
             title=_('Recent sdc sActions'),
             limit=10,
             user=context['request'].user.pk,
-            column=0,
-            order=1,
+            column=1,
+            order=0,
 
         ))
 
