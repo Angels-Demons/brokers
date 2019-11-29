@@ -1,6 +1,8 @@
 from logging.handlers import RotatingFileHandler
 import logging
 
+from django.core.exceptions import ValidationError
+
 from brokers.settings import log_direction
 
 
@@ -25,3 +27,17 @@ def set_logging():
     general_file_logger = RotatingFileHandler(filename=log_direction + "error.log", maxBytes=1 * 1024 * 1024, backupCount=5)
     general_file_logger.setFormatter(log_formatter)
     logging.getLogger().addHandler(general_file_logger)
+
+
+def phone_validator(value):
+    if not str(value).startswith('9') or len(str(value)) != 10:
+        raise ValidationError(
+            ("Phone number must be entered in 10 digits format: '9123456789'"),
+        )
+
+
+def amount_validator(value):
+    if value % 1000 != 0 or value > 2000000 or value < 1000:
+        raise ValidationError(
+            ("Invalid amount value"),
+        )

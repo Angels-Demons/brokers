@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.models import Broker
+from accounts.utils import phone_validator, amount_validator
 
 
 class ChargeType(Enum):
@@ -544,10 +545,10 @@ class ProvidersToken(models.Model):
 class TopUp(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
-    tell_num = models.BigIntegerField(blank=False, null=False)
+    tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value)
-    tell_charger = models.BigIntegerField(blank=False, null=False)
-    amount = models.PositiveIntegerField(blank=False, null=False)
+    tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
+    amount = models.PositiveIntegerField(blank=False, null=False, validators=[amount_validator])
     charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False)
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True)
     call_response_description = models.CharField(max_length=1023, null=True)
@@ -619,11 +620,11 @@ class TopUp(models.Model):
             return False
 
 
-class Package(models.Model):
+class MCIPackage(models.Model):
     package_type = models.IntegerField()
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, default='')
     active = models.BooleanField(default=True)
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, default='')
     amount = models.PositiveIntegerField()
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
@@ -635,12 +636,12 @@ class Package(models.Model):
 class PackageRecord(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
-    tell_num = models.BigIntegerField(blank=False, null=False)
+    tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value)
-    tell_charger = models.BigIntegerField(blank=False, null=False)
+    tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     # amount = models.PositiveIntegerField(blank=False, null=False)
     # package_type = models.IntegerField(blank=False, null=False)
-    package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True)
+    package = models.ForeignKey(MCIPackage, on_delete=models.SET_NULL, null=True)
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True)
     call_response_description = models.CharField(max_length=1023, null=True)
     execution_time = jmodels.jDateTimeField(null=True)
