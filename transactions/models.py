@@ -37,15 +37,15 @@ class TopUp(models.Model):
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     amount = models.PositiveIntegerField(blank=False, null=False, validators=[amount_validator])
     charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False)
-    call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True)
-    call_response_description = models.CharField(max_length=1023, null=True)
-    execution_time = jmodels.jDateTimeField(null=True)
-    exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True)
-    exe_response_description = models.CharField(max_length=1023, null=True)
-    provider_id = models.CharField(max_length=255, null=True)
-    bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True)
-    card_number = models.CharField(max_length=255, null=True)
-    card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True)
+    call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
+    call_response_description = models.CharField(max_length=1023, null=True, blank=True)
+    execution_time = jmodels.jDateTimeField(null=True, blank=True)
+    exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
+    exe_response_description = models.CharField(max_length=1023, null=True, blank=True)
+    provider_id = models.CharField(max_length=255, null=True, blank=True)
+    bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, blank=True)
+    card_number = models.CharField(max_length=255, null=True, blank=True)
+    card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
 
     def __str__(self):
         return "Top_up " + str(self.id)
@@ -55,20 +55,11 @@ class TopUp(models.Model):
         top_up = TopUp(
             broker=broker,
             tell_num=tell_num,
-            # state =
             tell_charger=tell_charger,
             amount=int(amount),
             charge_type=charge_type,
-            # call_response_type =
-            # call_response_description =
-            # exe_response_type =
-            # exe_response_description =
-            # provider_id =
-            # bank_code =
-            # card_number =
-            # card_type =
         )
-        top_up.clean_fields()
+        top_up.full_clean()
         top_up.save()
         return top_up
 
@@ -132,15 +123,15 @@ class PackageRecord(models.Model):
     # amount = models.PositiveIntegerField(blank=False, null=False)
     # package_type = models.IntegerField(blank=False, null=False)
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True)
-    call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True)
-    call_response_description = models.CharField(max_length=1023, null=True)
-    execution_time = jmodels.jDateTimeField(null=True)
-    exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True)
-    exe_response_description = models.CharField(max_length=1023, null=True)
-    provider_id = models.CharField(max_length=255, null=True)
-    bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True)
-    card_number = models.CharField(max_length=255, null=True)
-    card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True)
+    call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
+    call_response_description = models.CharField(max_length=1023, null=True, blank=True)
+    execution_time = jmodels.jDateTimeField(null=True, blank=True)
+    exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
+    exe_response_description = models.CharField(max_length=1023, null=True, blank=True)
+    provider_id = models.CharField(max_length=255, null=True, blank=True)
+    bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, blank=True)
+    card_number = models.CharField(max_length=255, null=True, blank=True)
+    card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
 
     def __str__(self):
         return "Package record " + str(self.id)
@@ -150,19 +141,8 @@ class PackageRecord(models.Model):
         package_record = PackageRecord(
             broker=broker,
             tell_num=tell_num,
-            # state =
             tell_charger=tell_charger,
-            # amount=amount,
             package_id=package_id,
-            # package_type=package_type,
-            # call_response_type =
-            # call_response_description =
-            # exe_response_type =
-            # exe_response_description =
-            # provider_id =
-            # bank_code =
-            # card_number =
-            # card_type =
         )
         package_record.full_clean()
         package_record.save()
