@@ -45,3 +45,6 @@ class BalanceIncrease(models.Model):
     comment = models.CharField(max_length=255, unique=True)
     success = models.BooleanField(default=False, editable=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.broker.username
