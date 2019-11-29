@@ -6,6 +6,9 @@
     </a>
 </div>
 <div class="dashboard-tools " style="display:flex;">
+{%  if user_credit != None  %}
+        <p style="margin:.4em 0.8em 0;">{% trans 'Your Credit: ' %}{{ user_credit }}</p>
+    {% endif %}
     <form action="{% url "jet-dashboard:add_user_dashboard_module" %}" method="POST" id="add-dashboard-module-form">
         {% csrf_token %}
         <select class="add-dashboard" name="module">
@@ -33,9 +36,7 @@
         <p>{% trans "Are you sure want to reset widgets?" %}</p>
     </div>
 
-    {%  if user_credit != None  %}
-        <p style="margin:.4em 0.8em 0;">{% trans 'Your Credit: ' %}{{ user_credit }}</p>
-    {% endif %}
+
 </div>
 {#<div class="dashboard-tools">#}
 {#    <form action="{% url "jet-dashboard:add_user_dashboard_module" %}" method="POST" id="add-dashboard-module-form">#}
