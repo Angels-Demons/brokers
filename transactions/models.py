@@ -9,7 +9,7 @@ from transactions.enums import *
 
 
 class ProvidersToken(models.Model):
-    provider = models.PositiveSmallIntegerField(choices=Choices.providers_type, null=False, blank=False)
+    provider = models.PositiveSmallIntegerField(choices=Choices.operators, null=False, blank=False)
     token = models.CharField(max_length=150, null=False, blank=False)
 
     @staticmethod
@@ -108,7 +108,7 @@ class TopUp(models.Model):
 
 class Package(models.Model):
     package_type = models.IntegerField()
-    operator = models.PositiveSmallIntegerField(choices=Choices.providers_type, default=ProviderType.MCI.value)
+    operator = models.PositiveSmallIntegerField(choices=Choices.operators, default=Operator.MCI.value)
     name = models.CharField(max_length=255, default='')
     active = models.BooleanField(default=True)
     description = models.CharField(max_length=255, default='')
