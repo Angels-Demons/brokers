@@ -1,11 +1,12 @@
-from django.db import transaction
-# from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions, status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from interface.API import MCI
 from accounts.models import Broker
 from transactions.models import TopUp, PackageRecord, TopUpState, Package
+from transactions.serializers import PackageSerializer
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -313,3 +314,13 @@ class BrokerCreditView(BaseAPIView):
                 "Credit": broker.credit
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(["GET"])
+def active_packages(request):
+    actives = PackageSerializer(Package.objects.filter(active=True), many=True).data
+    data = {'message': 'success: active packages',
+            'data': actives
+            }
+    return Response(data, status=status.HTTP_200_OK)
