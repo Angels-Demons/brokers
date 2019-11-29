@@ -58,7 +58,7 @@ class ChargeCallSaleView(BaseAPIView):
 
         if broker.credit < top_up.amount:
             data = {
-                "message": "error: Brokers balance is insufficient",
+                "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
                 "code": codes.insufficient_balance,
             }
@@ -81,7 +81,7 @@ class ChargeCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "failed to submit request",
+                "message": "Failed to submit request",
                 "message_fa": top_up.call_response_description,
                 "code": top_up.call_response_type,
             }
@@ -116,7 +116,7 @@ class ChargeExeSaleView(BaseAPIView):
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
                 data = {
-                    "message": "error: invalid 'provider_id'",
+                    "message": "Invalid 'provider_id'",
                     "message_fa": "خطا: پارامتر provider_id غیر معتبر",
                     "code": codes.invalid_parameter,
                 }
@@ -124,7 +124,7 @@ class ChargeExeSaleView(BaseAPIView):
 
         except Exception:
             data = {
-                "message": "error: invalid parameters",
+                "message": "Invalid parameters",
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": codes.invalid_parameter,
             }
@@ -132,7 +132,7 @@ class ChargeExeSaleView(BaseAPIView):
 
         if broker.credit < top_up.amount:
             data = {
-                "message": "error: Brokers balance is insufficient",
+                "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
                 "code": codes.insufficient_balance,
             }
@@ -140,7 +140,7 @@ class ChargeExeSaleView(BaseAPIView):
 
         if broker.active is False:
             data = {
-                "message": "error: Brokers is not active",
+                "message": "Brokers is not active",
                 "message_fa": "کارگذار غیرفعال است.",
                 "code": codes.inactive_broker,
             }
@@ -165,7 +165,7 @@ class ChargeExeSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "failed to execute request",
+                "message": "Failed to execute request",
                 "message_fa": top_up.call_response_description,
                 "code": top_up.call_response_type,
             }
@@ -212,7 +212,7 @@ class PackageCallSaleView(BaseAPIView):
 
         if broker.credit < package_log.package.amount:
             data = {
-                "message": "error: Brokers balance is insufficient",
+                "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
                 "code": codes.insufficient_balance,
             }
@@ -235,7 +235,7 @@ class PackageCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "failed to submit request",
+                "message": "Failed to submit request",
                 "message_fa": package_log.call_response_description,
                 "code": package_log.call_response_type,
             }
@@ -262,7 +262,7 @@ class PackageExeSaleView(BaseAPIView):
                 )
             else:
                 data = {
-                    "message": "error: invalid provider_id: could not find a record with valid call sale",
+                    "message": "Invalid provider_id: could not find a record with valid call sale",
                     "message_fa": "خطا: پارامتر provider_id غیر معتبر",
                     "code": codes.invalid_parameter,
                 }
@@ -278,7 +278,7 @@ class PackageExeSaleView(BaseAPIView):
 
         if broker.credit < package_log.package.amount:
             data = {
-                "message": "error: Brokers balance is insufficient",
+                "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
                 "code": codes.insufficient_balance,
             }
@@ -309,7 +309,7 @@ class PackageExeSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
-                "message": "failed to execute request",
+                "message": "Failed to execute request",
                 "message_fa": package_log.call_response_description,
                 "code": package_log.call_response_type,
             }
@@ -325,7 +325,7 @@ class BrokerCreditView(BaseAPIView):
             broker = Broker.objects.get(user=request.user)
         except Exception:
             data = {
-                "message": "error: Invalid Broker",
+                "message": "Invalid Broker",
                 "message_fa": "خطا: کارگزار نامعتبر است.",
                 "code": codes.invalid_parameter,
             }
@@ -333,7 +333,7 @@ class BrokerCreditView(BaseAPIView):
 
         if not broker.active:
             data = {
-                "message": "error: Brokers is not active",
+                "message": "Brokers is not active",
                 "message_fa": "کارگذار غیرفعال است.",
                 "code": codes.inactive_broker,
             }
