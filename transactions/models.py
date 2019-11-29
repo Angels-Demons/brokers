@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.models import Broker
@@ -67,6 +68,7 @@ class TopUp(models.Model):
             # card_number =
             # card_type =
         )
+        top_up.full_clean()
         top_up.save()
         return top_up
 
@@ -90,6 +92,7 @@ class TopUp(models.Model):
         self.bank_code = bank_code
         self.card_number = card_number
         self.card_type = card_type
+        self.full_clean()
         self.save()
 
     def after_execute(self, exe_response_type, exe_response_description):
@@ -161,6 +164,7 @@ class PackageRecord(models.Model):
             # card_number =
             # card_type =
         )
+        package_record.full_clean()
         package_record.save()
         return package_record
 
@@ -184,6 +188,7 @@ class PackageRecord(models.Model):
         self.bank_code = bank_code
         self.card_number = card_number
         self.card_type = card_type
+        self.full_clean()
         self.save()
 
     def after_execute(self, exe_response_type, exe_response_description):

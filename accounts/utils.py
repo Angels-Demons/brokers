@@ -38,7 +38,7 @@ def phone_validator(value):
 
 
 def amount_validator(value):
-    if value % 1000 != 0 or value > 2000000 or value < 1000:
+    if value % 1000 != 0 or value > 2000000 or value < 10000:
         raise ValidationError(
             ("Invalid amount value: it's not a multiple of 1000, bigger than 1000 or smaller than 2000000"),
             code="invalid_amount",
