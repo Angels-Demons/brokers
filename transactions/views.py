@@ -32,7 +32,7 @@ class ChargeCallSaleView(BaseAPIView):
             )
         except ValidationError as e:
             data = {
-                "message": str(e.message),
+                "message": str(e.messages),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
@@ -93,7 +93,7 @@ class ChargeExeSaleView(BaseAPIView):
                     )
                 except ValidationError as e:
                     data = {
-                        "message": str(e.message),
+                        "message": str(e.messages),
                         "message_fa": "خطا: پارامترهای غیر معتبر",
                         "code": -10,
                     }
@@ -179,7 +179,7 @@ class PackageCallSaleView(BaseAPIView):
             )
         except ValidationError as e:
             data = {
-                "message": str(e.message),
+                "message": str(e.messages),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
@@ -247,7 +247,7 @@ class PackageExeSaleView(BaseAPIView):
 
         except ValidationError as e:
             data = {
-                "message": str(e.message),
+                "message": str(e.messages),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": -10,
             }
