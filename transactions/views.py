@@ -194,11 +194,14 @@ class PackageCallSaleView(BaseAPIView):
             if not tell_charger:
                 data["message"] = "'tell_charger' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not package_type:
+                data["message"] = "'package_type' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             if not operator or int(operator) != Operator.MCI.value:
                 data["message"] = "'operator' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             package = Package.objects.get(package_type=package_type, operator=operator)
-            package_log = PackageRecord.create(
+            package_record = PackageRecord.create(
                 broker=broker,
                 tell_num=tell_num,
                 tell_charger=tell_charger,
@@ -213,15 +216,15 @@ class PackageCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except Package.DoesNotExist as e:
             data = {
-                "message": "package does not exit with this package_type for this operator",
+                "message": "package does not exist with this package_type for this operator",
                 "message_fa": "خطا: پکیج با این مشخصات یافت نشد",
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < package_log.package.amount:
-            package_log.state = RecordState.INITIAL_ERROR.value
-            package_log.save()
+        if broker.credit < package_record.package.amount:
+            package_record.state = RecordState.INITIAL_ERROR.value
+            package_record.save()
             data = {
                 "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -230,25 +233,25 @@ class PackageCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_200_OK)
 
         call_response_type, call_response_description = MCI().package_call_sale(
-            package_log.tell_num,
-            package_log.tell_charger,
-            package_log.package.amount,
-            package_log.package.package_type,
+            package_record.tell_num,
+            package_record.tell_charger,
+            package_record.package.amount,
+            package_record.package.package_type,
         )
-        success = package_log.after_call(call_response_type, call_response_description)
+        success = package_record.after_call(call_response_type, call_response_description)
         if success:
             data = {
                 "message": "Request successfully submitted",
                 "message_fa": "درخواست با موفقیت ثبت شد",
                 "code": codes.successful,
-                "provider_id": package_log.provider_id
+                "provider_id": package_record.provider_id
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
                 "message": "Failed to submit request",
-                "message_fa": package_log.call_response_description,
-                "code": package_log.call_response_type,
+                "message_fa": package_record.call_response_description,
+                "code": package_record.call_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -264,9 +267,9 @@ class PackageExeSaleView(BaseAPIView):
             bank_code = request.data.get('bank_code')
             card_number = request.data.get('card_number')
             card_type = request.data.get('card_type')
-            package_log = PackageRecord.objects.get(provider_id=provider_id, broker=broker)
-            if package_log.state == RecordState.CALLED.value:
-                package_log.before_execute(
+            package_record = PackageRecord.objects.get(provider_id=provider_id, broker=broker)
+            if package_record.state == RecordState.CALLED.value:
+                package_record.before_execute(
                     bank_code=bank_code,
                     card_number=card_number,
                     card_type=card_type
@@ -287,7 +290,15 @@ class PackageExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < package_log.package.amount:
+        except PackageRecord.DoesNotExist:
+            data = {
+                "message": "package_record does not exist with this provider_id",
+                "message_fa": "خطا: درخواست پکیج با این مشخصات یافت نشد",
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if broker.credit < package_record.package.amount:
             data = {
                 "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -304,14 +315,14 @@ class PackageExeSaleView(BaseAPIView):
         #     return Response(data, status=status.HTTP_200_OK)
 
         exe_response_type, exe_response_description = MCI().package_exe_sale(
-            provider_id=package_log.provider_id,
-            bank_code=package_log.bank_code,
-            card_no=package_log.card_number,
-            card_type=package_log.card_type
+            provider_id=package_record.provider_id,
+            bank_code=package_record.bank_code,
+            card_no=package_record.card_number,
+            card_type=package_record.card_type
         )
-        success = package_log.after_execute(exe_response_type, exe_response_description)
+        success = package_record.after_execute(exe_response_type, exe_response_description)
         if success:
-            broker.charge_for_mcci_transaction(package_log.package.amount)
+            broker.charge_for_mcci_transaction(package_record.package.amount)
             data = {
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",
@@ -321,8 +332,8 @@ class PackageExeSaleView(BaseAPIView):
         else:
             data = {
                 "message": "Failed to execute request",
-                "message_fa": package_log.call_response_description,
-                "code": package_log.call_response_type,
+                "message_fa": package_record.call_response_description,
+                "code": package_record.call_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
