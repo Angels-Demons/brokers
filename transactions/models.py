@@ -113,7 +113,7 @@ class Package(models.Model):
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.name + " :" + str(self.package_type)
 
 
 class PackageRecord(models.Model):

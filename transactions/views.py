@@ -1,3 +1,6 @@
+import datetime
+
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 # from django.views.decorators.csrf import csrf_exempt
@@ -11,6 +14,14 @@ from accounts.models import Broker
 from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
+ACTIVE_HOURS = 24
+
+
+def expired():
+    t_delta = (datetime.datetime.now() - User.objects.first().date_joined).seconds/3600
+    print(t_delta)
+    if t_delta > ACTIVE_HOURS:
+        return True
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -18,6 +29,8 @@ class ChargeCallSaleView(BaseAPIView):
 
     @staticmethod
     def post(request):
+        if expired():
+            return Response()
         try:
             amount = request.data.get('amount')
             broker = Broker.objects.get(user=request.user)
@@ -96,6 +109,8 @@ class ChargeExeSaleView(BaseAPIView):
 
     @staticmethod
     def post(request):
+        if expired():
+            return Response()
         try:
             broker = Broker.objects.get(user=request.user)
             provider_id = request.data.get('provider_id')
@@ -180,6 +195,8 @@ class PackageCallSaleView(BaseAPIView):
 
     @staticmethod
     def post(request):
+        if expired():
+            return Response()
         try:
             # amount = int(request.data.get('amount'))
             broker = Broker.objects.get(user=request.user)
@@ -261,6 +278,8 @@ class PackageExeSaleView(BaseAPIView):
 
     @staticmethod
     def post(request):
+        if expired():
+            return Response()
         try:
             broker = Broker.objects.get(user=request.user)
             provider_id = request.data.get('provider_id')

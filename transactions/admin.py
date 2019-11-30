@@ -57,7 +57,7 @@ class PackageRecordAdmin(admin.ModelAdmin):
 
 
 class PackageAdmin(admin.ModelAdmin):
-    list_display = ['package_type', 'name', 'amount', 'creator', 'timestamp', 'active', 'description']
+    list_display = ['operator', 'package_type', 'name', 'amount', 'creator', 'timestamp', 'active', 'description']
 
     def save_model(self, request, obj, form, change):
         obj.creator = request.user
@@ -65,7 +65,7 @@ class PackageAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['package_type', 'creator', 'timestamp']
+            return ['operator', 'package_type', 'creator', 'timestamp']
         else:
             return ['creator', 'timestamp']
 
