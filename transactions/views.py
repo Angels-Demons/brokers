@@ -211,6 +211,13 @@ class PackageCallSaleView(BaseAPIView):
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except Package.DoesNotExist as e:
+            data = {
+                "message": "package does not exit with this package_type for this operator",
+                "message_fa": "خطا: پکیج با این مشخصات یافت نشد",
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if broker.credit < package_log.package.amount:
             package_log.state = RecordState.INITIAL_ERROR.value
