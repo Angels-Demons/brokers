@@ -69,10 +69,10 @@ class PackageAdmin(admin.ModelAdmin):
         else:
             return ['creator', 'timestamp']
 
-    def get_queryset(self, request):
-        if request.user.is_superuser:
-            return super().get_queryset(request=request)
-        return super().get_queryset(request=request).filter(user=request.user)
+    # def get_queryset(self, request):
+    #     if request.user.is_superuser:
+    #         return super().get_queryset(request=request)
+    #     return super().get_queryset(request=request).filter(user=request.user)
 
 
 admin.site.register(TopUp, TopUpAdmin)
