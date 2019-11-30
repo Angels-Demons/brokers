@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from interface.API import MCI
 from accounts.models import Broker
-from transactions.models import TopUp, PackageRecord, TopUpState, Package
+from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
 
@@ -58,6 +58,8 @@ class ChargeCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if broker.credit < top_up.amount:
+            top_up.state = RecordState.INITIAL_ERROR.value
+            top_up.save()
             data = {
                 "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -101,7 +103,7 @@ class ChargeExeSaleView(BaseAPIView):
             card_number = request.data.get('card_number')
             card_type = request.data.get('card_type')
             top_up = TopUp.objects.get(provider_id=provider_id, broker=broker)
-            if top_up.state == TopUpState.CALLED.value:
+            if top_up.state == RecordState.CALLED.value:
                 try:
                     top_up.before_execute(
                         bank_code=bank_code,
@@ -139,13 +141,13 @@ class ChargeExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
-        if broker.active is False:
-            data = {
-                "message": "Brokers is not active",
-                "message_fa": "کارگذار غیرفعال است.",
-                "code": codes.inactive_broker,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+        # if broker.active is False:
+        #     data = {
+        #         "message": "Brokers is not active",
+        #         "message_fa": "کارگذار غیرفعال است.",
+        #         "code": codes.inactive_broker,
+        #     }
+        #     return Response(data, status=status.HTTP_200_OK)
 
         exe_response_type, exe_response_description = MCI().charge_exe_sale(
             provider_id=top_up.provider_id,
@@ -211,6 +213,8 @@ class PackageCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if broker.credit < package_log.package.amount:
+            package_log.state = RecordState.INITIAL_ERROR.value
+            package_log.save()
             data = {
                 "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -254,7 +258,7 @@ class PackageExeSaleView(BaseAPIView):
             card_number = request.data.get('card_number')
             card_type = request.data.get('card_type')
             package_log = PackageRecord.objects.get(provider_id=provider_id, broker=broker)
-            if package_log.state == TopUpState.CALLED.value:
+            if package_log.state == RecordState.CALLED.value:
                 package_log.before_execute(
                     bank_code=bank_code,
                     card_number=card_number,

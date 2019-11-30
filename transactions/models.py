@@ -34,7 +34,7 @@ class TopUp(models.Model):
     operator = models.PositiveSmallIntegerField(choices=Choices.operators, default=Operator.MCI.value)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
     tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
-    state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value)
+    state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     amount = models.PositiveIntegerField(blank=False, null=False, validators=[amount_validator])
     charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False)
@@ -71,17 +71,17 @@ class TopUp(models.Model):
 
         if int(call_response_type) == ResponseTypes.SUCCESS.value:
             self.provider_id = call_response_description
-            self.state = TopUpState.CALLED.value
+            self.state = RecordState.CALLED.value
             self.save()
             return True
         else:
-            self.state = TopUpState.CALL_ERROR.value
+            self.state = RecordState.CALL_ERROR.value
             self.save()
             return False
 
     def before_execute(self, bank_code, card_number, card_type):
         self.execution_time = datetime.now()
-        self.state = TopUpState.EXE_REQ.value
+        self.state = RecordState.EXE_REQ.value
         self.bank_code = bank_code
         self.card_number = card_number
         self.card_type = card_type
@@ -93,11 +93,11 @@ class TopUp(models.Model):
         self.exe_response_description = exe_response_description
 
         if int(exe_response_type) == ResponseTypes.SUCCESS.value:
-            self.state = TopUpState.EXECUTED.value
+            self.state = RecordState.EXECUTED.value
             self.save()
             return True
         else:
-            self.state = TopUpState.EXECUTE_ERROR.value
+            self.state = RecordState.EXECUTE_ERROR.value
             self.save()
             return False
 
@@ -120,7 +120,7 @@ class PackageRecord(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
     tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
-    state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value)
+    state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     # amount = models.PositiveIntegerField(blank=False, null=False)
     # package_type = models.IntegerField(blank=False, null=False)
@@ -156,17 +156,17 @@ class PackageRecord(models.Model):
 
         if int(call_response_type) == ResponseTypes.SUCCESS.value:
             self.provider_id = call_response_description
-            self.state = TopUpState.CALLED.value
+            self.state = RecordState.CALLED.value
             self.save()
             return True
         else:
-            self.state = TopUpState.CALL_ERROR.value
+            self.state = RecordState.CALL_ERROR.value
             self.save()
             return False
 
     def before_execute(self, bank_code, card_number, card_type):
         self.execution_time = datetime.now()
-        self.state = TopUpState.EXE_REQ.value
+        self.state = RecordState.EXE_REQ.value
         self.bank_code = bank_code
         self.card_number = card_number
         self.card_type = card_type
@@ -178,10 +178,10 @@ class PackageRecord(models.Model):
         self.exe_response_description = exe_response_description
 
         if int(exe_response_type) == ResponseTypes.SUCCESS.value:
-            self.state = TopUpState.EXECUTED.value
+            self.state = RecordState.EXECUTED.value
             self.save()
             return True
         else:
-            self.state = TopUpState.EXECUTE_ERROR.value
+            self.state = RecordState.EXECUTE_ERROR.value
             self.save()
             return False

@@ -360,7 +360,7 @@ class BankCodes(Enum):
             return "بانک خاورميانه"
 
 
-class TopUpState(Enum):
+class RecordState(Enum):
     INITIAL = 1
     INITIAL_ERROR = 7
     CALLED = 2
@@ -386,14 +386,14 @@ class Choices:
         (ChargeType.BANOVAN.value, ChargeType.farsi(ChargeType.BANOVAN.value)),
     )
 
-    top_up_states = (
-        (TopUpState.INITIAL.value, TopUpState.INITIAL.name),
-        (TopUpState.INITIAL_ERROR.value, TopUpState.INITIAL_ERROR.name),
-        (TopUpState.CALLED.value, TopUpState.CALLED.name),
-        (TopUpState.CALL_ERROR.value, TopUpState.CALL_ERROR.name),
-        (TopUpState.EXE_REQ.value, TopUpState.EXE_REQ.name),
-        (TopUpState.EXECUTED.value, TopUpState.EXECUTED.name),
-        (TopUpState.EXECUTE_ERROR.value, TopUpState.EXECUTE_ERROR.name),
+    record_states = (
+        (RecordState.INITIAL.value, RecordState.INITIAL.name),
+        (RecordState.INITIAL_ERROR.value, RecordState.INITIAL_ERROR.name),
+        (RecordState.CALLED.value, RecordState.CALLED.name),
+        (RecordState.CALL_ERROR.value, RecordState.CALL_ERROR.name),
+        (RecordState.EXE_REQ.value, RecordState.EXE_REQ.name),
+        (RecordState.EXECUTED.value, RecordState.EXECUTED.name),
+        (RecordState.EXECUTE_ERROR.value, RecordState.EXECUTE_ERROR.name),
     )
 
     operators = (
