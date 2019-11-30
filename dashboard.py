@@ -379,7 +379,7 @@ class CustomIndexDashboard(Dashboard):
         ))
 
         self.children.append(MyRecentActions(
-            title=_('Recent sdc sActions'),
+            title=_('Recent Actions'),
             limit=10,
             user=context['request'].user.pk,
             column=1,
