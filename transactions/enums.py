@@ -362,6 +362,7 @@ class BankCodes(Enum):
 
 class TopUpState(Enum):
     INITIAL = 1
+    INITIAL_ERROR = 7
     CALLED = 2
     CALL_ERROR = 3
     EXE_REQ = 4
@@ -387,6 +388,7 @@ class Choices:
 
     top_up_states = (
         (TopUpState.INITIAL.value, TopUpState.INITIAL.name),
+        (TopUpState.INITIAL_ERROR.value, TopUpState.INITIAL_ERROR.name),
         (TopUpState.CALLED.value, TopUpState.CALLED.name),
         (TopUpState.CALL_ERROR.value, TopUpState.CALL_ERROR.name),
         (TopUpState.EXE_REQ.value, TopUpState.EXE_REQ.name),
