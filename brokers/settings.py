@@ -129,8 +129,8 @@ JWT_AUTH = {
 
 
 
-# LANGUAGE_CODE = 'en-us'
-LANGUAGE_CODE = 'fa-IR'
+LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'fa-IR'
 
 TIME_ZONE = 'Asia/Tehran'
 # TIME_ZONE = 'UTC'

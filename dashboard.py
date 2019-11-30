@@ -293,7 +293,6 @@ class MyRecentActions(modules.RecentActions):
     #     self.user = settings.get('user', self.user)
 
     def init_with_context(self, context):
-        print('salam')
 
         def get_qset(list):
             qset = None
@@ -320,9 +319,7 @@ class MyRecentActions(modules.RecentActions):
             return qset
 
         qs = LogEntry.objects
-        print(self.user)
         if self.user:
-            print(self.user)
             qs = qs.filter(
                 user__pk=int(self.user)
             )
