@@ -5,19 +5,19 @@ from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
 
 class TopUpAdmin(admin.ModelAdmin):
     list_display = [
-        'id', 'broker', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
+        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
         'charge_type', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         # 'call_response_description', 'exe_response_description'
     ]
     # all
     readonly_fields = [
-        'id', 'broker', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
+        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
         'charge_type', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
     ]
-    list_filter = []
+    list_filter = ['charge_type']
     search_fields = []
 
     def get_queryset(self, request):

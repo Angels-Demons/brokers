@@ -31,6 +31,7 @@ class ProvidersToken(models.Model):
 
 class TopUp(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
+    operator = models.PositiveSmallIntegerField(choices=Choices.operators, default=Operator.MCI.value)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
     tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     state = models.PositiveSmallIntegerField(choices=Choices.top_up_states, default=TopUpState.INITIAL.value)
@@ -51,8 +52,9 @@ class TopUp(models.Model):
         return "Top_up " + str(self.id)
 
     @staticmethod
-    def create(broker, tell_num, tell_charger, amount, charge_type):
+    def create(operator, broker, tell_num, tell_charger, amount, charge_type):
         top_up = TopUp(
+            operator=operator,
             broker=broker,
             tell_num=tell_num,
             tell_charger=tell_charger,

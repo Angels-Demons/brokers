@@ -8,4 +8,4 @@ def test(request):
         credit = Broker.objects.get(user=request.user).credit
         return {'user_credit': credit}
     except:
-        return {'user_credit': 0}
+        return {}

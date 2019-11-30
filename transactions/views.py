@@ -10,7 +10,7 @@ from interface.API import MCI
 from accounts.models import Broker
 from transactions.models import TopUp, PackageRecord, TopUpState, Package
 from transactions.serializers import PackageSerializer
-from transactions.enums import ResponceCodeTypes as codes
+from transactions.enums import ResponceCodeTypes as codes, Operator
 
 
 class ChargeCallSaleView(BaseAPIView):
@@ -38,10 +38,11 @@ class ChargeCallSaleView(BaseAPIView):
             if not charge_type:
                 data["message"] = "'charge_type' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not operator or int(operator) != 1:
+            if not operator or int(operator) != Operator.MCI.value:
                 data["message"] = "'operator' is not provided or valid."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             top_up = TopUp.create(
+                operator=operator,
                 amount=amount,
                 broker=broker,
                 tell_num=tell_num,
@@ -191,12 +192,11 @@ class PackageCallSaleView(BaseAPIView):
             if not tell_charger:
                 data["message"] = "'tell_charger' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not operator or operator != 1:
+            if not operator or int(operator) != Operator.MCI.value:
                 data["message"] = "'operator' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            package = Package.objects.get(package_type=package_type)
+            package = Package.objects.get(package_type=package_type, operator=operator)
             package_log = PackageRecord.create(
-                # amount=amount,
                 broker=broker,
                 tell_num=tell_num,
                 tell_charger=tell_charger,
