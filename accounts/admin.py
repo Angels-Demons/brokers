@@ -9,6 +9,8 @@ from rest_framework.response import Response
 
 class BrokerAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'name', 'username', 'creator', 'credit', 'active', 'timestamp', 'email']
+    search_fields = ['name', 'username']
+    list_filter = ['active']
 
     def save_model(self, request, obj, form, change):
         if obj.id:

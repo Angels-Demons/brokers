@@ -17,8 +17,8 @@ class TopUpAdmin(admin.ModelAdmin):
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
     ]
-    list_filter = ['charge_type']
-    search_fields = []
+    list_filter = ['charge_type', 'broker', 'state']
+    search_fields = ['tell_num', 'tell_charger']
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -40,8 +40,8 @@ class PackageRecordAdmin(admin.ModelAdmin):
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
     ]
-    list_filter = []
-    search_fields = []
+    list_filter = ['package', 'broker', 'state']
+    search_fields = ['tell_num', 'tell_charger']
 
     def get_queryset(self, request):
         if request.user.is_superuser:
