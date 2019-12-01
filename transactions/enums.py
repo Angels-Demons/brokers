@@ -106,7 +106,7 @@ class ResponseTypes(Enum):
     @staticmethod
     def farsi(value):
         if value == 0:
-            return "شارژ با موفقيت انجام گرديد."
+            return "عملیات با موفقيت انجام گرديد."
         elif value == -1:
             return "به شرح خطاي اعلامي (درايه دوم آرايه برگشتي) رجوع گردد."
         elif value == -1001:
