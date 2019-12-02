@@ -184,6 +184,7 @@ class MCI:
 
         if int(response_type) == -2:
             self.token()
+            print("**************** -2 error")
             response = requests.post(api_url, headers=headers, data=data,
                                      auth=(api_username, self.behsa_generated_pass(api_username)))
             res = json.loads(response.text)
