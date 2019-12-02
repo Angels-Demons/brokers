@@ -93,7 +93,7 @@ class MCI:
         api_url = self.behsa_url + 'Topup/CallSaleProviderPackage'
         headers = {'Content-Type': 'application/json',}
         api_username = self.behsa_package_username
-        data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'PackageType\':' +str(packageType)+ ',\'BrokerId\':' + api_username +'}'
+        data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'PackageType\':' +str(packageType)+ ',\'BrokerId\':' + api_username +'}'
         response = requests.post(api_url , headers=headers, data=data,
                                  auth=(api_username,self.behsa_generated_pass(api_username)))
         res = json.loads(response.text)
