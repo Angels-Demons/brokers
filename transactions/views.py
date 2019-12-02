@@ -399,3 +399,40 @@ def active_packages(request):
         "packages": serialized_data
     }
     return Response(data, status=status.HTTP_200_OK)
+
+
+class TestApi58(BaseAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @staticmethod
+    def get(request):
+        try:
+            broker = Broker.objects.get(user=request.user)
+        except Exception:
+            data = {
+                "message": "Invalid Broker",
+                "message_fa": "خطا: کارگزار نامعتبر است.",
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if not broker.active:
+            data = {
+                "message": "Brokers is not active",
+                "message_fa": "کارگذار غیرفعال است.",
+                "code": codes.inactive_broker,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+
+        exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
+        exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
+
+        data = {
+            "message": "Request successfully executed",
+            "message_fa": "درخواست با موفقیت اجرا شد",
+            "exe_response_type_1":exe_response_type_1,
+            "exe_response_description_1": exe_response_description_1,
+            "exe_response_type_2": exe_response_type_2,
+            "exe_response_description_2" : exe_response_description_2
+        }
+        return Response(data, status=status.HTTP_200_OK)
