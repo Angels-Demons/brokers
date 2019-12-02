@@ -172,7 +172,7 @@ class MCI:
         return response_type, response_description
 
     def behsa_package_credit(self):
-        api_url = self.behsa_url + 'Topup/RemainCreditInquiry'
+        api_url = self.behsa_url + 'Topup/RemainCreditInquiryPackage'
         headers = {'Content-Type': 'application/json',}
         api_username = self.behsa_package_username
         data = '{\'BrokerId\':' + api_username +'}'
