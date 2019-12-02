@@ -207,17 +207,21 @@ class MCI:
                                  auth=(api_username,self.behsa_generated_pass(api_username)))
         res = json.loads(response.text)
         print(response.text)
-        response_type = res['ResponseType']
-        response_description = res['ResponseDesc']
+        try:
+            response_type = res['ResponseType']
+            response_description = res['ResponseDesc']
+        except:
+            return "",res
         if int(response_type) == -2:
             self.token()
-            print("**************** -2 error")
             response = requests.post(api_url, headers=headers, data=data,
                                      auth=(api_username, self.behsa_generated_pass(api_username)))
             res = json.loads(response.text)
-            print(response.text)
-            response_type = res['ResponseType']
-            response_description = res['ResponseDesc']
+            try:
+                response_type = res['ResponseType']
+                response_description = res['ResponseDesc']
+            except:
+                return "", res
         if int(response_type) < 0:
             logger = config_logging(logging.INFO, 'debug.log', 'debug')
             logger.propagate = False
