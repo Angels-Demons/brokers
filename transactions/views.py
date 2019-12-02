@@ -423,22 +423,19 @@ class TestApi58(BaseAPIView):
                 "code": codes.inactive_broker,
             }
             return Response(data, status=status.HTTP_200_OK)
-        # exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
+        print("************ Get Package Credit")
+        exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
+        print("************ Get Charge Credit")
+        exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
-        # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
+
 
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-            "exe_response_type_1":broker.username
+            "exe_response_type_1":exe_response_type_1,
+            "exe_response_description_1": exe_response_description_1,
+            "exe_response_type_2": exe_response_type_2,
+            "exe_response_description_2" : exe_response_description_2
         }
-
-        # data = {
-        #     "message": "Request successfully executed",
-        #     "message_fa": "درخواست با موفقیت اجرا شد",
-        #     "exe_response_type_1":exe_response_type_1,
-        #     "exe_response_description_1": exe_response_description_1,
-        #     "exe_response_type_2": exe_response_type_2,
-        #     "exe_response_description_2" : exe_response_description_2
-        # }
         return Response(data, status=status.HTTP_200_OK)
