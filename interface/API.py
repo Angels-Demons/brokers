@@ -198,6 +198,33 @@ class MCI:
             logger.info(content)
         return response_type, response_description
 
+    def behsa_package_query(self):
+        api_url = self.behsa_url + 'Topup/PackagesListQuery'
+        headers = {'Content-Type': 'application/json',}
+        api_username = self.behsa_package_username
+        data = {}
+        response = requests.post(api_url , headers=headers, data=data,
+                                 auth=(api_username,self.behsa_generated_pass(api_username)))
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        response_description = res['ResponseDesc']
+
+        if int(response_type) == -2:
+            self.token()
+            print("**************** -2 error")
+            response = requests.post(api_url, headers=headers, data=data,
+                                     auth=(api_username, self.behsa_generated_pass(api_username)))
+            res = json.loads(response.text)
+            response_type = res['ResponseType']
+            response_description = res['ResponseDesc']
+        if int(response_type) < 0:
+            logger = config_logging(logging.INFO, 'debug.log', 'debug')
+            logger.propagate = False
+            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
+                response_description)
+            logger.info(content)
+        return response_type, response_description
+
     def behsa_generated_pass(self,username):
         providerToken = ProvidersToken.objects.get(provider=Operator.MCI.value)
         return self.behsa_hash(username.upper() + '|' + self.behsa_password + '|' + providerToken.token)
