@@ -92,7 +92,7 @@ class MCI:
         headers = {'Content-Type': 'application/json',}
         data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'PackageType\':' +str(packageType)+ ',\'BrokerId\':' + self.behsa_package_username +'}'
         response = requests.post(url_charge , headers=headers, data=data,
-                                 auth=(self.behsa_package_username,self.behsa_generated_pass(self.behsa_package_username)))
+                                 auth=(self.behsa_package_username,self.behsa_generated_pass(self.behsa_charge_username)))
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']
@@ -100,7 +100,7 @@ class MCI:
         if int(response_type) == -2:
             self.token()
             response = requests.post(url_charge, headers=headers, data=data,
-                                     auth=(self.behsa_package_username, self.behsa_generated_pass(self.behsa_package_username)))
+                                     auth=(self.behsa_package_username, self.behsa_generated_pass(self.behsa_charge_username)))
             res = json.loads(response.text)
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
