@@ -16,7 +16,8 @@ MCI_token = ""
 class MCI:
     behsa_url = "http://10.19.252.21:5003/Rest/"
     behsa_charge_username = '13001053'
-    behsa_package_username = '13001447'
+    # behsa_package_username = '13001447'
+    behsa_package_username = '13001425'
     behsa_password = 'E@123456'
 
     def token(self):
@@ -92,7 +93,7 @@ class MCI:
         headers = {'Content-Type': 'application/json',}
         data = '{\'TelNum\':'+str(tel_num)+',\'TelCharger\':' +str(tel_charger) +',\'Amount\': '+str(amount)+',\'PackageType\':' +str(packageType)+ ',\'BrokerId\':' + self.behsa_package_username +'}'
         response = requests.post(url_charge , headers=headers, data=data,
-                                 auth=('test'+self.behsa_package_username,self.behsa_generated_pass(self.behsa_package_username)))
+                                 auth=(self.behsa_package_username,self.behsa_generated_pass(self.behsa_package_username)))
         res = json.loads(response.text)
         response_type = res['ResponseType']
         response_description = res['ResponseDesc']

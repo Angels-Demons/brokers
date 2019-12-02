@@ -23,20 +23,20 @@ class ChargeType(Enum):
 
 
 class Operator(Enum):
-    MCI = 1001
-    MTN = 1002
-    RIGHTEL = 1003
-    TALIYA = 1004
+    MCI = 1
+    MTN = 2
+    RIGHTEL = 3
+    TALIYA = 4
 
     @staticmethod
     def farsi(value):
-        if value == 1001:
+        if value == 1:
             return "همراه اول"
-        elif value == 1002:
+        elif value == 2:
             return "ایرانسل"
-        elif value == 1003:
+        elif value == 3:
             return "رایتل"
-        elif value == 1004:
+        elif value == 4:
             return "تالیا"
 
 
