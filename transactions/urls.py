@@ -10,8 +10,8 @@ urlpatterns = {
     url(r'^PackageCallSale', PackageCallSaleView.as_view()),
     url(r'^PackageExeSale', PackageExeSaleView.as_view()),
     url(r'^BrokerCredit', BrokerCreditView.as_view()),
+    url(r'^TestApi58', TestApi58.as_view()),
     path('active_packages', active_packages, name='active_packages'),
-    path('testAPI58', TestApi58.as_view(), name='testApi'),
 
 }
 urlpatterns = format_suffix_patterns(urlpatterns)
