@@ -377,7 +377,19 @@ class RecordState(Enum):
     #         return "دلخواه"
 
 
+class CreditType(Enum):
+    GENERAL = 1
+    TOP_UP = 2
+    PACKAGE = 3
+
+
 class Choices:
+    credit_types = (
+        (CreditType.GENERAL.value, CreditType.GENERAL.name),
+        (CreditType.TOP_UP.value, CreditType.TOP_UP.name),
+        (CreditType.PACKAGE.value, CreditType.PACKAGE.name),
+    )
+
     charge_type_choices = (
         (ChargeType.MOSTAGHIM.value, ChargeType.farsi(ChargeType.MOSTAGHIM.value)),
         (ChargeType.DELKHAH.value, ChargeType.farsi(ChargeType.DELKHAH.value)),
