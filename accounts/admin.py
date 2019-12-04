@@ -24,7 +24,7 @@ class AccessInline(admin.TabularInline):
 
 class OperatorAccessAdmin(admin.ModelAdmin):
     list_display = ['broker', 'operator', 'active', 'general_credit_access', 'top_up_access', 'package_access',
-                    'credit', 'top_up_credit', 'package_credit',
+                    'credit', 'top_up_credit', 'package_credit','top_up_discount','package_discount',
                     'last_editor', 'timestamp', 'comment']
 
     def get_readonly_fields(self, request, obj=None):
@@ -47,7 +47,7 @@ class OperatorAccessAdmin(admin.ModelAdmin):
 
 
 class BrokerAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'name', 'username', 'creator', 'credit', 'active', 'timestamp', 'email']
+    list_display = ['id', 'user', 'name', 'username', 'creator', 'active', 'timestamp', 'email']
     search_fields = ['name', 'username']
     list_filter = ['active']
 

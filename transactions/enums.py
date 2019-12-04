@@ -535,3 +535,7 @@ class ResponceCodeTypes:
     provider_error = -11
     insufficient_balance = -12
     inactive_broker = -13
+    invalid_access = -14
+    invalid_package_access = -15
+
+

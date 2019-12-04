@@ -52,6 +52,8 @@ class OperatorAccess(models.Model):
     last_editor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
     comment = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
+    top_up_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    package_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
 
     def can_sell(self, top_up=True):
@@ -72,17 +74,22 @@ class OperatorAccess(models.Model):
             return self.package_credit
 
     def charge(self, amount, top_up=True):
+        if top_up:
+            real_price = amount * (1 - (self.top_up_discount/100))
+        else:
+            real_price = amount * (1 - (self.package_discount/100))
+
         if self.general_credit_access:
-            self.credit -= amount
+            self.credit -= real_price
             self.save()
             return True
 
         if top_up:
-            self.top_up_credit -= amount
+            self.top_up_credit -= real_price
             self.save()
             return True
         else:
-            self.package_credit -= amount
+            self.package_credit -= real_price
             self.save()
             return True
 

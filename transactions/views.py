@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from interface.API import MCI
-from accounts.models import Broker
+from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
@@ -54,6 +54,14 @@ class ChargeCallSaleView(BaseAPIView):
             if not operator or int(operator) != Operator.MCI.value:
                 data["message"] = "'operator' is not provided or valid."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             top_up = TopUp.create(
                 operator=operator,
                 amount=amount,
@@ -62,6 +70,13 @@ class ChargeCallSaleView(BaseAPIView):
                 tell_charger=tell_charger,
                 charge_type=charge_type
             )
+        except OperatorAccess.DoesNotExist as e :
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as e:
             data = {
                 "message": str(e.messages[0]),
@@ -70,7 +85,7 @@ class ChargeCallSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < top_up.amount:
+        if operator_access.get_credit(top_up=True) < top_up.amount:
             top_up.state = RecordState.INITIAL_ERROR.value
             top_up.save()
             data = {
@@ -139,7 +154,21 @@ class ChargeExeSaleView(BaseAPIView):
                     "code": codes.invalid_parameter,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
+            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except OperatorAccess.DoesNotExist as e :
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             data = {
                 "message": "Invalid parameters",
@@ -148,7 +177,7 @@ class ChargeExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < top_up.amount:
+        if operator_access.get_credit(top_up=True) < top_up.amount:
             data = {
                 "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -173,7 +202,8 @@ class ChargeExeSaleView(BaseAPIView):
         success = top_up.after_execute(exe_response_type, exe_response_description)
         if success:
             # modify change chargin method
-            broker.charge_for_mcci_transaction(top_up.amount)
+            # broker.charge_for_mcci_transaction(top_up.amount)
+            operator_access.charge(amount=top_up.amount,top_up=True)
             data = {
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",
@@ -218,6 +248,25 @@ class PackageCallSaleView(BaseAPIView):
                 data["message"] = "'operator' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             package = Package.objects.get(package_type=package_type, operator=operator)
+
+            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            if (not operator_access.active) or (not operator_access.can_sell(top_up=False)):
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                operator_access.banned_packages.get(package_type=package.package_type)
+                data = {
+                    "message": "Broker does not have access to activate this package",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای فعال سازی این بسته راندارد.",
+                    "code": codes.invalid_package_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            except Package.DoesNotExist:
+                pass
             package_record = PackageRecord.create(
                 broker=broker,
                 tell_num=tell_num,
@@ -238,8 +287,14 @@ class PackageCallSaleView(BaseAPIView):
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-        if broker.credit < package_record.package.amount:
+        except OperatorAccess.DoesNotExist as e :
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if operator_access.get_credit(top_up=False) < package_record.package.amount:
             package_record.state = RecordState.INITIAL_ERROR.value
             package_record.save()
             data = {
@@ -300,7 +355,21 @@ class PackageExeSaleView(BaseAPIView):
                     "code": codes.invalid_parameter,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
+            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            if (not operator_access.active) or (not operator_access.can_sell(top_up=False)):
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except OperatorAccess.DoesNotExist as e:
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as e:
             data = {
                 "message": str(e.messages[0]),
@@ -317,7 +386,7 @@ class PackageExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if broker.credit < package_record.package.amount:
+        if operator_access.get_credit(top_up=False) < package_record.package.amount:
             data = {
                 "message": "Brokers balance is insufficient",
                 "message_fa": "اعتبار کارگزار کافی نیست.",
@@ -341,7 +410,8 @@ class PackageExeSaleView(BaseAPIView):
         )
         success = package_record.after_execute(exe_response_type, exe_response_description)
         if success:
-            broker.charge_for_mcci_transaction(package_record.package.amount)
+            operator_access.charge(amount=package_record.package.amount,top_up=False)
+            # broker.charge_for_mcci_transaction(package_record.package.amount)
             data = {
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",
