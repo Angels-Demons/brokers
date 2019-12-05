@@ -24,6 +24,38 @@ def expired():
         return True
 
 
+def search_mci_package(package, response):
+    for res in response:
+        if int(res['Package_Type']) == int(package.package_type):
+            package.name = res['Package_Desc']
+            package.description = res['Package_Desc']
+            package.amount = int(res['Package_Cost'] or 999)
+            package.system = int(res['Systems'] or 100)
+            package.active = True
+            package.save()
+            return
+    package.active = False
+    package.save()
+
+def update_mci_packages():
+    print("************** Start Updating Packages")
+    response_desc, response_code = MCI().behsa_package_query()
+    if response_code == 0:
+        all_mci_package = Package.objects.filter(operator=Operator.MCI.value)
+        # Update current packages
+        for package in all_mci_package:
+            search_mci_package(package,response_desc)
+        # Add new packages
+        for res in response_desc:
+            obj, created = Package.objects.get_or_create(
+                package_type = int(res['Package_Type']),
+                operator = Operator.MCI.value,
+                defaults={ 'name':res['Package_Desc'],'description': res['Package_Desc'],'amount':int(res['Package_Cost'] or 999),'system':int(res['Systems'] or 100)},
+            )
+        else:
+            print("************* Error in updating MCCI packages!  ***********")
+
+
 class ChargeCallSaleView(BaseAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -461,6 +493,11 @@ class BrokerCreditView(BaseAPIView):
 
 @api_view(["GET"])
 def active_packages(request):
+    try:
+        update_mci_packages()
+    except :
+        print("************* Error in updating MCCI packages!  ***********")
+
     serialized_data = PackageSerializer(Package.objects.filter(active=True), many=True).data
     data = {
         "message": "Request successfully executed",
@@ -496,22 +533,22 @@ class TestApi58(BaseAPIView):
         # print("************ Get Package Query")
         # exe_response_type_0, exe_response_description_0 = MCI().behsa_package_query()
 
-        print("************ Get Package Credit")
-        exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
+        # print("************ Get Package Credit")
+        # exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
 
-        print("************ Get Charge Credit")
-        exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
+        # print("************ Get Charge Credit")
+        # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
-
+        update_mci_packages()
 
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
-            "exe_response_type_1":exe_response_type_1,
-            "exe_response_description_1": exe_response_description_1,
-            "exe_response_type_2": exe_response_type_2,
-            "exe_response_description_2" : exe_response_description_2
+            # "exe_response_type_1":exe_response_type_1,
+            # "exe_response_description_1": exe_response_description_1,
+            # "exe_response_type_2": exe_response_type_2,
+            # "exe_response_description_2" : exe_response_description_2
         }
         return Response(data, status=status.HTTP_200_OK)

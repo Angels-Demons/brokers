@@ -205,7 +205,6 @@ class MCI:
         response = requests.post(api_url , headers=headers, data=data,
                                  auth=(api_username,self.behsa_generated_pass(api_username)))
         res = json.loads(response.text)
-        print(response.text)
         try:
             response_type = res['ResponseType']
             response_description = res['ResponseDesc']
