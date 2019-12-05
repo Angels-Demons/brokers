@@ -39,7 +39,7 @@ def search_mci_package(package, response):
 
 def update_mci_packages():
     print("************** Start Updating Packages")
-    response_desc, response_code = MCI().behsa_package_query()
+    response_code, response_desc = MCI().behsa_package_query()
     if response_code == 0:
         all_mci_package = Package.objects.filter(operator=Operator.MCI.value)
         # Update current packages
@@ -545,7 +545,7 @@ class TestApi58(BaseAPIView):
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
              "exe_response_type_0": exe_response_type_0,
-             "exe_response_description_0": type(exe_response_description_0),
+             "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1":exe_response_type_1,
             # "exe_response_description_1": exe_response_description_1,
             # "exe_response_type_2": exe_response_type_2,
