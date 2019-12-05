@@ -51,7 +51,7 @@ class OperatorAccess(models.Model):
     package_credit = models.BigIntegerField(default=0, validators=[MinValueValidator(limit_value=0, message='error')])
     banned_packages = models.ManyToManyField('transactions.Package', null=True, blank=True)
     last_editor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
-    comment = models.CharField(max_length=255)
+    comment = models.TextField()
     active = models.BooleanField(default=True)
     top_up_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0,
                                           validators=[MinValueValidator(0), MaxValueValidator(100)])
