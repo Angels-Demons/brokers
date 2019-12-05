@@ -545,7 +545,7 @@ class TestApi58(BaseAPIView):
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
              "exe_response_type_0": exe_response_type_0,
-             "exe_response_description_0": exe_response_description_0,
+             "exe_response_description_0": type(exe_response_description_0),
             # "exe_response_type_1":exe_response_type_1,
             # "exe_response_description_1": exe_response_description_1,
             # "exe_response_type_2": exe_response_type_2,
