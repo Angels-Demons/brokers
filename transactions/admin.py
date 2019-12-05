@@ -1,24 +1,34 @@
 from django.contrib import admin
+from django.contrib.humanize.templatetags.humanize import intcomma
 
 from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
 
 
 class TopUpAdmin(admin.ModelAdmin):
     list_display = [
-        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
+        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
         'charge_type', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         # 'call_response_description', 'exe_response_description'
     ]
+
     # all
     readonly_fields = [
-        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
+        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
         'charge_type', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
     ]
     list_filter = ['charge_type', 'broker', 'state']
     search_fields = ['tell_num', 'tell_charger']
+
+    exclude = ['amount']
+
+    def amount_display(self, obj):
+        return intcomma(obj.amount)
+
+    amount_display.allow_tags = True
+    amount_display.short_description = "Price (Rials)"
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -50,14 +60,21 @@ class PackageRecordAdmin(admin.ModelAdmin):
 
     def amount(self, obj):
         try:
-            return obj.package.amount
+            return intcomma(obj.package.amount)
         except AttributeError:
             return 0
     amount.allow_tags = True
+    amount.short_description = "Price (Rials)"
 
 
 class PackageAdmin(admin.ModelAdmin):
-    list_display = ['operator', 'package_type', 'name', 'amount','system', 'creator', 'timestamp', 'active', 'description']
+    list_display = ['operator', 'package_type', 'name', 'price_display', 'system', 'creator', 'timestamp', 'active', 'description']
+
+    def price_display(self, obj):
+        return intcomma(obj.amount)
+
+    price_display.allow_tags = True
+    price_display.short_description = "Price (Rials)"
 
     def save_model(self, request, obj, form, change):
         obj.creator = request.user

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group
-from django.shortcuts import redirect
+from django.contrib.humanize.templatetags.humanize import apnumber, intcomma
 
 from accounts.models import Broker, BalanceIncrease, OperatorAccess
 from rest_framework.response import Response
@@ -11,30 +11,83 @@ from transactions.enums import CreditType
 
 class AccessInline(admin.TabularInline):
     model = OperatorAccess
+    # exclude = []
+    exclude = ['credit', 'top_up_credit', 'package_credit']
     extra = 0
 
     def get_readonly_fields(self, request, obj=None):
-        if obj:
-            print('obj')
-            return ['operator', 'credit', 'top_up_credit', 'package_credit',]
-        else:
-            print('none')
-            return ['credit', 'top_up_credit', 'package_credit']
+        return ['operator', 'credit_display', 'top_up_credit_display', 'package_credit_display']
+        # if obj:
+        #     print('obj')
+        #     return ['operator', 'credit', 'top_up_credit', 'package_credit', ]
+        # else:
+        #     print('none')
+        #     return ['credit', 'top_up_credit', 'package_credit']
+
+    def credit_display(self, obj):
+        return intcomma(obj.credit)
+
+    credit_display.allow_tags = True
+    credit_display.short_description = "credit (Rials)"
+
+    def top_up_credit_display(self, obj):
+        return intcomma(obj.top_up_credit)
+
+    top_up_credit_display.allow_tags = True
+    top_up_credit_display.short_description = "top_tup credit (Rials)"
+
+    def package_credit_display(self, obj):
+        return intcomma(obj.package_credit)
+
+    package_credit_display.allow_tags = True
+    package_credit_display.short_description = "package credit (Rials)"
 
 
 class OperatorAccessAdmin(admin.ModelAdmin):
     list_display = ['broker', 'operator', 'active', 'general_credit_access', 'top_up_access', 'package_access',
-                    'credit', 'top_up_credit', 'package_credit','top_up_discount','package_discount',
+                    'credit_display', 'top_up_credit_display', 'package_credit_display',
+                    'top_up_discount', 'package_discount',
                     'last_editor', 'timestamp', 'comment']
+
+    def credit_display(self, obj):
+        return intcomma(obj.credit)
+
+    credit_display.allow_tags = True
+    credit_display.short_description = "credit (Rials)"
+
+    def top_up_credit_display(self, obj):
+        return intcomma(obj.top_up_credit)
+
+    top_up_credit_display.allow_tags = True
+    top_up_credit_display.short_description = "top_tup credit (Rials)"
+
+    def package_credit_display(self, obj):
+        return intcomma(obj.package_credit)
+
+    package_credit_display.allow_tags = True
+    package_credit_display.short_description = "package credit (Rials)"
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return ['broker', 'operator',
-                    'credit', 'top_up_credit', 'package_credit',
+                    # 'credit', 'top_up_credit', 'package_credit',
+                    'credit_display', 'top_up_credit_display', 'package_credit_display',
                     'last_editor', 'timestamp']
         else:
-            return ['credit', 'top_up_credit', 'package_credit',
-                    'last_editor', 'timestamp']
+            return [
+                # 'credit', 'top_up_credit', 'package_credit',
+                # 'credit_display', 'top_up_credit_display', 'package_credit_display',
+                # 'last_editor', 'timestamp'
+            ]
+
+    def get_exclude(self, request, obj=None):
+        if obj:
+            return ['credit', 'top_up_credit', 'package_credit']
+        else:
+            return [
+                'last_editor', 'timestamp',
+                'credit', 'top_up_credit', 'package_credit',
+                'credit_display', 'top_up_credit_display', 'package_credit_display']
 
     def save_model(self, request, obj, form, change):
         obj.last_editor = request.user
@@ -49,7 +102,20 @@ class OperatorAccessAdmin(admin.ModelAdmin):
 class BrokerAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'name', 'username', 'creator', 'active', 'timestamp', 'email']
     search_fields = ['name', 'username']
+
     list_filter = ['active']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ['username', 'creator', 'user', 'timestamp']
+        else:
+            return []
+
+    def get_exclude(self, request, obj=None):
+        if obj:
+            return []
+        else:
+            return ['creator', 'user']
 
     inlines = [
         AccessInline,
@@ -81,12 +147,6 @@ class BrokerAdmin(admin.ModelAdmin):
         obj.user = user
         super().save_model(request, obj, form, change)
 
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return ['username']
-        else:
-            return []
-
     def get_queryset(self, request):
         if request.user.is_superuser:
             return super().get_queryset(request=request)
@@ -94,7 +154,13 @@ class BrokerAdmin(admin.ModelAdmin):
 
 
 class BalanceIncreaseAdmin(admin.ModelAdmin):
-    list_display = ['broker', 'creator', 'amount', 'operator', 'credit_type', 'comment', 'success', 'timestamp']
+    list_display = ['broker', 'amount_display', 'creator', 'operator', 'credit_type', 'comment', 'success', 'timestamp']
+
+    def amount_display(self, obj):
+        return intcomma(obj.amount)
+
+    amount_display.allow_tags = True
+    amount_display.short_description = "amount (Rials)"
 
     def save_model(self, request, obj, form, change):
         obj.creator = request.user
@@ -118,9 +184,15 @@ class BalanceIncreaseAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['amount', 'broker', 'success']
+            return ['comment', 'amount_display', 'creator', 'broker', 'success', 'operator', 'credit_type']
         else:
-            return ['success']
+            return []
+
+    def get_exclude(self, request, obj=None):
+        if obj:
+            return ['amount']
+        else:
+            return ['creator', 'success']
 
     def get_queryset(self, request):
         if request.user.is_superuser:

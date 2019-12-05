@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_jalali.db import models as jmodels
@@ -117,17 +118,12 @@ class Package(models.Model):
         return self.name + " :" + str(self.package_type)
 
 
-
-
-
 class PackageRecord(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
     tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
-    # amount = models.PositiveIntegerField(blank=False, null=False)
-    # package_type = models.IntegerField(blank=False, null=False)
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True)
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
     call_response_description = models.CharField(max_length=1023, null=True, blank=True)
@@ -138,6 +134,10 @@ class PackageRecord(models.Model):
     bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, blank=True)
     card_number = models.CharField(max_length=255, null=True, blank=True)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
+
+    # @property
+    # def amount_display(self):
+    #     return intcomma(self.amount)
 
     def __str__(self):
         return "Package record " + str(self.id)

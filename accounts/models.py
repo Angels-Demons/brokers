@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_comma_separated_integer_list, MinValueValidator, MaxValueValidator
 from django.db import models, transaction
 from django_jalali.db import models as jmodels
 
@@ -11,32 +12,32 @@ from transactions.enums import Operator, CreditType
 
 
 class Broker(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name="user", editable=False)
-    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="creator", editable=False)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name="user")
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="creator")
     name = models.CharField(max_length=255, unique=True)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField()
-    credit = models.BigIntegerField(default=0, editable=False)
+    # credit = models.BigIntegerField(default=0, editable=False)
     active = models.BooleanField(default=True)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
-    mcci_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    # mcci_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
 
     def __str__(self):
         return self.name
 
-    def get_mcci_discount(self):
-        return self.mcci_discount/100
+    # def get_mcci_discount(self):
+    #     return self.mcci_discount/100
 
-    def charge_for_mcci_transaction(self, price):
-        # if self.active is False:
-        #     return False
-        real_price = price * (1-self.get_mcci_discount())
-        with transaction.atomic():
-            if self.credit >= real_price:
-                self.credit -= real_price
-                self.save()
-                return True
-            return False
+    # def charge_for_mcci_transaction(self, price):
+    #     # if self.active is False:
+    #     #     return False
+    #     real_price = price * (1-self.get_mcci_discount())
+    #     with transaction.atomic():
+    #         if self.credit >= real_price:
+    #             self.credit -= real_price
+    #             self.save()
+    #             return True
+    #         return False
 
 
 class OperatorAccess(models.Model):
@@ -45,15 +46,17 @@ class OperatorAccess(models.Model):
     general_credit_access = models.BooleanField(default=False)
     top_up_access = models.BooleanField(default=True)
     package_access = models.BooleanField(default=True)
-    credit = models.BigIntegerField(default=0)
-    top_up_credit = models.BigIntegerField(default=0)
-    package_credit = models.BigIntegerField(default=0)
+    credit = models.BigIntegerField(default=0, validators=[MinValueValidator(limit_value=0, message='error')])
+    top_up_credit = models.BigIntegerField(default=0, validators=[MinValueValidator(limit_value=0, message='error')])
+    package_credit = models.BigIntegerField(default=0, validators=[MinValueValidator(limit_value=0, message='error')])
     banned_packages = models.ManyToManyField('transactions.Package', null=True, blank=True)
     last_editor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
     comment = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
-    top_up_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
-    package_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    top_up_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0,
+                                          validators=[MinValueValidator(0), MaxValueValidator(100)])
+    package_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0,
+                                           validators=[MinValueValidator(0), MaxValueValidator(100)])
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
 
     def can_sell(self, top_up=True):
@@ -100,6 +103,7 @@ class OperatorAccess(models.Model):
             if self.general_credit_access:
                 # balance_increase.success = True
                 self.credit += balance_increase.amount
+                self.clean()
                 self.save()
                 return True, ""
             return False, "general credit access is not granted, thus no balance increase\nدسترسی به اعتبار عمومی ندارید"
@@ -107,6 +111,7 @@ class OperatorAccess(models.Model):
             if self.top_up_access:
                 # balance_increase.success = True
                 self.top_up_credit += balance_increase.amount
+                print(self.clean())
                 self.save()
                 return True, ""
             return False, "top_up access is not granted, thus no balance increase\nدسترسی به شارژ تاپ آپ ندارید"
@@ -114,7 +119,10 @@ class OperatorAccess(models.Model):
             if self.package_access:
                 # balance_increase.success = True
                 self.package_credit += balance_increase.amount
+                self.clean()
+                print("here!")
                 self.save()
+                self.clean()
                 return True, ""
             return False, "package access is not granted, thus no balance increase\nدسترسی به بسته ندارید"
         return False, "invalid credit type"
@@ -130,6 +138,10 @@ class OperatorAccess(models.Model):
         if self.general_credit_access:
             if self.top_up_access or self.package_access:
                 raise ValidationError('Brokers can either have general credit access or top_up/package access')
+            print(self.top_up_credit)
+            print(self.top_up_credit < 0)
+        if self.credit < 0 or self.package_credit < 0 or self.top_up_credit < 0:
+            raise ValidationError('credits can not be negative')
 
 
 class BalanceIncrease(models.Model):
@@ -140,13 +152,18 @@ class BalanceIncrease(models.Model):
     #     )
 
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
-    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     operator = models.PositiveSmallIntegerField(choices=enums.Choices.operators, default=enums.Operator.MCI.value)
     credit_type = models.PositiveSmallIntegerField(choices=enums.Choices.credit_types, default=enums.CreditType.GENERAL.value)
-    amount = models.PositiveIntegerField()
-    comment = models.CharField(max_length=255)
+    amount = models.BigIntegerField(verbose_name='Amount (Rials)')
+    # amount = models.CharField(validators=[validate_comma_separated_integer_list], default=0, max_length=255)
+    comment = models.TextField()
     success = models.BooleanField(default=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
+
+    # @property
+    # def amount_display(self):
+    #     return "$%s" % self.amount
 
     def clean(self):
         try:

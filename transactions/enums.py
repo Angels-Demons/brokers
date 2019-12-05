@@ -382,12 +382,21 @@ class CreditType(Enum):
     TOP_UP = 2
     PACKAGE = 3
 
+    @staticmethod
+    def farsi(value):
+        if value == CreditType.GENERAL.value:
+            return "عمومی"
+        elif value == CreditType.TOP_UP.value:
+            return "شارژ"
+        elif value == CreditType.PACKAGE.value:
+            return "بسته"
+
 
 class Choices:
     credit_types = (
-        (CreditType.GENERAL.value, CreditType.GENERAL.name),
-        (CreditType.TOP_UP.value, CreditType.TOP_UP.name),
-        (CreditType.PACKAGE.value, CreditType.PACKAGE.name),
+        (CreditType.GENERAL.value, CreditType.farsi(CreditType.GENERAL.value)),
+        (CreditType.TOP_UP.value, CreditType.farsi(CreditType.TOP_UP.value)),
+        (CreditType.PACKAGE.value, CreditType.farsi(CreditType.PACKAGE.value)),
     )
 
     charge_type_choices = (
