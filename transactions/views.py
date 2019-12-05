@@ -531,7 +531,7 @@ class TestApi58(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
         # print("************ Get Package Query")
-        # exe_response_type_0, exe_response_description_0 = MCI().behsa_package_query()
+         exe_response_type_0, exe_response_description_0 = MCI().behsa_package_query()
 
         # print("************ Get Package Credit")
         # exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
@@ -544,8 +544,8 @@ class TestApi58(BaseAPIView):
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-            # "exe_response_type_0": exe_response_type_0,
-            # "exe_response_description_0": exe_response_description_0,
+             "exe_response_type_0": exe_response_type_0,
+             "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1":exe_response_type_1,
             # "exe_response_description_1": exe_response_description_1,
             # "exe_response_type_2": exe_response_type_2,
