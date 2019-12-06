@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.humanize.templatetags.humanize import intcomma
-from  import_export.admin import ImportExportModelAdmin
+from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
 
@@ -8,6 +8,16 @@ from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
 class TopUpResource(resources.ModelResource):
     class Meta:
         model = TopUp
+
+
+class PackageLogResource(resources.ModelResource):
+    class Meta:
+        model = PackageRecord
+
+
+class PackageResource(resources.ModelResource):
+    class Meta:
+        model = Package
 
 
 class TopUpAdmin(ImportExportModelAdmin):
@@ -43,7 +53,8 @@ class TopUpAdmin(ImportExportModelAdmin):
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
 
-class PackageRecordAdmin(admin.ModelAdmin):
+class PackageRecordAdmin(ImportExportModelAdmin):
+    resource_class = PackageLogResource
     list_display = [
         'id', 'broker', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
         'package', 'call_response_type', 'exe_response_type', 'execution_time',
@@ -74,7 +85,8 @@ class PackageRecordAdmin(admin.ModelAdmin):
     amount.short_description = "Price (Rials)"
 
 
-class PackageAdmin(admin.ModelAdmin):
+class PackageAdmin(ImportExportModelAdmin):
+    resource_class = PackageResource
     list_display = ['operator', 'package_type', 'name', 'price_display', 'system', 'creator', 'timestamp', 'active', 'description']
 
     def price_display(self, obj):

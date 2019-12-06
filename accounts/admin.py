@@ -5,9 +5,24 @@ from django.contrib.humanize.templatetags.humanize import apnumber, intcomma
 
 from accounts.models import Broker, BalanceIncrease, OperatorAccess
 from rest_framework.response import Response
-
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from transactions.enums import CreditType
 
+
+class BrokerResource(resources.ModelResource):
+    class Meta:
+        model = Broker
+
+
+class BalanceIncreaseResource(resources.ModelResource):
+    class Meta:
+        model = BalanceIncrease
+
+
+class OperatorAccessResource(resources.ModelResource):
+    class Meta:
+        model = OperatorAccess
 
 class AccessInline(admin.TabularInline):
     model = OperatorAccess
@@ -43,7 +58,8 @@ class AccessInline(admin.TabularInline):
     package_credit_display.short_description = "package credit (Rials)"
 
 
-class OperatorAccessAdmin(admin.ModelAdmin):
+class OperatorAccessAdmin(ImportExportModelAdmin):
+    resource_class = OperatorAccessResource
     list_display = ['broker', 'operator', 'active', 'general_credit_access', 'top_up_access', 'package_access',
                     'credit_display', 'top_up_credit_display', 'package_credit_display',
                     'top_up_discount', 'package_discount',
@@ -99,7 +115,8 @@ class OperatorAccessAdmin(admin.ModelAdmin):
         return super().get_queryset(request=request).filter(user=request.user)
 
 
-class BrokerAdmin(admin.ModelAdmin):
+class BrokerAdmin(ImportExportModelAdmin):
+    resource_class = BrokerResource
     list_display = ['id', 'user', 'name', 'username', 'creator', 'active', 'timestamp', 'email']
     search_fields = ['name', 'username']
 
@@ -153,7 +170,8 @@ class BrokerAdmin(admin.ModelAdmin):
         return super().get_queryset(request=request).filter(user=request.user)
 
 
-class BalanceIncreaseAdmin(admin.ModelAdmin):
+class BalanceIncreaseAdmin(ImportExportModelAdmin):
+    resource_class = BalanceIncreaseResource
     list_display = ['broker', 'amount_display', 'creator', 'operator', 'credit_type', 'comment', 'success', 'timestamp']
 
     def amount_display(self, obj):
