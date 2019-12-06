@@ -214,7 +214,7 @@ class ChargeExeSaleView(BaseAPIView):
 
         with transaction.atomic():
             if operator_access.get_credit(top_up=True) < 10000000:
-                operator_access = broker.operatoraccess_set.select_for_update(of='self').get(operator=Operator.MCI.value)
+                operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
             if operator_access.get_credit(top_up=True) < top_up.amount:
                 data = {
                     "message": "Brokers balance is insufficient",
@@ -426,7 +426,7 @@ class PackageExeSaleView(BaseAPIView):
 
         with transaction.atomic():
             if operator_access.get_credit(top_up=True) < 10000000:
-                operator_access = broker.operatoraccess_set.select_for_update(of='self').get(operator=Operator.MCI.value)
+                operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
 
             if operator_access.get_credit(top_up=False) < package_record.package.amount:
                 data = {
