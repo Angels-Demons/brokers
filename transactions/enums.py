@@ -507,7 +507,8 @@ class Choices:
         (ResponseTypes.REPEATEDFACTORNUMBER.value, ResponseTypes.farsi(ResponseTypes.REPEATEDFACTORNUMBER.value)),
         (ResponseTypes.BANOVANCHARGEISINACCESSABLE.value,
          ResponseTypes.farsi(ResponseTypes.BANOVANCHARGEISINACCESSABLE.value)),
-        (ResponseTypes.LOYALCHARGEISINACCESSABLE.value, ResponseTypes.farsi(ResponseTypes.LOYALCHARGEISINACCESSABLE.value)),
+        (ResponseTypes.LOYALCHARGEISINACCESSABLE.value,
+         ResponseTypes.farsi(ResponseTypes.LOYALCHARGEISINACCESSABLE.value)),
         (ResponseTypes.INVALIDCHARGE.value, ResponseTypes.farsi(ResponseTypes.INVALIDCHARGE.value)),
         (ResponseTypes.PACKAGEISINACCESSABLE.value, ResponseTypes.farsi(ResponseTypes.PACKAGEISINACCESSABLE.value)),
         (ResponseTypes.NOPACKAGEFOUND.value, ResponseTypes.farsi(ResponseTypes.NOPACKAGEFOUND.value)),
@@ -519,7 +520,8 @@ class Choices:
         (ResponseTypes.PREPAIDPACKAGE.value, ResponseTypes.farsi(ResponseTypes.PREPAIDPACKAGE.value)),
         (ResponseTypes.POSTPAIDPACKAGE.value, ResponseTypes.farsi(ResponseTypes.POSTPAIDPACKAGE.value)),
         (ResponseTypes.EVACUATEDERROR.value, ResponseTypes.farsi(ResponseTypes.EVACUATEDERROR.value)),
-        (ResponseTypes.ERRORDEACTIVATESUBSCRIBER.value, ResponseTypes.farsi(ResponseTypes.ERRORDEACTIVATESUBSCRIBER.value)),
+        (ResponseTypes.ERRORDEACTIVATESUBSCRIBER.value,
+         ResponseTypes.farsi(ResponseTypes.ERRORDEACTIVATESUBSCRIBER.value)),
         (ResponseTypes.PACKAGEACTIVATIONERROR.value, ResponseTypes.farsi(ResponseTypes.PACKAGEACTIVATIONERROR.value)),
         (ResponseTypes.ERRORCHARGE.value, ResponseTypes.farsi(ResponseTypes.ERRORCHARGE.value)),
         (ResponseTypes.CHARGEERROR.value, ResponseTypes.farsi(ResponseTypes.CHARGEERROR.value)),
@@ -528,7 +530,8 @@ class Choices:
         (ResponseTypes.REPORTDENIEDACCESS.value, ResponseTypes.farsi(ResponseTypes.REPORTDENIEDACCESS.value)),
         (ResponseTypes.ACTIVERESRVEERROR.value, ResponseTypes.farsi(ResponseTypes.ACTIVERESRVEERROR.value)),
         (ResponseTypes.ACTIVEPAKAGEERROR.value, ResponseTypes.farsi(ResponseTypes.ACTIVEPAKAGEERROR.value)),
-        (ResponseTypes.CHANGERESERVEPACKAGEERROR.value, ResponseTypes.farsi(ResponseTypes.CHANGERESERVEPACKAGEERROR.value)),
+        (ResponseTypes.CHANGERESERVEPACKAGEERROR.value,
+         ResponseTypes.farsi(ResponseTypes.CHANGERESERVEPACKAGEERROR.value)),
         (ResponseTypes.BANOVANINVALIDAMOUNT.value, ResponseTypes.farsi(ResponseTypes.BANOVANINVALIDAMOUNT.value)),
         (ResponseTypes.PACKAGEERROR.value, ResponseTypes.farsi(ResponseTypes.PACKAGEERROR.value)),
         (ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value,
@@ -546,5 +549,3 @@ class ResponceCodeTypes:
     inactive_broker = -13
     invalid_access = -14
     invalid_package_access = -15
-
-

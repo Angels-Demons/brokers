@@ -20,6 +20,7 @@ class Broker(models.Model):
     # credit = models.BigIntegerField(default=0, editable=False)
     active = models.BooleanField(default=True)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
+
     # mcci_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
 
     def __str__(self):
@@ -78,9 +79,9 @@ class OperatorAccess(models.Model):
 
     def charge(self, amount, top_up=True):
         if top_up:
-            real_price = amount * (1 - (self.top_up_discount/100))
+            real_price = amount * (1 - (self.top_up_discount / 100))
         else:
-            real_price = amount * (1 - (self.package_discount/100))
+            real_price = amount * (1 - (self.package_discount / 100))
 
         if self.general_credit_access:
             self.credit -= real_price
@@ -145,7 +146,6 @@ class OperatorAccess(models.Model):
 
 
 class BalanceIncrease(models.Model):
-
     # class Meta:
     #     permissions = (
     #         ("top_up", "Can top up users"),
@@ -154,7 +154,8 @@ class BalanceIncrease(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     operator = models.PositiveSmallIntegerField(choices=enums.Choices.operators, default=enums.Operator.MCI.value)
-    credit_type = models.PositiveSmallIntegerField(choices=enums.Choices.credit_types, default=enums.CreditType.GENERAL.value)
+    credit_type = models.PositiveSmallIntegerField(choices=enums.Choices.credit_types,
+                                                   default=enums.CreditType.GENERAL.value)
     amount = models.BigIntegerField(verbose_name='Amount (Rials)')
     # amount = models.CharField(validators=[validate_comma_separated_integer_list], default=0, max_length=255)
     comment = models.TextField()

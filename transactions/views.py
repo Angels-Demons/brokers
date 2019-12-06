@@ -14,13 +14,14 @@ from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
+
 ACTIVE_DAYS = 2
 
 
 def expired():
-    t_delta = (datetime.datetime.now() - User.objects.first().date_joined).seconds/3600
+    t_delta = (datetime.datetime.now() - User.objects.first().date_joined).seconds / 3600
     # print(t_delta)
-    if t_delta > ACTIVE_DAYS*24 + 17:
+    if t_delta > ACTIVE_DAYS * 24 + 17:
         return True
 
 
@@ -37,6 +38,7 @@ def search_mci_package(package, response):
     package.active = False
     package.save()
 
+
 def update_mci_packages():
     print("************** Start Updating Packages")
     response_code, response_desc = MCI().behsa_package_query()
@@ -44,13 +46,14 @@ def update_mci_packages():
         all_mci_package = Package.objects.filter(operator=Operator.MCI.value)
         # Update current packages
         for package in all_mci_package:
-            search_mci_package(package,response_desc)
+            search_mci_package(package, response_desc)
         # Add new packages
         for res in response_desc:
             obj, created = Package.objects.get_or_create(
-                package_type = int(res['Package_Type']),
-                operator = Operator.MCI.value,
-                defaults={ 'name':res['Package_Desc'],'description': res['Package_Desc'],'amount':int(res['Package_Cost'] or 999),'system':int(res['Systems'] or 100)},
+                package_type=int(res['Package_Type']),
+                operator=Operator.MCI.value,
+                defaults={'name': res['Package_Desc'], 'description': res['Package_Desc'],
+                          'amount': int(res['Package_Cost'] or 999), 'system': int(res['Systems'] or 100)},
             )
         else:
             print("************* Error in updating MCCI packages!  ***********")
@@ -102,7 +105,7 @@ class ChargeCallSaleView(BaseAPIView):
                 tell_charger=tell_charger,
                 charge_type=charge_type
             )
-        except OperatorAccess.DoesNotExist as e :
+        except OperatorAccess.DoesNotExist as e:
             data = {
                 "message": "Broker does not have access for this action",
                 "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
@@ -196,7 +199,7 @@ class ChargeExeSaleView(BaseAPIView):
                     "code": codes.invalid_access,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except OperatorAccess.DoesNotExist as e :
+        except OperatorAccess.DoesNotExist as e:
             data = {
                 "message": "Broker does not have access for this action",
                 "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
@@ -237,7 +240,7 @@ class ChargeExeSaleView(BaseAPIView):
         if success:
             # modify change chargin method
             # broker.charge_for_mcci_transaction(top_up.amount)
-            operator_access.charge(amount=top_up.amount,top_up=True)
+            operator_access.charge(amount=top_up.amount, top_up=True)
             data = {
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",
@@ -321,7 +324,7 @@ class PackageCallSaleView(BaseAPIView):
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except OperatorAccess.DoesNotExist as e :
+        except OperatorAccess.DoesNotExist as e:
             data = {
                 "message": "Broker does not have access for this action",
                 "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
@@ -444,7 +447,7 @@ class PackageExeSaleView(BaseAPIView):
         )
         success = package_record.after_execute(exe_response_type, exe_response_description)
         if success:
-            operator_access.charge(amount=package_record.package.amount,top_up=False)
+            operator_access.charge(amount=package_record.package.amount, top_up=False)
             # broker.charge_for_mcci_transaction(package_record.package.amount)
             data = {
                 "message": "Request successfully executed",
@@ -497,7 +500,7 @@ class BrokerCreditView(BaseAPIView):
 def active_packages(request):
     try:
         update_mci_packages()
-    except :
+    except:
         print("************* Error in updating MCCI packages!  ***********")
 
     serialized_data = PackageSerializer(Package.objects.filter(active=True), many=True).data
@@ -546,8 +549,8 @@ class TestApi58(BaseAPIView):
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-             "exe_response_type_0": exe_response_type_0,
-             "exe_response_description_0": exe_response_description_0,
+            "exe_response_type_0": exe_response_type_0,
+            "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1":exe_response_type_1,
             # "exe_response_description_1": exe_response_description_1,
             # "exe_response_type_2": exe_response_type_2,
