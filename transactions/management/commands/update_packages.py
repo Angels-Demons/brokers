@@ -22,8 +22,9 @@ def update_mci_packages():
                 defaults={'name': res['Package_Desc'], 'description': res['Package_Desc'],
                           'amount': int(res['Package_Cost'] or 999), 'system': int(res['Systems'] or 100)},
             )
-        else:
-            print("************* Error in updating MCCI packages!  ***********")
+            print('created: ', str(created))
+    else:
+        print("************* Error in updating MCCI packages!  ***********")
 
 
 def search_mci_package(package, response):
