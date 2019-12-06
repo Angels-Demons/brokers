@@ -112,6 +112,6 @@ class PackageAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(TopUp, TopUpAdmin)
-admin.site.register(ProvidersToken)
+# admin.site.register(ProvidersToken)
 admin.site.register(PackageRecord, PackageRecordAdmin)
 admin.site.register(Package, PackageAdmin)
