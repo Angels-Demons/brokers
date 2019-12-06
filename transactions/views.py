@@ -190,8 +190,6 @@ class ChargeExeSaleView(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
-            if operator_access.get_credit(top_up=True) < 10000000:
-                operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
                 data = {
                     "message": "Broker does not have access for this action",
@@ -214,47 +212,50 @@ class ChargeExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if operator_access.get_credit(top_up=True) < top_up.amount:
-            data = {
-                "message": "Brokers balance is insufficient",
-                "message_fa": "اعتبار کارگزار کافی نیست.",
-                "code": codes.insufficient_balance,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+        with transaction.atomic():
+            if operator_access.get_credit(top_up=True) < 10000000:
+                operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
+            if operator_access.get_credit(top_up=True) < top_up.amount:
+                data = {
+                    "message": "Brokers balance is insufficient",
+                    "message_fa": "اعتبار کارگزار کافی نیست.",
+                    "code": codes.insufficient_balance,
+                }
+                return Response(data, status=status.HTTP_200_OK)
 
-        # if broker.active is False:
-        #     data = {
-        #         "message": "Brokers is not active",
-        #         "message_fa": "کارگذار غیرفعال است.",
-        #         "code": codes.inactive_broker,
-        #     }
-        #     return Response(data, status=status.HTTP_200_OK)
+            # if broker.active is False:
+            #     data = {
+            #         "message": "Brokers is not active",
+            #         "message_fa": "کارگذار غیرفعال است.",
+            #         "code": codes.inactive_broker,
+            #     }
+            #     return Response(data, status=status.HTTP_200_OK)
 
-        exe_response_type, exe_response_description = MCI().charge_exe_sale(
-            provider_id=top_up.provider_id,
-            bank_code=top_up.bank_code,
-            card_no=top_up.card_number,
-            card_type=top_up.card_type
-        )
-        success = top_up.after_execute(exe_response_type, exe_response_description)
-        if success:
-            # modify change chargin method
-            # broker.charge_for_mcci_transaction(top_up.amount)
-            operator_access.charge(amount=top_up.amount, top_up=True)
-            data = {
-                "message": "Request successfully executed",
-                "message_fa": "درخواست با موفقیت اجرا شد",
-                "code": codes.successful,
-                # "provider_id": top_up.provider_id
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        else:
-            data = {
-                "message": "Failed to execute request",
-                "message_fa": top_up.call_response_description,
-                "code": top_up.call_response_type,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+            exe_response_type, exe_response_description = MCI().charge_exe_sale(
+                provider_id=top_up.provider_id,
+                bank_code=top_up.bank_code,
+                card_no=top_up.card_number,
+                card_type=top_up.card_type
+            )
+            success = top_up.after_execute(exe_response_type, exe_response_description)
+            if success:
+                # modify change chargin method
+                # broker.charge_for_mcci_transaction(top_up.amount)
+                operator_access.charge(amount=top_up.amount, top_up=True)
+                data = {
+                    "message": "Request successfully executed",
+                    "message_fa": "درخواست با موفقیت اجرا شد",
+                    "code": codes.successful,
+                    # "provider_id": top_up.provider_id
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": top_up.call_response_description,
+                    "code": top_up.call_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
 
 
 class PackageCallSaleView(BaseAPIView):
