@@ -13,7 +13,7 @@ def update_mci_packages():
         all_mci_package = Package.objects.filter(operator=Operator.MCI.value)
         # Update current packages
         for package in all_mci_package:
-            search_mci_package(package, response_desc)
+            update_current_mci_package(package, response_desc)
         # Add new packages
         for res in response_desc:
             obj, created = Package.objects.get_or_create(
@@ -27,7 +27,7 @@ def update_mci_packages():
         print("************* Error in updating MCCI packages!  ***********")
 
 
-def search_mci_package(package, response):
+def update_current_mci_package(package, response):
     for res in response:
         if int(res['Package_Type']) == int(package.package_type):
             package.name = res['Package_Desc']
