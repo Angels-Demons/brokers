@@ -235,6 +235,8 @@ class ChargeExeSaleView(BaseAPIView):
         if success:
             # modify change chargin method
             # broker.charge_for_mcci_transaction(top_up.amount)
+            if operator_access.get_credit(top_up=True) < 10000000:
+                operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
             operator_access.charge(amount=top_up.amount,top_up=True)
             data = {
                 "message": "Request successfully executed",
