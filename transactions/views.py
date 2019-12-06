@@ -497,21 +497,46 @@ class BrokerCreditView(BaseAPIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-@api_view(["GET"])
-def active_packages(request):
-    try:
-        update_mci_packages()
-    except:
-        print("************* Error in updating MCCI packages!  ***********")
+class ActivePackages(BaseAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
 
-    serialized_data = PackageSerializer(Package.objects.filter(active=True), many=True).data
-    data = {
-        "message": "Request successfully executed",
-        "message_fa": "درخواست با موفقیت اجرا شد",
-        "code": codes.successful,
-        "packages": serialized_data
-    }
-    return Response(data, status=status.HTTP_200_OK)
+    @staticmethod
+    def get(request):
+        try:
+            broker = Broker.objects.get(user=request.user)
+            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            if not operator_access.active:
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            banned_package = operator_access.banned_packages.all().values('id')
+            serialized_data = PackageSerializer(Package.objects.filter(active=True).exclude(id__in=banned_package),
+                                                many=True).data
+            data = {
+                "message": "Request successfully executed",
+                "message_fa": "درخواست با موفقیت اجرا شد",
+                "code": codes.successful,
+                "packages": serialized_data
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except OperatorAccess.DoesNotExist as e:
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class TestApi58(BaseAPIView):
@@ -537,7 +562,7 @@ class TestApi58(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
         # print("************ Get Package Query")
-        exe_response_type_0, exe_response_description_0 = MCI().behsa_package_query()
+        # exe_response_type_0, exe_response_description_0 = MCI().behsa_package_query()
 
         # print("************ Get Package Credit")
         # exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
@@ -545,13 +570,13 @@ class TestApi58(BaseAPIView):
         # print("************ Get Charge Credit")
         # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
-        update_mci_packages()
+        # update_mci_packages()
 
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-            "exe_response_type_0": exe_response_type_0,
-            "exe_response_description_0": exe_response_description_0,
+            # "exe_response_type_0": exe_response_type_0,
+            # "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1":exe_response_type_1,
             # "exe_response_description_1": exe_response_description_1,
             # "exe_response_type_2": exe_response_type_2,
