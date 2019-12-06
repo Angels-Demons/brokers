@@ -1,10 +1,17 @@
 from django.contrib import admin
 from django.contrib.humanize.templatetags.humanize import intcomma
-
+from  import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
 
 
-class TopUpAdmin(admin.ModelAdmin):
+class TopUpResource(resources.ModelResource):
+    class Meta:
+        model = TopUp
+
+
+class TopUpAdmin(ImportExportModelAdmin):
+    resource_class = TopUpResource
     list_display = [
         'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
         'charge_type', 'call_response_type', 'exe_response_type', 'execution_time',
