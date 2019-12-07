@@ -8,6 +8,7 @@ from django_jalali.db import models as jmodels
 from accounts.models import Broker
 from accounts.utils import phone_validator, amount_validator
 from transactions.enums import *
+from django.db.models import Sum
 
 
 class ProvidersToken(models.Model):
@@ -37,7 +38,7 @@ class TopUp(models.Model):
     tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
-    amount = models.PositiveIntegerField(blank=False, null=False, validators=[amount_validator])
+    amount = models.PositiveIntegerField(blank=False, null=False, verbose_name="Price (Rials)", validators=[amount_validator])
     charge_type = models.PositiveSmallIntegerField(choices=Choices.charge_type_choices, blank=False, null=False)
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
     call_response_description = models.CharField(max_length=1023, null=True, blank=True)
@@ -48,6 +49,28 @@ class TopUp(models.Model):
     bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, blank=True)
     card_number = models.CharField(max_length=255, null=True, blank=True)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
+
+    @staticmethod
+    def report(broker, from_date, to_date):
+        dict = []
+        # records = TopUp.objects.filter(timestamp__in=None)
+        records = TopUp.objects.filter(broker=broker)
+        # FILTER BY TIME HERE
+        # ----
+
+        # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
+        dict.append({
+            "title": "جمع کل",
+            "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
+        })
+        for charge_type in ChargeType:
+            filtered_records = records.filter(charge_type=charge_type.value)
+            sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
+            # dict.append({ChargeType.farsi(charge_type.value), intcomma(sum)})
+            dict.append({
+                "title": ChargeType.farsi(charge_type.value),
+                "value": intcomma(sum)
+            })
 
     def __str__(self):
         return "Top_up " + str(self.id)
@@ -149,6 +172,7 @@ class PackageRecord(models.Model):
     state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True)
+    amount = models.PositiveIntegerField(default=0, verbose_name="Price (Rials)")
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
     call_response_description = models.CharField(max_length=1023, null=True, blank=True)
     execution_time = jmodels.jDateTimeField(null=True, blank=True)
@@ -159,6 +183,28 @@ class PackageRecord(models.Model):
     card_number = models.CharField(max_length=255, null=True, blank=True)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
 
+    @staticmethod
+    def report(broker, from_date, to_date):
+        dict = []
+        # records = TopUp.objects.filter(timestamp__in=None)
+        records = PackageRecord.objects.filter(broker=broker)
+        # FILTER BY TIME HERE
+        # ----
+
+        # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
+        dict.append({
+            "title": "جمع کل",
+            "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
+        })
+        # for charge_type in ChargeType:
+        #     filtered_records = records.filter(charge_type=charge_type.value)
+        #     sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
+        #     # dict.append({ChargeType.farsi(charge_type.value), intcomma(sum)})
+        #     dict.append({
+        #         "title": ChargeType.farsi(charge_type.value),
+        #         "value": intcomma(sum)
+        #     })
+        print(dict)
     # @property
     # def amount_display(self):
     #     return intcomma(self.amount)
@@ -167,12 +213,13 @@ class PackageRecord(models.Model):
         return "Package record " + str(self.id)
 
     @staticmethod
-    def create(broker, tell_num, tell_charger, package_id):
+    def create(broker, tell_num, tell_charger, package):
         package_record = PackageRecord(
             broker=broker,
             tell_num=tell_num,
             tell_charger=tell_charger,
-            package_id=package_id,
+            package_id=package.pk,
+            amount=package.amount
         )
         package_record.full_clean()
         package_record.save()

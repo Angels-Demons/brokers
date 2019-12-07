@@ -47,10 +47,13 @@ class OperatorAccess(models.Model):
     general_credit_access = models.BooleanField(default=False)
     top_up_access = models.BooleanField(default=True)
     package_access = models.BooleanField(default=True)
-    credit = models.BigIntegerField(default=0, validators=[MinValueValidator(limit_value=0, message='error')])
-    top_up_credit = models.BigIntegerField(default=0, validators=[MinValueValidator(limit_value=0, message='error')])
-    package_credit = models.BigIntegerField(default=0, validators=[MinValueValidator(limit_value=0, message='error')])
-    banned_packages = models.ManyToManyField('transactions.Package', null=True, blank=True)
+    credit = models.BigIntegerField(default=0, verbose_name='Credit (Rials)',
+                                    validators=[MinValueValidator(limit_value=0, message='error')])
+    top_up_credit = models.BigIntegerField(default=0, verbose_name='Top_up credit (Rials)',
+                                           validators=[MinValueValidator(limit_value=0, message='error')])
+    package_credit = models.BigIntegerField(default=0, verbose_name='Package credit (Rials)',
+                                            validators=[MinValueValidator(limit_value=0, message='error')])
+    banned_packages = models.ManyToManyField('transactions.Package', blank=True)
     last_editor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
     comment = models.TextField()
     active = models.BooleanField(default=True)

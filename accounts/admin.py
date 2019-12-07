@@ -24,46 +24,69 @@ class OperatorAccessResource(resources.ModelResource):
     class Meta:
         model = OperatorAccess
 
+
 class AccessInline(admin.TabularInline):
     model = OperatorAccess
     # exclude = []
-    exclude = ['credit', 'top_up_credit', 'package_credit']
+    exclude = ['credit', 'top_up_credit', 'package_credit',
+               'general_credit_access', 'top_up_access', 'package_access',
+               'comment', 'banned_packages']
     extra = 0
 
-    def get_readonly_fields(self, request, obj=None):
-        return ['operator', 'credit_display', 'top_up_credit_display', 'package_credit_display']
-        # if obj:
-        #     print('obj')
-        #     return ['operator', 'credit', 'top_up_credit', 'package_credit', ]
-        # else:
-        #     print('none')
-        #     return ['credit', 'top_up_credit', 'package_credit']
+    def access(self, obj):
+        if obj.general_credit_access:
+            return "اعتبار عمومی"
+        if obj.top_up_access and obj.package_access:
+            return "اعتبار شارژ و بسته"
+        if obj.top_up_access:
+            return "فقط اعتبار شارژ"
+        if obj.package_access:
+            return "فقط اعتبار بسته"
+        return "بدون دسترسی"
+    access.allow_tags = True
+    access.admin_order_field = "general_credit_access"
 
     def credit_display(self, obj):
         return intcomma(obj.credit)
-
     credit_display.allow_tags = True
     credit_display.short_description = "credit (Rials)"
 
     def top_up_credit_display(self, obj):
         return intcomma(obj.top_up_credit)
-
     top_up_credit_display.allow_tags = True
-    top_up_credit_display.short_description = "top_tup credit (Rials)"
+    top_up_credit_display.short_description = "top_up credit (Rials)"
 
     def package_credit_display(self, obj):
         return intcomma(obj.package_credit)
-
     package_credit_display.allow_tags = True
     package_credit_display.short_description = "package credit (Rials)"
+
+    def get_readonly_fields(self, request, obj=None):
+        return ['access', 'operator', 'active', 'package_discount', 'top_up_discount',
+                'credit_display', 'top_up_credit_display', 'package_credit_display']
 
 
 class OperatorAccessAdmin(ImportExportModelAdmin):
     resource_class = OperatorAccessResource
-    list_display = ['broker', 'operator', 'active', 'general_credit_access', 'top_up_access', 'package_access',
+
+    list_display = ['broker', 'access', 'operator', 'top_up_discount', 'package_discount', 'active',
+                    # 'general_credit_access', 'top_up_access', 'package_access',
+                    # 'credit', 'top_up_credit', 'package_credit',
                     'credit_display', 'top_up_credit_display', 'package_credit_display',
-                    'top_up_discount', 'package_discount',
                     'last_editor', 'timestamp', 'comment']
+
+    def access(self, obj):
+        if obj.general_credit_access:
+            return "اعتبار عمومی"
+        if obj.top_up_access and obj.package_access:
+            return "اعتبار شارژ و بسته"
+        if obj.top_up_access:
+            return "فقط اعتبار شارژ"
+        if obj.package_access:
+            return "فقط اعتبار بسته"
+        return "بدون دسترسی"
+    access.allow_tags = True
+    access.admin_order_field = "general_credit_access"
 
     def credit_display(self, obj):
         return intcomma(obj.credit)
@@ -75,7 +98,7 @@ class OperatorAccessAdmin(ImportExportModelAdmin):
         return intcomma(obj.top_up_credit)
 
     top_up_credit_display.allow_tags = True
-    top_up_credit_display.short_description = "top_tup credit (Rials)"
+    top_up_credit_display.short_description = "top_up credit (Rials)"
 
     def package_credit_display(self, obj):
         return intcomma(obj.package_credit)
@@ -85,16 +108,11 @@ class OperatorAccessAdmin(ImportExportModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['broker', 'operator',
-                    # 'credit', 'top_up_credit', 'package_credit',
+            return ['broker', 'operator', 'access',
                     'credit_display', 'top_up_credit_display', 'package_credit_display',
                     'last_editor', 'timestamp']
         else:
-            return [
-                # 'credit', 'top_up_credit', 'package_credit',
-                # 'credit_display', 'top_up_credit_display', 'package_credit_display',
-                # 'last_editor', 'timestamp'
-            ]
+            return []
 
     def get_exclude(self, request, obj=None):
         if obj:
@@ -102,8 +120,7 @@ class OperatorAccessAdmin(ImportExportModelAdmin):
         else:
             return [
                 'last_editor', 'timestamp',
-                'credit', 'top_up_credit', 'package_credit',
-                'credit_display', 'top_up_credit_display', 'package_credit_display']
+                'credit', 'top_up_credit', 'package_credit']
 
     def save_model(self, request, obj, form, change):
         obj.last_editor = request.user
@@ -174,31 +191,15 @@ class BalanceIncreaseAdmin(ImportExportModelAdmin):
     resource_class = BalanceIncreaseResource
     list_display = ['broker', 'amount_display', 'creator', 'operator', 'credit_type', 'comment', 'success', 'timestamp']
 
+    def save_model(self, request, obj, form, change):
+        obj.creator = request.user
+        super().save_model(request, obj, form, change)
+
     def amount_display(self, obj):
         return intcomma(obj.amount)
 
     amount_display.allow_tags = True
-    amount_display.short_description = "amount (Rials)"
-
-    def save_model(self, request, obj, form, change):
-        obj.creator = request.user
-        # try:
-        #     operator_access = OperatorAccess.objects.get(operator=obj.operator, broker=obj.broker)
-        #     obj.success, obj.error = operator_access.increase_balance(obj)
-        # except Exception as e:
-        #     obj.error = e.__str__()
-        #     print(e)
-        super().save_model(request, obj, form, change)
-
-        # obj.creator = request.user
-        # former_balance = obj.broker.credit
-        # obj.broker.credit += obj.amount
-        # obj.broker.save()
-        # if former_balance + obj.amount == obj.broker.credit:
-        #     obj.success = True
-        #     super().save_model(request, obj, form, change)
-        # else:
-        #     super().save_model(request, obj, form, change)
+    amount_display.short_description = "Amount (Rials)"
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
