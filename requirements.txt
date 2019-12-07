@@ -9,3 +9,4 @@ sqlparse==0.3.0
 django-jet==1.0.8
 django-import-export==2.0
 pandas==0.25.3
+django-jalali-date==0.2.10
