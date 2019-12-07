@@ -5,7 +5,7 @@ from accounts.models import Broker
 
 def test(request):
     try:
-        credit = Broker.objects.get(user=request.user).credit
-        return {'user_credit': credit}
+        credit = Broker.objects.get(user=request.user)
+        return {'user_Broker': 1}
     except:
         return {}

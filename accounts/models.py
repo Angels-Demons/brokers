@@ -12,8 +12,8 @@ from transactions.enums import Operator, CreditType
 
 
 class Broker(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name="user")
-    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="creator")
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name="broker")
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="created_brokers")
     name = models.CharField(max_length=255, unique=True)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField()
