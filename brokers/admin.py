@@ -40,10 +40,11 @@ class MyAdminSite(admin.AdminSite):
 
     def my_view(self, request, extra_context=None):
         # app_list = self.get_app_list(request)
-        report_form = ReportForm()
+
         report_dictionary = {}
         if request.method == 'GET':
             if request.GET.get('from_date') and request.GET.get('to_date'):
+                report_form = ReportForm(initial={'from_date': request.GET.get('from_date'), 'to_date':request.GET.get('to_date')})
                 try:
                     print(request.GET.get('from_date'))
                     from_date_list = request.GET.get('from_date').split('-')
@@ -63,6 +64,8 @@ class MyAdminSite(admin.AdminSite):
                 except Exception:
                     traceback.print_exc(file=sys.stdout)
                     raise Http404("تاریخ ورودی صحیح نیست.")
+            else:
+                report_form = ReportForm()
         context = {
             # **self.each_context(request),
             'title': 'گزارش فروش شارژ',
