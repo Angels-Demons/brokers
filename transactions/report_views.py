@@ -4,7 +4,7 @@ import pandas as pd
 from accounts.views import BaseAPIView
 
 
-class ChargeCallSaleView(BaseAPIView):
+class ChargeSaleReportView(BaseAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     @staticmethod

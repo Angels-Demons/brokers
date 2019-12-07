@@ -7,6 +7,7 @@ urlpatterns = [
                   url(r'^dash/', admin.site.urls),
                   url(r'^v1/', include('accounts.urls')),
                   url(r'^v1/', include('transactions.urls')),
+                  url(r'^reports/', include('transactions.report_urls')),
                   url(r'^jet/', include('jet.urls', 'jet')),
                   url(r'^jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL,
