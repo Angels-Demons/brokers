@@ -111,10 +111,7 @@ class TopUp(models.Model):
         # ----
 
         # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
-        dict.append({
-            "title": "جمع کل",
-            "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
-        })
+
         for charge_type in ChargeType:
             filtered_records = records.filter(charge_type=charge_type.value)
             sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
@@ -123,6 +120,10 @@ class TopUp(models.Model):
                 "title": ChargeType.farsi(charge_type.value),
                 "value": intcomma(sum)
             })
+        dict.append({
+            "title": "جمع کل شارژ",
+            "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
+        })
         return dict
 
 
@@ -223,7 +224,7 @@ class PackageRecord(models.Model):
 
         # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
         dict.append({
-            "title": "جمع کل",
+            "title": "جمع کل بسته ها",
             "value": intcomma(records.aggregate(Sum('package__amount'))['package__amount__sum'])
         })
         # for charge_type in ChargeType:

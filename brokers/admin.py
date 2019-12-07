@@ -14,7 +14,7 @@ from django.template.response import TemplateResponse
 from jalali_date.widgets import AdminJalaliDateWidget
 
 from accounts.models import Broker
-from transactions.models import TopUp
+from transactions.models import TopUp, PackageRecord
 
 
 class ReportForm(forms.Form):
@@ -61,6 +61,8 @@ class MyAdminSite(admin.AdminSite):
                     except Broker.DoesNotExist:
                         raise Http404("شما دسترسی به این گزارش را ندارید.")
                     report_dictionary = TopUp.report(broker, from_date, to_date)
+                    for i in PackageRecord.report(broker, from_date, to_date):
+                        report_dictionary.append(i)
                 except Exception:
                     traceback.print_exc(file=sys.stdout)
                     raise Http404("تاریخ ورودی صحیح نیست.")
