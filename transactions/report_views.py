@@ -9,7 +9,7 @@ from transactions.models import TopUp, PackageRecord
 
 class ChargeSaleReportView(BaseAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    authentication_classes = (authentication.CSRFCheck,)
+    authentication_classes = (authentication.BasicAuthentication,)
 
     @staticmethod
     def get(request):
@@ -35,7 +35,7 @@ class ChargeSaleReportView(BaseAPIView):
 
 class PackageSaleReportView(BaseAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    authentication_classes = (authentication.CSRFCheck,)
+    authentication_classes = (authentication.BasicAuthentication,)
 
     @staticmethod
     def get(request):
