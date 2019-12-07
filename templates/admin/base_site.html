@@ -31,14 +31,14 @@
 {#    </a>#}
 {% endblock %}
 
-{% block userlinks %}
-    <a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a>
+{#{% block userlinks %}#}
+{#    <a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a>#}
 {#    <a>{% trans 'Your Credit: ' %}{{ user_credit }}</a>#}
 {#    <a href="{% url 'admin:logout' %}">asdfafd</a>#}
-
+{##}
 {#    <a href="{% url 'admin:logout' %}"><strong>{% firstof user.get_short_name user.get_username %}</strong></a>#}
-
-{% endblock %}
+{##}
+{#{% endblock %}#}
 
 {% block footer %}
     {{ block.super }}

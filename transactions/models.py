@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from django.db.models import Sum
 from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ValidationError
@@ -102,6 +102,29 @@ class TopUp(models.Model):
             self.save()
             return False
 
+    @staticmethod
+    def report(broker, from_date, to_date):
+        dict = []
+        # records = TopUp.objects.filter(timestamp__in=None)
+        records = TopUp.objects.filter(broker=broker, timestamp__range=(from_date, to_date))
+        # FILTER BY TIME HERE
+        # ----
+
+        # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
+        dict.append({
+            "title": "جمع کل",
+            "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
+        })
+        for charge_type in ChargeType:
+            filtered_records = records.filter(charge_type=charge_type.value)
+            sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
+            # dict.append({ChargeType.farsi(charge_type.value), intcomma(sum)})
+            dict.append({
+                "title": ChargeType.farsi(charge_type.value),
+                "value": intcomma(sum)
+            })
+        return dict
+
 
 class Package(models.Model):
     package_type = models.IntegerField()
@@ -189,3 +212,26 @@ class PackageRecord(models.Model):
             self.state = RecordState.EXECUTE_ERROR.value
             self.save()
             return False
+
+    @staticmethod
+    def report(broker, from_date, to_date):
+        dict = []
+        # records = TopUp.objects.filter(timestamp__in=None)
+        records = PackageRecord.objects.filter(broker=broker, timestamp__range=(from_date, to_date))
+        # FILTER BY TIME HERE
+        # ----
+
+        # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
+        dict.append({
+            "title": "جمع کل",
+            "value": intcomma(records.aggregate(Sum('package__amount'))['package__amount__sum'])
+        })
+        # for charge_type in ChargeType:
+        #     filtered_records = records.filter(charge_type=charge_type.value)
+        #     sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
+        #     # dict.append({ChargeType.farsi(charge_type.value), intcomma(sum)})
+        #     dict.append({
+        #         "title": ChargeType.farsi(charge_type.value),
+        #         "value": intcomma(sum)
+        #     })
+        return dict
