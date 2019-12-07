@@ -3,8 +3,11 @@ import sys
 import traceback
 
 import jdatetime
+import pandas as pd
 from django.contrib import admin
 from django import forms
+from django.shortcuts import redirect
+from django.urls import reverse
 from django_jalali.forms import jDateField
 from django.forms import SelectDateWidget
 from django.http import HttpResponse, Http404
@@ -50,6 +53,7 @@ class MyAdminSite(admin.AdminSite):
                     from_date_list = request.GET.get('from_date').split('-')
                     to_date_list = request.GET.get('to_date').split('-')
                     print(request.GET.get('to_date'))
+
                     # from_date = jdatetime.date(int(from_date_list[0]), int(from_date_list[1]), int(from_date_list[
                     # 2]), locale='fa_IR') to_date = jdatetime.date(int(to_date_list[0]), int(to_date_list[1]),
                     # int(to_date_list[2]), locale='fa_IR')
@@ -63,6 +67,10 @@ class MyAdminSite(admin.AdminSite):
                     report_dictionary = TopUp.report(broker, from_date, to_date)
                     for i in PackageRecord.report(broker, from_date, to_date):
                         report_dictionary.append(i)
+                    # if 'xlsx' in request.GET:
+                    #     return redirect(reverse('ChargeSaleReport'), from_date=from_date, to_date=to_date )
+                        # return redirect(reverse('transactions.views.report_view'), from_date=from_date, to_date=to_date)
+                        # return pd.DataFrame.from_dict(data=report_dictionary)
                 except Exception:
                     traceback.print_exc(file=sys.stdout)
                     raise Http404("تاریخ ورودی صحیح نیست.")
