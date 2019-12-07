@@ -31,12 +31,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_jalali',
+    'jalali_date',
     'django.contrib.humanize',
     'jet.dashboard',
     'jet',
     'accounts',
     'transactions',
-    'django.contrib.admin',
+    # 'django.contrib.admin',
+    'brokers.apps.MyAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
