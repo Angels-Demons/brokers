@@ -17,6 +17,7 @@ from django.utils import timezone
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -27,6 +28,7 @@ SECRET_KEY = '*1w75d3+#n&w%9by+mx4jthfvory89_-b6o^w-=(r3v)a6*if1'
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
 
 # Application definition
 
@@ -77,6 +79,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'brokers.wsgi.application'
 
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -86,6 +89,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -112,18 +116,19 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     # 'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend', ),
-    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend', ),
 }
 
 JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'HHRAA',
-    'JWT_EXPIRATION_DELTA': timezone.timedelta(minutes=10),
+    'JWT_EXPIRATION_DELTA': timezone.timedelta(hours=12, days=10),
     'JWT_ALLOW_REFRESH': True,
-    'JWT_REFRESH_EXPIRATION_DELTA': timezone.timedelta(days=3),
+    'JWT_REFRESH_EXPIRATION_DELTA': timezone.timedelta(days=30),
 }
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
+
 
 
 LANGUAGE_CODE = 'en-us'
@@ -135,9 +140,10 @@ TIME_ZONE = 'Asia/Tehran'
 USE_I18N = True
 
 USE_L10N = True
-USE_THOUSAND_SEPARATOR = True
+# USE_THOUSAND_SEPARATOR = True
 
 USE_TZ = False
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -157,6 +163,7 @@ try:
     from .local_settings import *
 except ImportError:
     pass
+
 
 JET_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 JET_APP_INDEX_DASHBOARD = 'dashboard.CustomAppIndexDashboard'

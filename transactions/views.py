@@ -309,7 +309,7 @@ class PackageCallSaleView(BaseAPIView):
                 broker=broker,
                 tell_num=tell_num,
                 tell_charger=tell_charger,
-                package_id=package.pk
+                package=package
             )
         except ValidationError as e:
             data = {
