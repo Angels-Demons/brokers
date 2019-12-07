@@ -33,13 +33,13 @@ class MyAdminSite(admin.AdminSite):
         from django.urls import path
         urls = super().get_urls()
         urls += [
-            path('separated_report/', self.admin_view(self.my_view)),
-            path('api/separated_report/', self.admin_view(self.my_view)),
+            path('separated_report/', self.admin_view(self.separated_report), name='separated_report'),
+            path('api/separated_report/', self.admin_view(self.separated_report)),
         ]
         return urls
 
-    def my_view(self, request, extra_context=None):
-        # app_list = self.get_app_list(request)
+    def separated_report(self, request, extra_context=None):
+        app_list = self.get_app_list(request)
 
         report_dictionary = {}
         if request.method == 'GET':
@@ -67,10 +67,10 @@ class MyAdminSite(admin.AdminSite):
             else:
                 report_form = ReportForm()
         context = {
-            # **self.each_context(request),
+            **self.each_context(request),
             'title': 'گزارش فروش شارژ',
-            # 'app_list': app_list,
-            # **(extra_context or {}),
+            'app_list': app_list,
+            **(extra_context or {}),
             'form': report_form,
             'report_json_string':json.dumps(report_dictionary),
             'report_json_dict': report_dictionary,
