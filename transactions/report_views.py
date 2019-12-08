@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework import permissions, authentication, status
 import pandas as pd
 from rest_framework.response import Response
-from rest_pandas import PandasExcelRenderer
+from rest_pandas import PandasExcelRenderer, PandasSimpleView
 
 from accounts.views import BaseAPIView
 from transactions.models import TopUp, PackageRecord
