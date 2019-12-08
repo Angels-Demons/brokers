@@ -113,11 +113,13 @@ class TopUp(models.Model):
         if broker is not None:
             records = TopUp.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
                                            timestamp__range=(from_date, to_date))
-        elif user in Group.objects.get(name="admin").user_set:
-            records = TopUp.objects.filter(state=RecordState.EXECUTED.value,
-                                           timestamp__range=(from_date, to_date))
         else:
-            raise PermissionError("You must be a broker or admin to view this report")
+            (admin_group, created) = Group.objects.get_or_create(name='admin')
+            if user in admin_group.user_set.all():
+                records = TopUp.objects.filter(state=RecordState.EXECUTED.value,
+                                                       timestamp__range=(from_date, to_date))
+            else:
+                raise PermissionError("You must be a broker or admin to view this report")
         for charge_type in ChargeType:
             filtered_records = records.filter(charge_type=charge_type.value)
             sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
@@ -240,11 +242,13 @@ class PackageRecord(models.Model):
         if broker is not None:
             records = PackageRecord.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
                                                    timestamp__range=(from_date, to_date))
-        elif user in Group.objects.get(name="admin").user_set:
-            records = PackageRecord.objects.filter(state=RecordState.EXECUTED.value,
-                                                   timestamp__range=(from_date, to_date))
         else:
-            raise PermissionError("You must be a broker or admin to view this report")
+            (admin_group, created) = Group.objects.get_or_create(name='admin')
+            if user in admin_group.user_set.all():
+                records = PackageRecord.objects.filter(state=RecordState.EXECUTED.value,
+                                                       timestamp__range=(from_date, to_date))
+            else:
+                raise PermissionError("You must be a broker or admin to view this report")
 
         if records.aggregate(Sum('package__amount'))['package__amount__sum'] is None:
             dict.append({
