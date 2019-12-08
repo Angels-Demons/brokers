@@ -82,6 +82,7 @@
         </div>
         <div class="clear"></div>
         <div class="results">
+        <p>فروش شارژ</p>
             <table id="result_list">
                 <thead>
                     <tr>
@@ -103,6 +104,35 @@
 
                 <tbody>
                     {% for report in report_json_dict %}
+                    <tr>
+                        <td class="field-email">{{ report.title }}</td>
+                        <td class="field-email">{{ report.value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        <p>فروش بسته</p>
+        <table id="result_list">
+                <thead>
+                    <tr>
+                            <th scope="col" class="sortable column-username sorted ascending">
+{#                               <div class="sortoptions">#}
+{#                                 <a class="sortremove" href="?o=" title="Remove from sorting"></a>#}
+{#                                 <a href="?o=-1" class="toggle ascending" title="Toggle sorting"></a>#}
+{#                               </div>#}
+                                <div class="text"> بسته</div>
+                                <div class="clear"></div>
+                            </th>
+                            <th scope="col" class="sortable column-email">
+                                <div class="text">مقدار فروش</div>
+                                <div class="clear"></div>
+                            </th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+                    {% for report in report_dictionary_package_record %}
                     <tr>
                         <td class="field-email">{{ report.title }}</td>
                         <td class="field-email">{{ report.value }}</td>

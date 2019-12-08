@@ -44,7 +44,8 @@ class MyAdminSite(admin.AdminSite):
     def separated_report(self, request, extra_context=None):
         app_list = self.get_app_list(request)
 
-        report_dictionary = {}
+        report_dictionary = [{}]
+        report_dictionary_package_record = [{}]
         if request.method == 'GET':
             if request.GET.get('from_date') and request.GET.get('to_date'):
                 report_form = ReportForm(initial={'from_date': request.GET.get('from_date'), 'to_date':request.GET.get('to_date')})
@@ -65,8 +66,9 @@ class MyAdminSite(admin.AdminSite):
                     # except Broker.DoesNotExist:
                     #     raise Http404("شما دسترسی به این گزارش را ندارید.")
                     report_dictionary = TopUp.report(request.user, from_date, to_date)
-                    for i in PackageRecord.report(request.user, from_date, to_date):
-                        report_dictionary.append(i)
+                    report_dictionary_package_record = PackageRecord.report(request.user, from_date, to_date)
+                    # for i in report_dictionary_package_record:
+                    #     report_dictionary.append(i)
                     # if 'xlsx' in request.GET:
                     #     return redirect(reverse('ChargeSaleReport'), from_date=from_date, to_date=to_date )
                         # return redirect(reverse('transactions.views.report_view'), from_date=from_date, to_date=to_date)
@@ -84,6 +86,7 @@ class MyAdminSite(admin.AdminSite):
             'form': report_form,
             'report_json_string':json.dumps(report_dictionary),
             'report_json_dict': report_dictionary,
+            'report_dictionary_package_record': report_dictionary_package_record
 
         }
         # return TemplateResponse(request, self.index_template or 'admin/index.html', context)
