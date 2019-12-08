@@ -13,7 +13,7 @@ class ChargeSaleReportView(BaseAPIView):
     authentication_classes = (authentication.BasicAuthentication,)
 
     @staticmethod
-    def get(request):
+    def get_data(request):
         user = request.user
         from_date = request.query_params.get('from_date')
         to_date = request.query_params.get('to_date')
@@ -44,7 +44,7 @@ class PackageSaleReportView(BaseAPIView):
     authentication_classes = (authentication.BasicAuthentication,)
 
     @staticmethod
-    def get(request):
+    def get_data(request):
         user = request.user
         from_date = request.query_params.get('from_date')
         to_date = request.query_params.get('to_date')
