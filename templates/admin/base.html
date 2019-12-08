@@ -175,14 +175,14 @@
                             </span>
                         </a>
                     {% endif %}
-                    {% if site_url %}
-                        <a href="{{ site_url }}" class="sidebar-link icon">
-                            <span class="sidebar-link-label">
-                                <span class="sidebar-link-icon icon-open-external"></span>
-                                {% trans 'View site' %}
-                            </span>
-                        </a>
-                    {% endif %}
+{#                    {% if site_url %}#}
+{#                        <a href="{{ site_url }}" class="sidebar-link icon">#}
+{#                            <span class="sidebar-link-label">#}
+{#                                <span class="sidebar-link-icon icon-open-external"></span>#}
+{#                                {% trans 'View site' %}#}
+{#                            </span>#}
+{#                        </a>#}
+{#                    {% endif %}#}
                     {% url 'django-admindocs-docroot' as docsroot %}
                     {% if docsroot %}
                         <a href="{{ docsroot }}" class="sidebar-link icon">
