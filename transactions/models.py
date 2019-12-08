@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.db.models import Sum
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -104,16 +104,16 @@ class TopUp(models.Model):
             return False
 
     @staticmethod
-    def report(broker, from_date, to_date):
+    def report(user, from_date, to_date):
         dict = []
-        # records = TopUp.objects.filter(timestamp__in=None)
-        records = TopUp.objects.filter(broker=broker, state=RecordState.EXECUTED.value,
-                                       timestamp__range=(from_date, to_date))
-        # FILTER BY TIME HERE
-        # ----
-
-        # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
-
+        if user.broker:
+            records = TopUp.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
+                                           timestamp__range=(from_date, to_date))
+        elif user in Group.objects.get(name="admin").user_set:
+            records = TopUp.objects.filter(state=RecordState.EXECUTED.value,
+                                           timestamp__range=(from_date, to_date))
+        else:
+            raise PermissionError("You must be a broker or admin to view this report")
         for charge_type in ChargeType:
             filtered_records = records.filter(charge_type=charge_type.value)
             sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
@@ -227,15 +227,17 @@ class PackageRecord(models.Model):
             return False
 
     @staticmethod
-    def report(broker, from_date, to_date):
+    def report(user, from_date, to_date):
         dict = []
-        # records = TopUp.objects.filter(timestamp__in=None)
-        records = PackageRecord.objects.filter(broker=broker, state=RecordState.EXECUTED.value,
-                                               timestamp__range=(from_date, to_date))
-        # FILTER BY TIME HERE
-        # ----
+        if user.broker:
+            records = PackageRecord.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
+                                                   timestamp__range=(from_date, to_date))
+        elif user in Group.objects.get(name="admin").user_set:
+            records = PackageRecord.objects.filter(state=RecordState.EXECUTED.value,
+                                                   timestamp__range=(from_date, to_date))
+        else:
+            raise PermissionError("You must be a broker or admin to view this report")
 
-        # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
         if records.aggregate(Sum('package__amount'))['package__amount__sum'] is None:
             dict.append({
                 "title": "جمع کل بسته ها",
