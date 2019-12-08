@@ -3,19 +3,21 @@ from django.contrib.auth.models import User
 from rest_framework import permissions, authentication, status
 import pandas as pd
 from rest_framework.response import Response
+from rest_pandas import PandasExcelRenderer
 
 from accounts.views import BaseAPIView
 from transactions.models import TopUp, PackageRecord
 
 
-class ChargeSaleReportView(BaseAPIView):
+class ChargeSaleReportView(PandasSimpleView):
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = (authentication.BasicAuthentication,)
+    renderer_classes = [PandasExcelRenderer]
 
-    def get_data(self, request, from_date, to_date, *args, **kwargs):
+    def get_data(self, request, *args, **kwargs):
         user = request.user
-        # from_date = request.query_params.get('from_date')
-        # to_date = request.query_params.get('to_date')
+        from_date = request.query_params.get('from_date')
+        to_date = request.query_params.get('to_date')
 
         data = {}
         if not from_date:
