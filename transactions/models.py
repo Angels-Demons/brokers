@@ -172,7 +172,7 @@ class PackageRecord(models.Model):
     state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True)
-    amount = models.PositiveIntegerField(default=0, verbose_name="Price (Rials)")
+    # amount = models.PositiveIntegerField(default=0, verbose_name="Price (Rials)")
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
     call_response_description = models.CharField(max_length=1023, null=True, blank=True)
     execution_time = jmodels.jDateTimeField(null=True, blank=True)

@@ -83,7 +83,10 @@ class PackageRecordAdmin(ImportExportModelAdmin):
             return []
 
     def amount_display(self, obj):
-        return intcomma(obj.amount)
+        try:
+            return intcomma(obj.amount)
+        except:
+            return 0
 
     amount_display.allow_tags = True
     amount_display.short_description = "Amount (Rials)"
