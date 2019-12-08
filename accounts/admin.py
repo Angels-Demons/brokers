@@ -75,12 +75,16 @@ class AccessInline(admin.TabularInline):
 
 class OperatorAccessAdmin(ImportExportModelAdmin):
     resource_class = OperatorAccessResource
-
     list_display = ['broker', 'access', 'operator', 'top_up_discount', 'package_discount', 'active',
                     # 'general_credit_access', 'top_up_access', 'package_access',
                     # 'credit', 'top_up_credit', 'package_credit',
                     'credit_display', 'top_up_credit_display', 'package_credit_display',
                     'last_editor', 'timestamp', 'comment']
+
+    def get_list_filter(self, request):
+        if request.user.is_superuser or is_admin(request.user):
+            return ['broker', 'operator', 'active']
+        return []
 
     def access(self, obj):
         if obj.general_credit_access:
