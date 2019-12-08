@@ -129,7 +129,8 @@ class TopUp(models.Model):
     def report(broker, from_date, to_date):
         dict = []
         # records = TopUp.objects.filter(timestamp__in=None)
-        records = TopUp.objects.filter(broker=broker, timestamp__range=(from_date, to_date))
+        records = TopUp.objects.filter(broker=broker, state=RecordState.EXECUTED.value,
+                                       timestamp__range=(from_date, to_date))
         # FILTER BY TIME HERE
         # ----
 
@@ -139,14 +140,26 @@ class TopUp(models.Model):
             filtered_records = records.filter(charge_type=charge_type.value)
             sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
             # dict.append({ChargeType.farsi(charge_type.value), intcomma(sum)})
+            if sum is None:
+                dict.append({
+                    "title": ChargeType.farsi(charge_type.value),
+                    "value": 0
+                })
+            else:
+                dict.append({
+                    "title": ChargeType.farsi(charge_type.value),
+                    "value": intcomma(sum)
+                })
+        if records.aggregate(Sum('amount'))['amount__sum'] is None:
             dict.append({
-                "title": ChargeType.farsi(charge_type.value),
-                "value": intcomma(sum)
+                "title": "جمع کل شارژ",
+                "value": 0
             })
-        dict.append({
-            "title": "جمع کل شارژ",
-            "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
-        })
+        else:
+            dict.append({
+                "title": "جمع کل شارژ",
+                "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
+            })
         return dict
 
 
@@ -172,7 +185,7 @@ class PackageRecord(models.Model):
     state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True)
-    # amount = models.PositiveIntegerField(default=0, verbose_name="Price (Rials)")
+    amount = models.PositiveIntegerField(default=0, verbose_name="Price (Rials)")
     call_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
     call_response_description = models.CharField(max_length=1023, null=True, blank=True)
     execution_time = jmodels.jDateTimeField(null=True, blank=True)
@@ -183,31 +196,32 @@ class PackageRecord(models.Model):
     card_number = models.CharField(max_length=255, null=True, blank=True)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
 
-    @staticmethod
-    def report(broker, from_date, to_date):
-        dict = []
-        # records = TopUp.objects.filter(timestamp__in=None)
-        records = PackageRecord.objects.filter(broker=broker)
-        # FILTER BY TIME HERE
-        # ----
-
-        # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
-        dict.append({
-            "title": "جمع کل",
-            "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
-        })
-        # for charge_type in ChargeType:
-        #     filtered_records = records.filter(charge_type=charge_type.value)
-        #     sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
-        #     # dict.append({ChargeType.farsi(charge_type.value), intcomma(sum)})
-        #     dict.append({
-        #         "title": ChargeType.farsi(charge_type.value),
-        #         "value": intcomma(sum)
-        #     })
-        print(dict)
-    # @property
-    # def amount_display(self):
-    #     return intcomma(self.amount)
+    # @staticmethod
+    # def report(broker, from_date, to_date):
+    #     dict = []
+    #     # records = TopUp.objects.filter(timestamp__in=None)
+    #     records = PackageRecord.objects.filter(broker=broker, state=RecordState.EXECUTED.value,
+    #                                            timestamp__range=(from_date, to_date))
+    #     # FILTER BY TIME HERE
+    #     # ----
+    #
+    #     # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
+    #     dict.append({
+    #         "title": "جمع کل",
+    #         "value": intcomma(records.aggregate(Sum('amount'))['amount__sum'])
+    #     })
+    #     # for charge_type in ChargeType:
+    #     #     filtered_records = records.filter(charge_type=charge_type.value)
+    #     #     sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
+    #     #     # dict.append({ChargeType.farsi(charge_type.value), intcomma(sum)})
+    #     #     dict.append({
+    #     #         "title": ChargeType.farsi(charge_type.value),
+    #     #         "value": intcomma(sum)
+    #     #     })
+    #     print(dict)
+    # # @property
+    # # def amount_display(self):
+    # #     return intcomma(self.amount)
 
     def __str__(self):
         return "Package record " + str(self.id)
@@ -265,15 +279,22 @@ class PackageRecord(models.Model):
     def report(broker, from_date, to_date):
         dict = []
         # records = TopUp.objects.filter(timestamp__in=None)
-        records = PackageRecord.objects.filter(broker=broker, timestamp__range=(from_date, to_date))
+        records = PackageRecord.objects.filter(broker=broker, state=RecordState.EXECUTED.value,
+                                               timestamp__range=(from_date, to_date))
         # FILTER BY TIME HERE
         # ----
 
         # dict.append({"مجموع", intcomma(records.aggregate(Sum('amount'))['amount__sum'])})
-        dict.append({
-            "title": "جمع کل بسته ها",
-            "value": intcomma(records.aggregate(Sum('package__amount'))['package__amount__sum'])
-        })
+        if records.aggregate(Sum('package__amount'))['package__amount__sum'] is None:
+            dict.append({
+                "title": "جمع کل بسته ها",
+                "value": 0
+            })
+        else:
+            dict.append({
+                "title": "جمع کل بسته ها",
+                "value": intcomma(records.aggregate(Sum('package__amount'))['package__amount__sum'])
+            })
         # for charge_type in ChargeType:
         #     filtered_records = records.filter(charge_type=charge_type.value)
         #     sum = filtered_records.aggregate(Sum('amount'))['amount__sum']
