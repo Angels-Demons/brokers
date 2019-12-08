@@ -1,3 +1,4 @@
+import jdatetime
 from django.contrib.auth.models import User
 from rest_framework import permissions, authentication, status
 import pandas as pd
@@ -14,8 +15,8 @@ class ChargeSaleReportView(BaseAPIView):
     @staticmethod
     def get(request):
         user = request.user
-        from_date = request.data.get('from_date')
-        to_date = request.data.get('to_date')
+        from_date = request.query_params.get('from_date')
+        to_date = request.query_params.get('to_date')
 
         data = {}
         if not from_date:
@@ -28,7 +29,12 @@ class ChargeSaleReportView(BaseAPIView):
             data["message"] = "user is not a broker."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        data = TopUp.report(user.broker, from_date, to_date)
+        from_date_list = from_date.split('-')
+        to_date_list = to_date.split('-')
+        from_date_mod = jdatetime.date(int(from_date_list[0]), int(from_date_list[1]), int(from_date_list[2]))
+        to_date_mod = jdatetime.date(int(to_date_list[0]), int(to_date_list[1]), int(to_date_list[2]))
+
+        data = TopUp.report(user.broker, from_date_mod, to_date_mod)
 
         return pd.DataFrame.from_dict(data=data)
 
@@ -40,8 +46,8 @@ class PackageSaleReportView(BaseAPIView):
     @staticmethod
     def get(request):
         user = request.user
-        from_date = request.data.get('from_date')
-        to_date = request.data.get('to_date')
+        from_date = request.query_params.get('from_date')
+        to_date = request.query_params.get('to_date')
 
         data = {}
         if not from_date:
@@ -54,6 +60,11 @@ class PackageSaleReportView(BaseAPIView):
             data["message"] = "user is not a broker."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        data = PackageRecord.report(user.broker, from_date, to_date)
+        from_date_list = from_date.split('-')
+        to_date_list = to_date.split('-')
+        from_date_mod = jdatetime.date(int(from_date_list[0]), int(from_date_list[1]), int(from_date_list[2]))
+        to_date_mod = jdatetime.date(int(to_date_list[0]), int(to_date_list[1]), int(to_date_list[2]))
+
+        data = PackageRecord.report(user.broker, from_date_mod, to_date_mod)
 
         return pd.DataFrame.from_dict(data=data)
