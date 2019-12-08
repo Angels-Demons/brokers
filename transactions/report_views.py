@@ -12,11 +12,10 @@ class ChargeSaleReportView(BaseAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = (authentication.BasicAuthentication,)
 
-    @staticmethod
-    def get_data(request):
+    def get_data(self, request, from_date, to_date, *args, **kwargs):
         user = request.user
-        from_date = request.query_params.get('from_date')
-        to_date = request.query_params.get('to_date')
+        # from_date = request.query_params.get('from_date')
+        # to_date = request.query_params.get('to_date')
 
         data = {}
         if not from_date:
