@@ -60,12 +60,12 @@ class MyAdminSite(admin.AdminSite):
                     from_date = jdatetime.date(int(from_date_list[0]), int(from_date_list[1]), int(from_date_list[2]))
                     to_date = jdatetime.date(int(to_date_list[0]), int(to_date_list[1]), int(to_date_list[2]))
 
-                    try:
-                        broker = Broker.objects.get(user=request.user)
-                    except Broker.DoesNotExist:
-                        raise Http404("شما دسترسی به این گزارش را ندارید.")
-                    report_dictionary = TopUp.report(broker, from_date, to_date)
-                    for i in PackageRecord.report(broker, from_date, to_date):
+                    # try:
+                    #     broker = Broker.objects.get(user=request.user)
+                    # except Broker.DoesNotExist:
+                    #     raise Http404("شما دسترسی به این گزارش را ندارید.")
+                    report_dictionary = TopUp.report(request.user, from_date, to_date)
+                    for i in PackageRecord.report(request.user, from_date, to_date):
                         report_dictionary.append(i)
                     # if 'xlsx' in request.GET:
                     #     return redirect(reverse('ChargeSaleReport'), from_date=from_date, to_date=to_date )
