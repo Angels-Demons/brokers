@@ -139,7 +139,6 @@ class OperatorAccessAdmin(ImportExportModelAdmin):
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
 
-
 class BrokerAdmin(ImportExportModelAdmin):
     resource_class = BrokerResource
     list_display = ['id', 'user', 'name', 'username', 'creator', 'active', 'timestamp', 'email']

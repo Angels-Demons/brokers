@@ -100,7 +100,7 @@ class PackageRecordAdmin(ImportExportModelAdmin):
     amount_display.short_description = "Amount (Rials)"
 
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.is_superuser or is_admin(request.user):
             return super().get_queryset(request=request)
         return super().get_queryset(request=request).filter(broker__user=request.user)
 

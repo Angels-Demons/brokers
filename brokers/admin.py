@@ -64,6 +64,7 @@ class MyAdminSite(admin.AdminSite):
                     #     return redirect(reverse('ChargeSaleReport'), from_date=from_date, to_date=to_date )
                         # return redirect(reverse('transactions.views.report_view'), from_date=from_date, to_date=to_date)
                         # return pd.DataFrame.from_dict(data=report_dictionary)
+                # MODIFY later
                 except PermissionError as e:
                     return HttpResponse(e.__str__())
                 except Exception:
