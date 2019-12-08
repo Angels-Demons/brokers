@@ -16,16 +16,14 @@ class ChargeSaleReportView(PandasSimpleView):
 
     def get_data(self, request, *args, **kwargs):
         user = request.user
-        from_date = request.query_params.get('from_date')
-        to_date = request.query_params.get('to_date')
-
         data = {}
-        if not from_date:
-            data["message"] = "'from_date' is not provided."
+        try:
+            from_date = request.query_params.get('from_date')
+            to_date = request.query_params.get('to_date')
+        except:
+            data["message"] = "params are not provided."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        if not to_date:
-            data["message"] = "'to_date' is not provided."
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        
         if not user.broker:
             data["message"] = "user is not a broker."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -40,23 +38,21 @@ class ChargeSaleReportView(PandasSimpleView):
         return pd.DataFrame.from_dict(data=data)
 
 
-class PackageSaleReportView(BaseAPIView):
+class PackageSaleReportView(PandasSimpleView):
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = (authentication.BasicAuthentication,)
+    renderer_classes = [PandasExcelRenderer]
 
-    @staticmethod
-    def get_data(request):
+    def get_data(self, request, *args, **kwargs):
         user = request.user
-        from_date = request.query_params.get('from_date')
-        to_date = request.query_params.get('to_date')
-
         data = {}
-        if not from_date:
-            data["message"] = "'from_date' is not provided."
+        try:
+            from_date = request.query_params.get('from_date')
+            to_date = request.query_params.get('to_date')
+        except:
+            data["message"] = "params are not provided."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        if not to_date:
-            data["message"] = "'to_date' is not provided."
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         if not user.broker:
             data["message"] = "user is not a broker."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
