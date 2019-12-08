@@ -1,22 +1,13 @@
 import json
 import sys
 import traceback
-
 import jdatetime
-import pandas as pd
 from django.contrib import admin
 from django import forms
-from django.shortcuts import redirect
-from django.urls import reverse
-from django_jalali.forms import jDateField
-from django.forms import SelectDateWidget
 from django.http import HttpResponse, Http404
-# import JalaliDateField
 from jalali_date.fields import JalaliDateField
 from django.template.response import TemplateResponse
 from jalali_date.widgets import AdminJalaliDateWidget
-
-from accounts.models import Broker
 from transactions.models import TopUp, PackageRecord
 
 
@@ -73,9 +64,12 @@ class MyAdminSite(admin.AdminSite):
                     #     return redirect(reverse('ChargeSaleReport'), from_date=from_date, to_date=to_date )
                         # return redirect(reverse('transactions.views.report_view'), from_date=from_date, to_date=to_date)
                         # return pd.DataFrame.from_dict(data=report_dictionary)
+                # MODIFY later
+                except PermissionError as e:
+                    return HttpResponse(e.__str__())
                 except Exception:
                     traceback.print_exc(file=sys.stdout)
-                    raise Http404("تاریخ ورودی صحیح نیست.")
+                    raise HttpResponse("تاریخ ورودی صحیح نیست.")
             else:
                 report_form = ReportForm()
         context = {
@@ -84,7 +78,7 @@ class MyAdminSite(admin.AdminSite):
             'app_list': app_list,
             **(extra_context or {}),
             'form': report_form,
-            'report_json_string':json.dumps(report_dictionary),
+            'report_json_string': json.dumps(report_dictionary),
             'report_json_dict': report_dictionary,
             'report_dictionary_package_record': report_dictionary_package_record
 

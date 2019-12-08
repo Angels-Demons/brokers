@@ -10,6 +10,13 @@ from import_export import resources
 from transactions.enums import CreditType
 
 
+def is_admin(user):
+    (admin_group, created) = Group.objects.get_or_create(name='admin')
+    if user in admin_group.user_set.all():
+        return True
+    return False
+
+
 class BrokerResource(resources.ModelResource):
     class Meta:
         model = Broker
@@ -127,9 +134,9 @@ class OperatorAccessAdmin(ImportExportModelAdmin):
         super().save_model(request, obj, form, change)
 
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.is_superuser or is_admin(request.user):
             return super().get_queryset(request=request)
-        return super().get_queryset(request=request).filter(user=request.user)
+        return super().get_queryset(request=request).filter(broker__user=request.user)
 
 
 class BrokerAdmin(ImportExportModelAdmin):
@@ -182,7 +189,7 @@ class BrokerAdmin(ImportExportModelAdmin):
         super().save_model(request, obj, form, change)
 
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.is_superuser or is_admin(request.user):
             return super().get_queryset(request=request)
         return super().get_queryset(request=request).filter(user=request.user)
 
@@ -214,7 +221,7 @@ class BalanceIncreaseAdmin(ImportExportModelAdmin):
             return ['creator', 'success']
 
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.is_superuser or is_admin(request.user):
             return super().get_queryset(request=request)
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
