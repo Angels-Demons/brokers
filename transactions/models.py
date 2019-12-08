@@ -106,7 +106,11 @@ class TopUp(models.Model):
     @staticmethod
     def report(user, from_date, to_date):
         dict = []
-        if user.broker:
+        try:
+            broker = user.broker
+        except Exception:
+            broker = None
+        if broker is not None:
             records = TopUp.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
                                            timestamp__range=(from_date, to_date))
         elif user in Group.objects.get(name="admin").user_set:
@@ -229,7 +233,11 @@ class PackageRecord(models.Model):
     @staticmethod
     def report(user, from_date, to_date):
         dict = []
-        if user.broker:
+        try:
+            broker = user.broker
+        except Exception:
+            broker = None
+        if broker is not None:
             records = PackageRecord.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
                                                    timestamp__range=(from_date, to_date))
         elif user in Group.objects.get(name="admin").user_set:
