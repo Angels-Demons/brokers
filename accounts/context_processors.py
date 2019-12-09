@@ -12,7 +12,7 @@ def test(request):
         exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
 
         if int(exe_response_type_1) == 0:
-            dictionary['Charge_Credit'] = exe_response_description_1
+            dictionary['Charge_Credit'] = int(exe_response_description_1)
         else:
             dictionary['Charge_Credit'] = "اتصال با سرور برقرار نیست"
         if int(exe_response_type_2) == 0:
