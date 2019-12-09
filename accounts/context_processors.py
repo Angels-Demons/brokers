@@ -17,7 +17,7 @@ def test(request):
         else:
             dictionary['Charge_Credit'] = "اتصال با سرور برقرار نیست"
         if int(exe_response_type_2) == 0:
-            dictionary['Package_Credit'] = intcomma(exe_response_description_2)
+            dictionary['Package_Credit'] = intcomma(int(exe_response_description_2))
         else:
             dictionary['Package_Credit'] = "اتصال با سرور برقرار نیست"
 
