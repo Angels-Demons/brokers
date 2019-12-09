@@ -14,7 +14,8 @@ def test(request):
         if exe_response_type_1 == 0:
             dictionary['Charge_Credit'] = exe_response_description_1
         else:
-            dictionary['Charge_Credit'] = "اتصال با سرور برقرار نیست"
+            # dictionary['Charge_Credit'] = "اتصال با سرور برقرار نیست"
+            dictionary['Charge_Credit'] = exe_response_type_1
         if exe_response_type_2 == 0:
             dictionary['Package_Credit'] = exe_response_description_2
         else:
