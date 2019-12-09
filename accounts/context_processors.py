@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.humanize.templatetags.humanize import intcomma
 
 from accounts.admin import is_admin
 from accounts.models import Broker
@@ -12,11 +13,11 @@ def test(request):
         exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
 
         if int(exe_response_type_1) == 0:
-            dictionary['Charge_Credit'] = exe_response_description_1
+            dictionary['Charge_Credit'] = intcomma(int(exe_response_description_1))
         else:
             dictionary['Charge_Credit'] = "اتصال با سرور برقرار نیست"
         if int(exe_response_type_2) == 0:
-            dictionary['Package_Credit'] = exe_response_description_2
+            dictionary['Package_Credit'] = intcomma(exe_response_description_2)
         else:
             dictionary['Package_Credit'] = "اتصال با سرور برقرار نیست"
 
