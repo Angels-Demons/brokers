@@ -6,8 +6,12 @@
     </a>
 </div>
 <div class="dashboard-tools " style="display:flex;">
-{%  if user_credit != None  %}
-        <p style="margin:.4em 0.8em 0;">{% trans 'Your Credit: ' %}{{ user_credit }}</p>
+
+    {%  if Charge_Credit != None  %}
+        <p style="margin:.4em 0.8em 0;">{% trans 'Your Charge Credit: ' %}{{ Charge_Credit }}</p>
+    {% endif %}
+    {%  if Package_Credit != None  %}
+        <p style="margin:.4em 0.8em 0;">{% trans 'Your Package Credit: ' %}{{ Package_Credit }}</p>
     {% endif %}
     <form action="{% url "jet-dashboard:add_user_dashboard_module" %}" method="POST" id="add-dashboard-module-form">
         {% csrf_token %}

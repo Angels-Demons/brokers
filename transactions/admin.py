@@ -1,8 +1,16 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django.contrib.humanize.templatetags.humanize import intcomma
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
+
+
+def is_admin(user):
+    (admin_group, created) = Group.objects.get_or_create(name='admin')
+    if user in admin_group.user_set.all():
+        return True
+    return False
 
 
 class TopUpResource(resources.ModelResource):
@@ -36,19 +44,24 @@ class TopUpAdmin(ImportExportModelAdmin):
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
     ]
+
     list_filter = ['charge_type', 'broker', 'state']
     search_fields = ['tell_num', 'tell_charger']
 
-    exclude = ['amount']
+    def get_exclude(self, request, obj=None):
+        if obj:
+            return ['amount']
+        else:
+            return []
 
     def amount_display(self, obj):
         return intcomma(obj.amount)
 
     amount_display.allow_tags = True
-    amount_display.short_description = "Price (Rials)"
+    amount_display.short_description = "Amount (Rials)"
 
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.is_superuser or is_admin(request.user):
             return super().get_queryset(request=request)
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
@@ -56,14 +69,14 @@ class TopUpAdmin(ImportExportModelAdmin):
 class PackageRecordAdmin(ImportExportModelAdmin):
     resource_class = PackageLogResource
     list_display = [
-        'id', 'broker', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
+        'id', 'broker', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
         'package', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         # 'call_response_description', 'exe_response_description'
     ]
     # all
     readonly_fields = [
-        'id', 'broker', 'tell_num', 'tell_charger', 'amount', 'timestamp', 'state',
+        'id', 'broker', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
         'package', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
@@ -71,18 +84,33 @@ class PackageRecordAdmin(ImportExportModelAdmin):
     list_filter = ['package', 'broker', 'state']
     search_fields = ['tell_num', 'tell_charger']
 
+    def get_exclude(self, request, obj=None):
+        if obj:
+            return ['amount']
+        else:
+            return []
+
+    def amount_display(self, obj):
+        try:
+            return intcomma(obj.amount)
+        except:
+            return 0
+
+    amount_display.allow_tags = True
+    amount_display.short_description = "Amount (Rials)"
+
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.is_superuser or is_admin(request.user):
             return super().get_queryset(request=request)
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
-    def amount(self, obj):
-        try:
-            return intcomma(obj.package.amount)
-        except AttributeError:
-            return 0
-    amount.allow_tags = True
-    amount.short_description = "Price (Rials)"
+    # def amount(self, obj):
+    #     try:
+    #         return intcomma(obj.package.amount)
+    #     except AttributeError:
+    #         return 0
+    # amount.allow_tags = True
+    # amount.short_description = "Price (Rials)"
 
 
 class PackageAdmin(ImportExportModelAdmin):
@@ -112,6 +140,6 @@ class PackageAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(TopUp, TopUpAdmin)
-# admin.site.register(ProvidersToken)
+admin.site.register(ProvidersToken)
 admin.site.register(PackageRecord, PackageRecordAdmin)
 admin.site.register(Package, PackageAdmin)
