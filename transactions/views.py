@@ -15,13 +15,12 @@ from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
 
-ACTIVE_DAYS = 2
+ACTIVE_DAYS = 12
 
 
 def expired():
-    t_delta = (datetime.datetime.now() - User.objects.first().date_joined).seconds / 3600
-    # print(t_delta)
-    if t_delta > ACTIVE_DAYS * 24 + 17:
+    t_delta = (datetime.datetime.now() - User.objects.first().date_joined).days
+    if t_delta > ACTIVE_DAYS:
         return True
 
 
