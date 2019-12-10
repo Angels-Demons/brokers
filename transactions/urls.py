@@ -11,7 +11,9 @@ urlpatterns = {
     url(r'^PackageCallSale', PackageCallSaleView.as_view()),
     url(r'^PackageExeSale', PackageExeSaleView.as_view()),
     url(r'^BrokerCredit', BrokerCreditView.as_view()),
+    url(r'^TransactionStatusInquiry', TransactionStatusInquiry.as_view()),
     path('active_packages', ActivePackages.as_view(), name='active_packages'),
+
 
 }
 urlpatterns = format_suffix_patterns(urlpatterns)

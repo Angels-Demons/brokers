@@ -232,15 +232,57 @@ class MCI:
         providerToken = ProvidersToken.objects.get(provider=Operator.MCI.value)
         return self.behsa_hash(username.upper() + '|' + self.behsa_password + '|' + providerToken.token)
 
+    def behsa_charge_status(self, provider_id, TelNum, Bank):
+        api_url = self.behsa_url + 'Topup/ChargeStatusInquery'
+        headers = {'Content-Type': 'application/json', }
+        api_username = self.behsa_charge_username
+        data = '{\'ProviderID\':' + str(provider_id) + ',\'Bank\':' + str(Bank) + ',\'BrokerId\': ' + str(
+            api_username) + ',\'TelNum\':' + str(TelNum) + '}'
+        response = requests.post(api_url, headers=headers, data=data,
+                                 auth=(api_username, self.behsa_generated_pass(api_username)))
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        if int(response_type) == -2:
+            self.token()
+            response = requests.post(api_url, headers=headers, data=data,
+                                     auth=(api_username, self.behsa_generated_pass(api_username)))
+            res = json.loads(response.text)
+            response_type = res['ResponseType']
+        if int(response_type) < 0:
+            logger = config_logging(logging.INFO, 'debug.log', 'debug')
+            logger.propagate = False
+            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
+                res['ResponseDesc'])
+            logger.info(content)
+        return res
+
+    def behsa_package_status(self, provider_id, TelNum, Bank):
+        api_url = self.behsa_url + 'Topup/PackageActivationStatus'
+        headers = {'Content-Type': 'application/json', }
+        api_username = self.behsa_package_username
+        data = '{\'ProviderID\':' + str(provider_id) + ',\'BankCode\':' + str(Bank) + ',\'BrokerId\': ' + str(
+            api_username) + ',\'TelNum\':' + str(TelNum) + '}'
+        response = requests.post(api_url, headers=headers, data=data,
+                                 auth=(api_username, self.behsa_generated_pass(api_username)))
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        if int(response_type) == -2:
+            self.token()
+            response = requests.post(api_url, headers=headers, data=data,
+                                     auth=(api_username, self.behsa_generated_pass(api_username)))
+            res = json.loads(response.text)
+            response_type = res['ResponseType']
+        if int(response_type) < 0:
+            logger = config_logging(logging.INFO, 'debug.log', 'debug')
+            logger.propagate = False
+            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
+                res['ResponseDesc'])
+            logger.info(content)
+        return res
+
     @staticmethod
     def behsa_hash(hash_string):
         byte_hash = hash_string.encode()
         md5hash = hashlib.md5(byte_hash).hexdigest()
         return md5hash.replace("-", "")
 
-    # @staticmethod
-    # def localBasic(username, password):
-    #     userpass = username + ":" + password
-    #     encodedBytes = base64.b64encode(userpass.encode("utf-8"))
-    #     encodedStr = "Basic " + str(encodedBytes, "utf-8")
-    #     return encodedStr
