@@ -45,14 +45,45 @@
 {#  </div>#}
 {#{% endblock %}#}
 {% extends "admin/base_site.html" %}
-{% load jformat admin_static admin_modify%}
-{% load i18n %}
 {% load jalali_tags %}
+{% load static jformat admin_static admin_modify admin_urls  admin_list%}
+{% load i18n %}
 
+
+{% block extrahead %}{{ block.super }}
+{#    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>#}
+    <script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+
+{{ media }}
+{% endblock %}
+
+{#{% block field_sets %}#}
+{#{% for fieldset in adminform %}#}
+{#  {% include "admin/includes/fieldset.html" %}#}
+{#{% endfor %}#}
+{#{% endblock %}#}
+
+
+
+
+{#{% block admin_change_form_document_ready %}#}
+{#    <script type="text/javascript"#}
+{#            id="django-admin-form-add-constants"#}
+{#            src="{% static 'admin/js/change_form.js' %}"#}
+{#            {% if adminform and add %}#}
+{#                data-model-name="{{ opts.model_name }}"#}
+{#            {% endif %}>#}
+{#    </script>#}
+{#{% endblock %}#}
 {% block extrastyle %}
+    <script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css' %}">
-		<script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
+
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 {% endblock %}
 
 {% block content %}

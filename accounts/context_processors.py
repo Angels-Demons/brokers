@@ -8,18 +8,18 @@ from interface.API import MCI
 
 def test(request):
     dictionary = {}
-    if request.user.is_superuser or is_admin(request.user):
-        exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
-        exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
-
-        if int(exe_response_type_1) == 0:
-            dictionary['Charge_Credit'] = intcomma(int(exe_response_description_1))
-        else:
-            dictionary['Charge_Credit'] = "اتصال با سرور برقرار نیست"
-        if int(exe_response_type_2) == 0:
-            dictionary['Package_Credit'] = intcomma(int(exe_response_description_2))
-        else:
-            dictionary['Package_Credit'] = "اتصال با سرور برقرار نیست"
+    # if request.user.is_superuser or is_admin(request.user):
+    #     exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
+    #     exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
+    #
+    #     if int(exe_response_type_1) == 0:
+    #         dictionary['Charge_Credit'] = intcomma(int(exe_response_description_1))
+    #     else:
+    #         dictionary['Charge_Credit'] = "اتصال با سرور برقرار نیست"
+    #     if int(exe_response_type_2) == 0:
+    #         dictionary['Package_Credit'] = intcomma(int(exe_response_description_2))
+    #     else:
+    #         dictionary['Package_Credit'] = "اتصال با سرور برقرار نیست"
 
     try:
         Broker.objects.get(user=request.user)

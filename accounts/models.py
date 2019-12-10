@@ -22,6 +22,13 @@ class Broker(models.Model):
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
 
     # mcci_discount = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    @staticmethod
+    def get_brokers():
+        brokers_tuple = []
+        brokers = Broker.objects.all()
+        for broker in brokers:
+            brokers_tuple.append((str(broker.pk), broker.name))
+        return brokers_tuple
 
     def __str__(self):
         return self.name
