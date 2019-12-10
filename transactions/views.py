@@ -492,10 +492,10 @@ class TransactionStatusInquiry(BaseAPIView):
 
             if operator == Operator.MCI.value and transaction_type == 1:
                 log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=Operator.MCI.value)
-                res = MCI().behsa_charge_status(provider_id = provider_id,tell_num = tell_num,Bank=TopUp.bank_code)
+                res = MCI().behsa_charge_status(provider_id = provider_id,TelNum = tell_num,Bank=TopUp.bank_code)
             elif operator == Operator.MCI.value and transaction_type == 2:
                 log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=Operator.MCI.value)
-                res = MCI().behsa_package_status(provider_id=provider_id, tell_num=tell_num, Bank=TopUp.bank_code)
+                res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
 
             if res['ResponseType'] == 0:
 
