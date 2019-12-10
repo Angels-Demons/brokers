@@ -527,10 +527,10 @@ class TransactionStatusInquiry(BaseAPIView):
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
+        except Exception as e :
             data = {
                 "message": "Invalid parameters",
-                "message_fa": "خطا: پارامترهای غیر معتبر",
+                "message_fa": str(e),
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
