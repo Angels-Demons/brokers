@@ -11,6 +11,13 @@ from transactions.enums import *
 from django.db.models import Sum
 
 
+def is_admin(user):
+    (admin_group, created) = Group.objects.get_or_create(name='admin')
+    if user in admin_group.user_set.all():
+        return True
+    return False
+
+
 class ProvidersToken(models.Model):
     provider = models.PositiveSmallIntegerField(choices=Choices.operators, null=False, blank=False)
     token = models.CharField(max_length=150, null=False, blank=False)
@@ -114,8 +121,7 @@ class TopUp(models.Model):
             records = TopUp.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
                                            timestamp__range=(from_date, to_date))
         else:
-            (admin_group, created) = Group.objects.get_or_create(name='admin')
-            if user in admin_group.user_set.all():
+            if user.is_superuser or is_admin(user):
                 records = TopUp.objects.filter(state=RecordState.EXECUTED.value,
                                                        timestamp__range=(from_date, to_date))
             else:
@@ -243,8 +249,7 @@ class PackageRecord(models.Model):
             records = PackageRecord.objects.filter(broker=user.broker, state=RecordState.EXECUTED.value,
                                                    timestamp__range=(from_date, to_date))
         else:
-            (admin_group, created) = Group.objects.get_or_create(name='admin')
-            if user in admin_group.user_set.all():
+            if user.is_superuser or is_admin(user):
                 records = PackageRecord.objects.filter(state=RecordState.EXECUTED.value,
                                                        timestamp__range=(from_date, to_date))
             else:
