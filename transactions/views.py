@@ -492,45 +492,48 @@ class TransactionStatusInquiry(BaseAPIView):
 
             if operator == Operator.MCI.value and transaction_type == 1:
                 log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=Operator.MCI.value)
-                res = MCI().behsa_charge_status(provider_id = provider_id,TelNum = tell_num,Bank=TopUp.bank_code)
+                res = MCI().behsa_charge_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
                 if log_record.state == RecordState.EXECUTED.value:
                     data = {
-                                "message": "Request successfully executed",
-                                "message_fa": "درخواست با موفقیت اجرا شد",
-                                "code": codes.successful,
-                                "transaction_status": 1,
-                                "transaction_type": log_record.charge_type,
-                                "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
-                                "exe_response_code": log_record.exe_response_type,
-                                "exe_response_description": log_record.exe_response_description
+                        "message": "Request successfully executed",
+                        "message_fa": "درخواست با موفقیت اجرا شد",
+                        "code": codes.successful,
+                        "transaction_status": 1,
+                        "transaction_type": log_record.charge_type,
+                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
+                        "exe_response_code": log_record.exe_response_type,
+                        "exe_response_description": log_record.exe_response_description
                     }
                     return Response(data, status=status.HTTP_200_OK)
                 else:
                     data = {
-                                "message": "Request successfully executed",
-                                "message_fa": "درخواست با موفقیت اجرا شد",
-                                "code": codes.successful,
-                                "transaction_status": -1,
-                                "transaction_type": log_record.charge_type,
-                                "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
-                                "exe_response_code": log_record.exe_response_type,
-                                "exe_response_description": log_record.exe_response_description
+                        "message": "Request successfully executed",
+                        "message_fa": "درخواست با موفقیت اجرا شد",
+                        "code": codes.successful,
+                        "transaction_status": -1,
+                        "transaction_type": log_record.charge_type,
+                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                            "%Y/%m/%d %H:%M:%S"),
+                        "exe_response_code": log_record.exe_response_type,
+                        "exe_response_description": log_record.exe_response_description
                     }
                     return Response(data, status=status.HTTP_200_OK)
 
             elif operator == Operator.MCI.value and transaction_type == 2:
-                log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=Operator.MCI.value)
+                log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num,
+                                                       operator=Operator.MCI.value)
                 res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
                 if log_record.state == RecordState.EXECUTED.value:
                     data = {
-                                "message": "Request successfully executed",
-                                "message_fa": "درخواست با موفقیت اجرا شد",
-                                "code": codes.successful,
-                                "transaction_status": 1,
-                                "transaction_type": log_record.package.package_type,
-                                "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
-                                "exe_response_code": log_record.exe_response_type,
-                                "exe_response_description": log_record.exe_response_description
+                        "message": "Request successfully executed",
+                        "message_fa": "درخواست با موفقیت اجرا شد",
+                        "code": codes.successful,
+                        "transaction_status": 1,
+                        "transaction_type": log_record.package.package_type,
+                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                            "%Y/%m/%d %H:%M:%S"),
+                        "exe_response_code": log_record.exe_response_type,
+                        "exe_response_description": log_record.exe_response_description
                     }
                     return Response(data, status=status.HTTP_200_OK)
 
@@ -541,7 +544,8 @@ class TransactionStatusInquiry(BaseAPIView):
                         "code": codes.successful,
                         "transaction_status": -1,
                         "transaction_type": log_record.package.package_type,
-                        "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
+                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                            "%Y/%m/%d %H:%M:%S"),
                         "exe_response_code": log_record.exe_response_type,
                         "exe_response_description": log_record.exe_response_description
                     }
@@ -577,20 +581,13 @@ class TransactionStatusInquiry(BaseAPIView):
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e :
+        except Exception as e:
             data = {
                 "message": "Invalid parameters",
                 "message_fa": str(e),
                 "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
 
 
 class BrokerCreditView(BaseAPIView):
@@ -704,9 +701,9 @@ class TestApi58(BaseAPIView):
             "message_fa": "درخواست با موفقیت اجرا شد",
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
-            "exe_response_type_1":exe_response_type_1,
+            "exe_response_type_1": exe_response_type_1,
             "exe_response_description_1": exe_response_description_1,
             "exe_response_type_2": exe_response_type_2,
-            "exe_response_description_2" : exe_response_description_2
+            "exe_response_description_2": exe_response_description_2
         }
         return Response(data, status=status.HTTP_200_OK)
