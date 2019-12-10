@@ -493,26 +493,76 @@ class TransactionStatusInquiry(BaseAPIView):
             if operator == Operator.MCI.value and transaction_type == 1:
                 log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=Operator.MCI.value)
                 res = MCI().behsa_charge_status(provider_id = provider_id,TelNum = tell_num,Bank=TopUp.bank_code)
+                if log_record.state == RecordState.EXECUTED.value:
+                    data = {
+                                "message": "Request successfully executed",
+                                "message_fa": "درخواست با موفقیت اجرا شد",
+                                "code": codes.successful,
+                                "transaction_status": 1,
+                                "transaction_type": log_record.charge_type,
+                                "execution_time": log_record.execution_time,
+                                "exe_response_code": log_record.exe_response_type,
+                                "exe_response_description": log_record.exe_response_description
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
+                else:
+                    data = {
+                                "message": "Request successfully executed",
+                                "message_fa": "درخواست با موفقیت اجرا شد",
+                                "code": codes.successful,
+                                "transaction_status": -1,
+                                "transaction_type": log_record.charge_type,
+                                "execution_time": log_record.execution_time,
+                                "exe_response_code": log_record.exe_response_type,
+                                "exe_response_description": log_record.exe_response_description
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
+
             elif operator == Operator.MCI.value and transaction_type == 2:
                 log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=Operator.MCI.value)
                 res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
+                if log_record.state == RecordState.EXECUTED.value:
+                    data = {
+                                "message": "Request successfully executed",
+                                "message_fa": "درخواست با موفقیت اجرا شد",
+                                "code": codes.successful,
+                                "transaction_status": 1,
+                                "transaction_type": log_record.package.package_type,
+                                "execution_time": log_record.execution_time,
+                                "exe_response_code": log_record.exe_response_type,
+                                "exe_response_description": log_record.exe_response_description
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
 
-            if res['ResponseType'] == 0:
+                else:
+                    data = {
+                        "message": "Request successfully executed",
+                        "message_fa": "درخواست با موفقیت اجرا شد",
+                        "code": codes.successful,
+                        "transaction_status": -1,
+                        "transaction_type": log_record.package.package_type,
+                        "execution_time": log_record.execution_time,
+                        "exe_response_code": log_record.exe_response_type,
+                        "exe_response_description": log_record.exe_response_description
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
 
-                data = {
-                    "message": "Request successfully executed",
-                    "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": codes.successful,
-                    "response" : str(res)
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": res['ResponseDesc'],
-                    "code": res['ResponseType'],
-                }
-                return Response(data, status=status.HTTP_200_OK)
+            # if res['ResponseType'] == 0:
+            #
+            #     data = {
+            #         "message": "Request successfully executed",
+            #         "message_fa": "درخواست با موفقیت اجرا شد",
+            #         "code": codes.successful,
+            #         "response" : str(res)
+            #     }
+            #     return Response(data, status=status.HTTP_200_OK)
+            # else:
+            #     data = {
+            #         "message": "Failed to execute request",
+            #         "message_fa": res['ResponseDesc'],
+            #         "code": res['ResponseType'],
+            #     }
+            #     return Response(data, status=status.HTTP_200_OK)
         except OperatorAccess.DoesNotExist as e:
             data = {
                 "message": "Broker does not have access for this action",
