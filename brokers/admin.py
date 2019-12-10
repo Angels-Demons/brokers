@@ -11,14 +11,9 @@ from django.template.response import TemplateResponse
 from jalali_date.widgets import AdminJalaliDateWidget
 
 from accounts.models import Broker
-# from transactions.admin import is_admin
 from transactions.models import TopUp, PackageRecord
 
-# BROKER_CHOICE = [
-#     ('', 'ALL'),
-# ]
 
-# BROKER_CHOICES = [('', 'ALL'), Broker.get_brokers()]
 
 def is_admin(user):
     (admin_group, created) = Group.objects.get_or_create(name='admin')
@@ -30,22 +25,18 @@ def is_admin(user):
 class ReportForm(forms.Form):
     from_date = JalaliDateField(
         widget=AdminJalaliDateWidget
-        # widget=SelectDateWidget("Choose Year", "Choose Month", "Choose Day")
     )
     to_date = JalaliDateField(
         widget=AdminJalaliDateWidget
-        # widget=SelectDateWidget("Choose Year", "Choose Month", "Choose Day")
     )
 
 
 class ReportFormAdmin(forms.Form):
     from_date = JalaliDateField(
         widget=AdminJalaliDateWidget
-        # widget=SelectDateWidget("Choose Year", "Choose Month", "Choose Day")
     )
     to_date = JalaliDateField(
         widget=AdminJalaliDateWidget
-        # widget=SelectDateWidget("Choose Year", "Choose Month", "Choose Day")
     )
     broker_id = forms.CharField(label='Broker:', widget=forms.Select(choices=[]))
 
@@ -104,29 +95,12 @@ class MyAdminSite(admin.AdminSite):
                 report_form = ReportForm(
                     initial={'from_date': request.GET.get('from_date'), 'to_date': request.GET.get('to_date')})
                 try:
-                    print(request.GET.get('from_date'))
                     from_date_list = request.GET.get('from_date').split('-')
                     to_date_list = request.GET.get('to_date').split('-')
-                    print(request.GET.get('to_date'))
-
-                    # from_date = jdatetime.date(int(from_date_list[0]), int(from_date_list[1]), int(from_date_list[
-                    # 2]), locale='fa_IR') to_date = jdatetime.date(int(to_date_list[0]), int(to_date_list[1]),
-                    # int(to_date_list[2]), locale='fa_IR')
                     from_date = jdatetime.date(int(from_date_list[0]), int(from_date_list[1]), int(from_date_list[2]))
                     to_date = jdatetime.date(int(to_date_list[0]), int(to_date_list[1]), int(to_date_list[2]))
-
-                    # try:
-                    #     broker = Broker.objects.get(user=request.user)
-                    # except Broker.DoesNotExist:
-                    #     raise Http404("شما دسترسی به این گزارش را ندارید.")
                     report_dictionary = TopUp.report(request.user, from_date, to_date)
                     report_dictionary_package_record = PackageRecord.report(request.user, from_date, to_date)
-                    # for i in report_dictionary_package_record:
-                    #     report_dictionary.append(i)
-                    # if 'xlsx' in request.GET:
-                    #     return redirect(reverse('ChargeSaleReport'), from_date=from_date, to_date=to_date )
-                    # return redirect(reverse('transactions.views.report_view'), from_date=from_date, to_date=to_date)
-                    # return pd.DataFrame.from_dict(data=report_dictionary)
                 # MODIFY later
                 except PermissionError as e:
                     return HttpResponse(e.__str__())
@@ -149,7 +123,6 @@ class MyAdminSite(admin.AdminSite):
                 'report_dictionary_package_record': report_dictionary_package_record
 
             }
-            # return TemplateResponse(request, self.index_template or 'admin/index.html', context)
             return TemplateResponse(request, 'admin/charge_report.html', context)
         else:
             raise HttpResponse("این متد تعریف نشده است.")

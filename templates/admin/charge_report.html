@@ -1,49 +1,4 @@
-{#{% extends "admin/base_site.html" %}#}
-{#{% load i18n %}#}
-{##}
-{#{% block content %}#}
-{#  <div id="content-main">#}
-{#    {% block object-tools %}#}
-{#        <ul class="object-tools">#}
-{#          {% block object-tools-items %}#}
-{##}
-{#          {% endblock %}#}
-{#        </ul>#}
-{#    {% endblock %}#}
-{#    {% if cl.formset and cl.formset.errors %}#}
-{#        <p class="errornote">#}
-{#        {% if cl.formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}#}
-{#        </p>#}
-{#        {{ cl.formset.non_form_errors }}#}
-{#    {% endif %}#}
-{#    <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">#}
-{#      {% block search %}{% search_form cl %}{% endblock %}#}
-{#      {% block date_hierarchy %}{% if cl.date_hierarchy %}{% date_hierarchy cl %}{% endif %}{% endblock %}#}
-{##}
-{#      {% block filters %}#}
-{#        {% if cl.has_filters %}#}
-{#          <div id="changelist-filter">#}
-{#            <h2>{% trans 'Filter' %}</h2>#}
-{#            {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}#}
-{#          </div>#}
-{#        {% endif %}#}
-{#      {% endblock %}#}
-{##}
-{#      <form id="changelist-form" method="post"{% if cl.formset and cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}#}
-{#      {% if cl.formset %}#}
-{#        <div>{{ cl.formset.management_form }}</div>#}
-{#      {% endif %}#}
-{##}
-{#      {% block result_list %}#}
-{#          {% if action_form and actions_on_top and cl.show_admin_actions %}{% admin_actions %}{% endif %}#}
-{#          {% result_list cl %}#}
-{#          {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}#}
-{#      {% endblock %}#}
-{#      {% block pagination %}{% pagination cl %}{% endblock %}#}
-{#      </form>#}
-{#    </div>#}
-{#  </div>#}
-{#{% endblock %}#}
+
 {% extends "admin/base_site.html" %}
 {% load jalali_tags %}
 {% load static jformat admin_static admin_modify admin_urls  admin_list%}
@@ -51,7 +6,6 @@
 
 
 {% block extrahead %}{{ block.super }}
-{#    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>#}
     <script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
     <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
     <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
@@ -60,24 +14,7 @@
 {{ media }}
 {% endblock %}
 
-{#{% block field_sets %}#}
-{#{% for fieldset in adminform %}#}
-{#  {% include "admin/includes/fieldset.html" %}#}
-{#{% endfor %}#}
-{#{% endblock %}#}
 
-
-
-
-{#{% block admin_change_form_document_ready %}#}
-{#    <script type="text/javascript"#}
-{#            id="django-admin-form-add-constants"#}
-{#            src="{% static 'admin/js/change_form.js' %}"#}
-{#            {% if adminform and add %}#}
-{#                data-model-name="{{ opts.model_name }}"#}
-{#            {% endif %}>#}
-{#    </script>#}
-{#{% endblock %}#}
 {% block extrastyle %}
     <script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
 {{ block.super }}
@@ -99,17 +36,6 @@
 
             </form>
 
-{#            <form id="changelist-search" method="get">#}
-{#                <div><!-- DIV needed for valid HTML -->#}
-{#                    <label for="searchbar"><img src="/static/admin/img/search.svg" alt="جستوجو"></label>#}
-{#                    <input type="text" name="day" value="12/23/2008" required>#}
-{#                    <input type="text" size="40" name="start-date" value="" style="vertical-align: top;" id="" autofocus="" placeholder="تاریخ شروع">#}
-{#                    <input type="text" size="40" name="end-date" value="" style="vertical-align: top;" id="" autofocus="" placeholder="تاریخ پایان">#}
-{#                    <input type="submit" value="جستوجو">#}
-{##}
-{#            <input type="text" name="date1" class="jalali_date-date hasDatepicker" size="10" required="" id="id_date1">#}
-{#                </div>#}
-{#            </form>#}
         </div>
         <div class="clear"></div>
         <div class="results">
@@ -118,10 +44,6 @@
                 <thead>
                     <tr>
                             <th scope="col" class="sortable column-username sorted ascending">
-{#                               <div class="sortoptions">#}
-{#                                 <a class="sortremove" href="?o=" title="Remove from sorting"></a>#}
-{#                                 <a href="?o=-1" class="toggle ascending" title="Toggle sorting"></a>#}
-{#                               </div>#}
                                 <div class="text">نوع شارژ</div>
                                 <div class="clear"></div>
                             </th>
@@ -147,10 +69,7 @@
                 <thead>
                     <tr>
                             <th scope="col" class="sortable column-username sorted ascending">
-{#                               <div class="sortoptions">#}
-{#                                 <a class="sortremove" href="?o=" title="Remove from sorting"></a>#}
-{#                                 <a href="?o=-1" class="toggle ascending" title="Toggle sorting"></a>#}
-{#                               </div>#}
+
                                 <div class="text"> بسته</div>
                                 <div class="clear"></div>
                             </th>
@@ -179,40 +98,3 @@
 {% endblock %}
 
 
-
-
-{#<ul>#}
-{#    {% for app in module.children %}#}
-{#        <li class="contrast">#}
-{#            {% if app.name != app.app_label|capfirst|escape %}#}
-{#                <a href="{{ app.app_url }}" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">{{ app.name }}</a>#}
-{#            {% else %}#}
-{#                {% trans app.app_label as app_label %}#}
-{#                <a href="{{ app.app_url }}" title="{% blocktrans with name=app_label %}Models in the {{ name }} application{% endblocktrans %}">{{ app_label }}</a>#}
-{#            {% endif %}#}
-{#        </li>#}
-{##}
-{#        {% for model in app.models %}#}
-{#            <li>#}
-{#                <span class="float-right">#}
-{#                    {% if model.add_url %}#}
-{#                        <a href="{{ model.add_url }}" class="addlink" title="{% trans 'Add' %}"></a>#}
-{#                    {% else %}#}
-{#                        &nbsp;#}
-{#                    {% endif %}#}
-{##}
-{#                    {% if model.admin_url %}#}
-{#                        <a href="{{ model.admin_url }}" class="changelink" title="{% trans 'Change' %}"></a>#}
-{#                    {% else %}#}
-{#                        &nbsp;#}
-{#                    {% endif %}#}
-{#                </span>#}
-{#                {% if model.admin_url %}#}
-{#                    <a href="{{ model.admin_url }}">{{ model.name }}</a>#}
-{#                {% elif model.view_url %}#}
-{#                    <a href="{{ model.view_url }}">{{ model.name }}</a>#}
-{#                {% endif %}#}
-{#            </li>#}
-{#        {% endfor %}#}
-{#    {% endfor %}#}
-{#</ul>#}
