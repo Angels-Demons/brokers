@@ -500,7 +500,7 @@ class TransactionStatusInquiry(BaseAPIView):
                                 "code": codes.successful,
                                 "transaction_status": 1,
                                 "transaction_type": log_record.charge_type,
-                                "execution_time": log_record.execution_time,
+                                "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
                                 "exe_response_code": log_record.exe_response_type,
                                 "exe_response_description": log_record.exe_response_description
                     }
@@ -512,7 +512,7 @@ class TransactionStatusInquiry(BaseAPIView):
                                 "code": codes.successful,
                                 "transaction_status": -1,
                                 "transaction_type": log_record.charge_type,
-                                "execution_time": log_record.execution_time,
+                                "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
                                 "exe_response_code": log_record.exe_response_type,
                                 "exe_response_description": log_record.exe_response_description
                     }
@@ -528,7 +528,7 @@ class TransactionStatusInquiry(BaseAPIView):
                                 "code": codes.successful,
                                 "transaction_status": 1,
                                 "transaction_type": log_record.package.package_type,
-                                "execution_time": log_record.execution_time,
+                                "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
                                 "exe_response_code": log_record.exe_response_type,
                                 "exe_response_description": log_record.exe_response_description
                     }
@@ -541,7 +541,7 @@ class TransactionStatusInquiry(BaseAPIView):
                         "code": codes.successful,
                         "transaction_status": -1,
                         "transaction_type": log_record.package.package_type,
-                        "execution_time": log_record.execution_time,
+                        "execution_time": log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
                         "exe_response_code": log_record.exe_response_type,
                         "exe_response_description": log_record.exe_response_description
                     }
