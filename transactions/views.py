@@ -597,6 +597,21 @@ class BrokerCreditView(BaseAPIView):
     def get(request):
         try:
             broker = Broker.objects.get(user=request.user)
+            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            if not operator_access.active:
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except OperatorAccess.DoesNotExist as e:
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             data = {
                 "message": "Invalid Broker",
@@ -612,12 +627,22 @@ class BrokerCreditView(BaseAPIView):
                 "code": codes.inactive_broker,
             }
             return Response(data, status=status.HTTP_200_OK)
+        general_credit = ""
+        topup_credit = ""
+        package_credit = ""
+        if operator_access.general_credit_access:
+            general_credit = operator_access.get_credit(top_up=True)
+        else:
+            topup_credit = operator_access.get_credit(top_up=True)
+            package_credit = operator_access.get_credit(top_up=False)
 
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
             "code": codes.successful,
-            "credit": broker.credit
+            "general_credit":general_credit,
+            "topup_credit":topup_credit,
+            "package_credit":package_credit
         }
         return Response(data, status=status.HTTP_200_OK)
 
