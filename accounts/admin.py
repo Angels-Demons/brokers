@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.auth.models import Group
 from django.contrib.humanize.templatetags.humanize import apnumber, intcomma
 
-from accounts.models import Broker, BalanceIncrease, OperatorAccess
+from accounts.models import Broker, BalanceIncrease, OperatorAccess, ChargeType
 from rest_framework.response import Response
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -233,3 +233,4 @@ class BalanceIncreaseAdmin(ImportExportModelAdmin):
 admin.site.register(Broker, BrokerAdmin)
 admin.site.register(BalanceIncrease, BalanceIncreaseAdmin)
 admin.site.register(OperatorAccess, OperatorAccessAdmin)
+admin.site.register(ChargeType)

@@ -48,6 +48,17 @@ class Broker(models.Model):
     #         return False
 
 
+class ChargeType(models.Model):
+    name_fa = models.CharField(max_length=255, default='', editable=False)
+    charge_type = models.PositiveSmallIntegerField(choices=enums.Choices.charge_type_choices, unique=True)
+
+    def clean(self):
+        self.name_fa = enums.ChargeType.farsi(self.charge_type)
+
+    def __str__(self):
+        return self.name_fa
+
+
 class OperatorAccess(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     operator = models.PositiveSmallIntegerField(choices=enums.Choices.operators, default=Operator.MCI.value)
@@ -61,6 +72,8 @@ class OperatorAccess(models.Model):
     package_credit = models.BigIntegerField(default=0, verbose_name='Package credit (Rials)',
                                             validators=[MinValueValidator(limit_value=0, message='error')])
     banned_packages = models.ManyToManyField('transactions.Package', blank=True)
+    banned_charge_types = models.ManyToManyField(ChargeType, blank=True)
+    # banned_charge_types = models.IntegerField(default=0)
     last_editor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
     comment = models.TextField()
     active = models.BooleanField(default=True)
