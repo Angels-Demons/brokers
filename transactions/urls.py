@@ -12,7 +12,7 @@ urlpatterns = {
     url(r'^PackageExeSale', PackageExeSaleView.as_view()),
     url(r'^BrokerCredit', BrokerCreditView.as_view()),
     url(r'^TransactionStatusInquiry', TransactionStatusInquiry.as_view()),
-    path('active_packages', ActivePackages.as_view(), name='active_packages'),
+    url(r'^active_packages', ActivePackages.as_view()),
 
 
 }
