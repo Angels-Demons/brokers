@@ -627,9 +627,9 @@ class BrokerCreditView(BaseAPIView):
                 "code": codes.inactive_broker,
             }
             return Response(data, status=status.HTTP_200_OK)
-        general_credit = ""
-        topup_credit = ""
-        package_credit = ""
+        general_credit = 0
+        topup_credit = 0
+        package_credit = 0
         if operator_access.general_credit_access:
             general_credit = operator_access.get_credit(top_up=True)
         else:
