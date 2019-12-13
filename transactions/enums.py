@@ -549,3 +549,4 @@ class ResponceCodeTypes:
     inactive_broker = -13
     invalid_access = -14
     invalid_package_access = -15
+    invalid_charge_access = -16

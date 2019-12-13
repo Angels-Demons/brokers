@@ -9,6 +9,7 @@ from rest_framework import permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from accounts.views import BaseAPIView
+from accounts.models import ChargeType
 from interface.API import MCI
 from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
@@ -96,6 +97,16 @@ class ChargeCallSaleView(BaseAPIView):
                     "code": codes.invalid_access,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                operator_access.banned_charge_types.get(charge_type=charge_type)
+                data = {
+                    "message": "Broker does not have access to use this type of charge",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای استفاده از این نوع شارژ راندارد.",
+                    "code": codes.invalid_charge_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            except ChargeType.DoesNotExist:
+                pass
             top_up = TopUp.create(
                 operator=operator,
                 amount=amount,
