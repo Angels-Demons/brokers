@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.humanize.templatetags.humanize import intcomma
-from import_export.admin import ImportExportModelAdmin
+from import_export.admin import ImportExportModelAdmin , ExportMixin
 from import_export import resources
 from transactions.models import TopUp, PackageRecord, ProvidersToken, Package
 
@@ -113,7 +113,7 @@ class PackageRecordAdmin(ImportExportModelAdmin):
     # amount.short_description = "Price (Rials)"
 
 
-class PackageAdmin(ImportExportModelAdmin):
+class PackageAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = PackageResource
     list_display = ['operator', 'package_type', 'name', 'price_display', 'system', 'creator', 'timestamp', 'active', 'description']
 
