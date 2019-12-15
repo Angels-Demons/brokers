@@ -28,7 +28,7 @@ class PackageResource(resources.ModelResource):
         model = Package
 
 
-class TopUpAdmin(ImportExportModelAdmin):
+class TopUpAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = TopUpResource
     list_display = [
         'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
@@ -66,7 +66,7 @@ class TopUpAdmin(ImportExportModelAdmin):
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
 
-class PackageRecordAdmin(ImportExportModelAdmin):
+class PackageRecordAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = PackageLogResource
     list_display = [
         'id', 'broker', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',

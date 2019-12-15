@@ -5,7 +5,7 @@ from django.contrib.humanize.templatetags.humanize import apnumber, intcomma
 
 from accounts.models import Broker, BalanceIncrease, OperatorAccess, ChargeType
 from rest_framework.response import Response
-from import_export.admin import ImportExportModelAdmin
+from import_export.admin import ImportExportModelAdmin , ExportMixin
 from import_export import resources
 from transactions.enums import CreditType
 
@@ -73,7 +73,7 @@ class AccessInline(admin.TabularInline):
                 'credit_display', 'top_up_credit_display', 'package_credit_display']
 
 
-class OperatorAccessAdmin(ImportExportModelAdmin):
+class OperatorAccessAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OperatorAccessResource
     list_display = ['broker', 'access', 'operator', 'top_up_discount', 'package_discount', 'active',
                     # 'general_credit_access', 'top_up_access', 'package_access',
@@ -143,7 +143,7 @@ class OperatorAccessAdmin(ImportExportModelAdmin):
         return super().get_queryset(request=request).filter(broker__user=request.user)
 
 
-class BrokerAdmin(ImportExportModelAdmin):
+class BrokerAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = BrokerResource
     list_display = ['id', 'user', 'name', 'username', 'creator', 'active', 'timestamp', 'email']
     search_fields = ['name', 'username']
@@ -198,7 +198,7 @@ class BrokerAdmin(ImportExportModelAdmin):
         return super().get_queryset(request=request).filter(user=request.user)
 
 
-class BalanceIncreaseAdmin(ImportExportModelAdmin):
+class BalanceIncreaseAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = BalanceIncreaseResource
     list_display = ['broker', 'amount_display', 'creator', 'operator', 'credit_type', 'comment', 'success', 'timestamp']
 
