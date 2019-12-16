@@ -1,4 +1,5 @@
 import datetime
+from time import sleep
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -665,6 +666,7 @@ class RaceTest(BaseAPIView):
     def post(request):
         with transaction.atomic():
             try:
+                sleep(0.4)
                 broker = Broker.objects.get(user=request.user)
                 operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
                 operator_access.charge(1, True)
