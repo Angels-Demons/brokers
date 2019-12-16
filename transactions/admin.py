@@ -31,7 +31,7 @@ class PackageResource(resources.ModelResource):
 class TopUpAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = TopUpResource
     list_display = [
-        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
+        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'cost', 'timestamp', 'state',
         'charge_type', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         # 'call_response_description', 'exe_response_description'
@@ -39,7 +39,7 @@ class TopUpAdmin(ExportMixin, admin.ModelAdmin):
 
     # all
     readonly_fields = [
-        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
+        'id', 'broker', 'operator', 'tell_num', 'tell_charger', 'amount_display', 'cost', 'timestamp', 'state',
         'charge_type', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
@@ -69,14 +69,14 @@ class TopUpAdmin(ExportMixin, admin.ModelAdmin):
 class PackageRecordAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = PackageLogResource
     list_display = [
-        'id', 'broker', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
+        'id', 'broker', 'tell_num', 'tell_charger', 'amount_display', 'cost', 'timestamp', 'state',
         'package', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         # 'call_response_description', 'exe_response_description'
     ]
     # all
     readonly_fields = [
-        'id', 'broker', 'tell_num', 'tell_charger', 'amount_display', 'timestamp', 'state',
+        'id', 'broker', 'tell_num', 'tell_charger', 'amount_display', 'cost', 'timestamp', 'state',
         'package', 'call_response_type', 'exe_response_type', 'execution_time',
         'provider_id', 'bank_code', 'card_number', 'card_type',
         'call_response_description', 'exe_response_description'
