@@ -223,50 +223,47 @@ class ChargeExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        with transaction.atomic():
-            if operator_access.get_credit(top_up=True) < 10000000:
-                operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
-            if operator_access.get_credit(top_up=True) < top_up.amount:
-                data = {
-                    "message": "Brokers balance is insufficient",
-                    "message_fa": "اعتبار کارگزار کافی نیست.",
-                    "code": codes.insufficient_balance,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        if operator_access.get_credit(top_up=True) < top_up.amount:
+            data = {
+                "message": "Brokers balance is insufficient",
+                "message_fa": "اعتبار کارگزار کافی نیست.",
+                "code": codes.insufficient_balance,
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
-            # if broker.active is False:
-            #     data = {
-            #         "message": "Brokers is not active",
-            #         "message_fa": "کارگذار غیرفعال است.",
-            #         "code": codes.inactive_broker,
-            #     }
-            #     return Response(data, status=status.HTTP_200_OK)
+        # if broker.active is False:
+        #     data = {
+        #         "message": "Brokers is not active",
+        #         "message_fa": "کارگذار غیرفعال است.",
+        #         "code": codes.inactive_broker,
+        #     }
+        #     return Response(data, status=status.HTTP_200_OK)
 
-            exe_response_type, exe_response_description = MCI().charge_exe_sale(
-                provider_id=top_up.provider_id,
-                bank_code=top_up.bank_code,
-                card_no=top_up.card_number,
-                card_type=top_up.card_type
-            )
-            success = top_up.after_execute(exe_response_type, exe_response_description)
-            if success:
-                # modify change chargin method
-                # broker.charge_for_mcci_transaction(top_up.amount)
-                operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
-                data = {
-                    "message": "Request successfully executed",
-                    "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": codes.successful,
-                    # "provider_id": top_up.provider_id
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": top_up.call_response_description,
-                    "code": top_up.call_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        exe_response_type, exe_response_description = MCI().charge_exe_sale(
+            provider_id=top_up.provider_id,
+            bank_code=top_up.bank_code,
+            card_no=top_up.card_number,
+            card_type=top_up.card_type
+        )
+        success = top_up.after_execute(exe_response_type, exe_response_description)
+        if success:
+            # modify change chargin method
+            # broker.charge_for_mcci_transaction(top_up.amount)
+            operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
+            data = {
+                "message": "Request successfully executed",
+                "message_fa": "درخواست با موفقیت اجرا شد",
+                "code": codes.successful,
+                # "provider_id": top_up.provider_id
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": top_up.call_response_description,
+                "code": top_up.call_response_type,
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
 
 class PackageCallSaleView(BaseAPIView):
@@ -435,49 +432,45 @@ class PackageExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        with transaction.atomic():
-            if operator_access.get_credit(top_up=True) < 10000000:
-                operator_access = broker.operatoraccess_set.select_for_update().get(operator=Operator.MCI.value)
+        if operator_access.get_credit(top_up=False) < package_record.package.amount:
+            data = {
+                "message": "Brokers balance is insufficient",
+                "message_fa": "اعتبار کارگزار کافی نیست.",
+                "code": codes.insufficient_balance,
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
-            if operator_access.get_credit(top_up=False) < package_record.package.amount:
-                data = {
-                    "message": "Brokers balance is insufficient",
-                    "message_fa": "اعتبار کارگزار کافی نیست.",
-                    "code": codes.insufficient_balance,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        # if broker.active is False:
+        #     data = {
+        #         "message": "error: Brokers is deactive",
+        #         "message_fa": "کارگذار غیرفعال است.",
+        #         "code": -21,
+        #     }
+        #     return Response(data, status=status.HTTP_200_OK)
 
-            # if broker.active is False:
-            #     data = {
-            #         "message": "error: Brokers is deactive",
-            #         "message_fa": "کارگذار غیرفعال است.",
-            #         "code": -21,
-            #     }
-            #     return Response(data, status=status.HTTP_200_OK)
-
-            exe_response_type, exe_response_description = MCI().package_exe_sale(
-                provider_id=package_record.provider_id,
-                bank_code=package_record.bank_code,
-                card_no=package_record.card_number,
-                card_type=package_record.card_type
-            )
-            success = package_record.after_execute(exe_response_type, exe_response_description)
-            if success:
-                operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
-                # broker.charge_for_mcci_transaction(package_record.package.amount)
-                data = {
-                    "message": "Request successfully executed",
-                    "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": codes.successful,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": package_record.call_response_description,
-                    "code": package_record.call_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        exe_response_type, exe_response_description = MCI().package_exe_sale(
+            provider_id=package_record.provider_id,
+            bank_code=package_record.bank_code,
+            card_no=package_record.card_number,
+            card_type=package_record.card_type
+        )
+        success = package_record.after_execute(exe_response_type, exe_response_description)
+        if success:
+            operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
+            # broker.charge_for_mcci_transaction(package_record.package.amount)
+            data = {
+                "message": "Request successfully executed",
+                "message_fa": "درخواست با موفقیت اجرا شد",
+                "code": codes.successful,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": package_record.call_response_description,
+                "code": package_record.call_response_type,
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
 
 class TransactionStatusInquiry(BaseAPIView):
@@ -664,30 +657,31 @@ class RaceTest(BaseAPIView):
 
     @staticmethod
     def post(request):
-        try:
-            broker = Broker.objects.get(user=request.user)
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
-            operator_access.charge(1, True)
-            data = {
-                "message": "Request successfully executed",
-                "message_fa": "درخواست با موفقیت اجرا شد",
-                "code": codes.successful,
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        except OperatorAccess.DoesNotExist as e:
-            data = {
-                "message": "Broker does not have access for this action",
-                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
-                "code": codes.invalid_access,
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            data = {
-                "message": "Broker does not have access for this action",
-                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
-                "code": codes.invalid_access,
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            try:
+                broker = Broker.objects.get(user=request.user)
+                operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+                operator_access.charge(1, True)
+                data = {
+                    "message": "Request successfully executed",
+                    "message_fa": "درخواست با موفقیت اجرا شد",
+                    "code": codes.successful,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            except OperatorAccess.DoesNotExist as e:
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                data = {
+                    "message": "Broker does not have access for this action",
+                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                    "code": codes.invalid_access,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ActivePackages(BaseAPIView):

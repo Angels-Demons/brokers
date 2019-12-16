@@ -109,50 +109,54 @@ class OperatorAccess(models.Model):
         if record is not None:
             record.cost = real_price
             record.save()
-        if self.general_credit_access:
-            self.credit -= real_price
-            self.save()
-            return True
+        with transaction.atomic():
+            locked_self = OperatorAccess.objects.select_for_update().get(id=self.id)
+            if locked_self.general_credit_access:
+                locked_self.credit -= real_price
+                locked_self.save()
+                return True
 
-        if top_up:
-            self.top_up_credit -= real_price
-            self.save()
-            return True
-        else:
-            self.package_credit -= real_price
-            self.save()
-            return True
+            if top_up:
+                locked_self.top_up_credit -= real_price
+                locked_self.save()
+                return True
+            else:
+                locked_self.package_credit -= real_price
+                locked_self.save()
+                return True
 
     def increase_balance(self, balance_increase):
         if not self.active:
             return False, "operator access is not active\nدسترسی شما به این اپراتور فعال نیست"
-        if balance_increase.credit_type == CreditType.GENERAL.value:
-            if self.general_credit_access:
-                # balance_increase.success = True
-                self.credit += balance_increase.amount
-                self.clean()
-                self.save()
-                return True, ""
-            return False, "general credit access is not granted, thus no balance increase\nدسترسی به اعتبار عمومی ندارید"
-        elif balance_increase.credit_type == CreditType.TOP_UP.value:
-            if self.top_up_access:
-                # balance_increase.success = True
-                self.top_up_credit += balance_increase.amount
-                print(self.clean())
-                self.save()
-                return True, ""
-            return False, "top_up access is not granted, thus no balance increase\nدسترسی به شارژ تاپ آپ ندارید"
-        elif balance_increase.credit_type == CreditType.PACKAGE.value:
-            if self.package_access:
-                # balance_increase.success = True
-                self.package_credit += balance_increase.amount
-                self.clean()
-                print("here!")
-                self.save()
-                self.clean()
-                return True, ""
-            return False, "package access is not granted, thus no balance increase\nدسترسی به بسته ندارید"
-        return False, "invalid credit type"
+        with transaction.atomic():
+            locked_self = OperatorAccess.objects.select_for_update().get(id=self.id)
+            if balance_increase.credit_type == CreditType.GENERAL.value:
+                if locked_self.general_credit_access:
+                    # balance_increase.success = True
+                    locked_self.credit += balance_increase.amount
+                    locked_self.clean()
+                    locked_self.save()
+                    return True, ""
+                return False, "general credit access is not granted, thus no balance increase\nدسترسی به اعتبار عمومی ندارید"
+            elif balance_increase.credit_type == CreditType.TOP_UP.value:
+                if locked_self.top_up_access:
+                    # balance_increase.success = True
+                    locked_self.top_up_credit += balance_increase.amount
+                    print(locked_self.clean())
+                    locked_self.save()
+                    return True, ""
+                return False, "top_up access is not granted, thus no balance increase\nدسترسی به شارژ تاپ آپ ندارید"
+            elif balance_increase.credit_type == CreditType.PACKAGE.value:
+                if locked_self.package_access:
+                    # balance_increase.success = True
+                    locked_self.package_credit += balance_increase.amount
+                    locked_self.clean()
+                    print("here!")
+                    locked_self.save()
+                    locked_self.clean()
+                    return True, ""
+                return False, "package access is not granted, thus no balance increase\nدسترسی به بسته ندارید"
+            return False, "invalid credit type"
 
     class Meta:
         verbose_name_plural = "Access to operators"
