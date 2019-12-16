@@ -100,12 +100,15 @@ class OperatorAccess(models.Model):
         else:
             return self.package_credit
 
-    def charge(self, amount, top_up=True):
+    def charge(self, amount, top_up=True, record=None):
         if top_up:
             real_price = amount * (1 - (self.top_up_discount / 100))
         else:
             real_price = amount * (1 - (self.package_discount / 100))
 
+        if record is not None:
+            record.cost = real_price
+            record.save()
         if self.general_credit_access:
             self.credit -= real_price
             self.save()
