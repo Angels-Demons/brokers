@@ -658,6 +658,37 @@ class BrokerCreditView(BaseAPIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class RaceTest(BaseAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @staticmethod
+    def post(request):
+        try:
+            broker = Broker.objects.get(user=request.user)
+            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            operator_access.charge(1, True)
+            data = {
+                "message": "Request successfully executed",
+                "message_fa": "درخواست با موفقیت اجرا شد",
+                "code": codes.successful,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except OperatorAccess.DoesNotExist as e:
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            data = {
+                "message": "Broker does not have access for this action",
+                "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
+                "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ActivePackages(BaseAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 

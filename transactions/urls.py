@@ -13,6 +13,7 @@ urlpatterns = {
     url(r'^BrokerCredit', BrokerCreditView.as_view()),
     url(r'^TransactionStatusInquiry', TransactionStatusInquiry.as_view()),
     url(r'^active_packages', ActivePackages.as_view()),
+    url(r'^raceTest', RaceTest.as_view()),
 
 
 }
