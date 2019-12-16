@@ -251,7 +251,7 @@ class ChargeExeSaleView(BaseAPIView):
             if success:
                 # modify change chargin method
                 # broker.charge_for_mcci_transaction(top_up.amount)
-                operator_access.charge(amount=top_up.amount, top_up=True)
+                operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
                 data = {
                     "message": "Request successfully executed",
                     "message_fa": "درخواست با موفقیت اجرا شد",
@@ -462,7 +462,7 @@ class PackageExeSaleView(BaseAPIView):
             )
             success = package_record.after_execute(exe_response_type, exe_response_description)
             if success:
-                operator_access.charge(amount=package_record.package.amount, top_up=False)
+                operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
                 # broker.charge_for_mcci_transaction(package_record.package.amount)
                 data = {
                     "message": "Request successfully executed",
