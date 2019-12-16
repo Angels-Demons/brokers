@@ -69,7 +69,7 @@ class ChargeCallSaleView(BaseAPIView):
             return Response()
         try:
             amount = request.data.get('amount')
-            broker = Broker.objects.get(user=request.user)
+            broker = request.user.broker
             tell_num = request.data.get('tell_num')
             operator = request.data.get('operator')
             tell_charger = request.data.get('tell_charger')
@@ -173,7 +173,7 @@ class ChargeExeSaleView(BaseAPIView):
         if expired():
             return Response()
         try:
-            broker = Broker.objects.get(user=request.user)
+            broker = request.user.broker
             provider_id = request.data.get('provider_id')
             bank_code = request.data.get('bank_code')
             card_number = request.data.get('card_number')
@@ -275,7 +275,7 @@ class PackageCallSaleView(BaseAPIView):
             return Response()
         try:
             # amount = int(request.data.get('amount'))
-            broker = Broker.objects.get(user=request.user)
+            broker = request.user.broker
             operator = request.data.get('operator')
             tell_num = request.data.get('tell_num')
             tell_charger = request.data.get('tell_charger')
@@ -382,7 +382,7 @@ class PackageExeSaleView(BaseAPIView):
         if expired():
             return Response()
         try:
-            broker = Broker.objects.get(user=request.user)
+            broker = request.user.broker
             provider_id = request.data.get('provider_id')
             bank_code = request.data.get('bank_code')
             card_number = request.data.get('card_number')
@@ -481,7 +481,7 @@ class TransactionStatusInquiry(BaseAPIView):
         if expired():
             return Response()
         try:
-            broker = Broker.objects.get(user=request.user)
+            broker = request.user.broker
             provider_id = request.data.get('provider_id')
             tell_num = request.data.get('TelNum')
             operator = request.data.get('operator')
@@ -601,7 +601,7 @@ class BrokerCreditView(BaseAPIView):
     @staticmethod
     def get(request):
         try:
-            broker = Broker.objects.get(user=request.user)
+            broker = request.user.broker
             operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
             if not operator_access.active:
                 data = {
@@ -690,7 +690,7 @@ class ActivePackages(BaseAPIView):
     @staticmethod
     def get(request):
         try:
-            broker = Broker.objects.get(user=request.user)
+            broker = request.user.broker
             operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
             if not operator_access.active:
                 data = {
