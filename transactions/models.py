@@ -172,6 +172,7 @@ class Package(models.Model):
 class PackageRecord(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=False)
     timestamp = jmodels.jDateTimeField(auto_now_add=True)
+    operator = models.PositiveSmallIntegerField(choices=Choices.operators, default=Operator.MCI.value)
     tell_num = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
     state = models.PositiveSmallIntegerField(choices=Choices.record_states, default=RecordState.INITIAL.value)
     tell_charger = models.BigIntegerField(blank=False, null=False, validators=[phone_validator])
@@ -192,10 +193,11 @@ class PackageRecord(models.Model):
         return "Package record " + str(self.id)
 
     @staticmethod
-    def create(broker, tell_num, tell_charger, package):
+    def create(broker, tell_num, tell_charger, package,operator):
         package_record = PackageRecord(
             broker=broker,
             tell_num=tell_num,
+            operator=operator,
             tell_charger=tell_charger,
             package_id=package.pk,
             amount=package.amount

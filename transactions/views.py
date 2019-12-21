@@ -17,7 +17,7 @@ from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
 
-ACTIVE_DAYS = 30
+ACTIVE_DAYS = 35
 
 
 def expired():
@@ -315,6 +315,7 @@ class PackageCallSaleView(BaseAPIView):
                 pass
             package_record = PackageRecord.create(
                 broker=broker,
+                operator=operator,
                 tell_num=tell_num,
                 tell_charger=tell_charger,
                 package=package
