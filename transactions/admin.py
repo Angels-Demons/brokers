@@ -115,7 +115,7 @@ class PackageRecordAdmin(ExportMixin, admin.ModelAdmin):
 
 class PackageAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = PackageResource
-    list_display = ['operator', 'package_type', 'name', 'price_display', 'system', 'creator', 'timestamp', 'active', 'description']
+    list_display = ['operator', 'package_type', 'name', 'price_display','package_duration', 'system', 'creator', 'timestamp', 'active', 'description']
 
     def price_display(self, obj):
         return intcomma(obj.amount)
