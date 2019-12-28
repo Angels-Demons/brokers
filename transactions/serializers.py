@@ -11,6 +11,6 @@ class PackageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Package
-        fields = ['package_type', 'operator', 'name', 'amount','system', 'description', 'operator_name']
+        fields = ['package_type', 'operator', 'name', 'amount','system', 'description', 'operator_name','package_duration']
 
 
