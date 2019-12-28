@@ -65,6 +65,7 @@ def get_duration(name):
     elif name.find('360 روزه')!= -1:
         return '360'
     else:
+        print(name)
         return ''
 
 class Command(BaseCommand):
