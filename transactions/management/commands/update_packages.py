@@ -41,22 +41,23 @@ def update_current_mci_package(package, response):
     package.active = False
     package.save()
 
+
 def get_duration(name):
-    if name.find('1 روزه')!= -1:
+    if name.find('1 روزه') != -1:
         return '1'
-    elif name.find('يک روزه')!= -1:
+    elif name.find('يک روزه') != -1:
         return '1'
-    elif name.find('7 روزه')!= -1:
+    elif name.find('7 روزه') != -1:
         return '7'
-    elif name.find('یک هفته') != -1:
+    elif name.find('يک هفته') != -1:
         return '7'
-    elif name.find('8 روزه')!= -1:
+    elif name.find('8 روزه') != -1:
         return '8'
     elif name.find('30 روزه') != -1:
         return '30'
-    elif name.find('سی روزه') != -1:
+    elif name.find('سي روزه') != -1:
         return '30'
-    elif name.find('یک ماهه') != -1:
+    elif name.find('يک ماهه') != -1:
         return '30'
     elif name.find('60 روزه') != -1:
         return '60'
@@ -68,6 +69,8 @@ def get_duration(name):
         return '180'
     elif name.find('360 روزه') != -1:
         return '360'
+    elif name.find('365 روزه') != -1:
+        return '365'
     else:
         print(name)
         return ''
