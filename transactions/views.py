@@ -511,6 +511,18 @@ class TransactionStatusInquiry(BaseAPIView):
                         "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
                     }
                     return Response(data, status=status.HTTP_200_OK)
+                elif log_record.state == RecordState.EXE_REQ.value:
+                    data = {
+                        "message": "Request successfully executed",
+                        "message_fa": "درخواست با موفقیت اجرا شد",
+                        "code": codes.successful,
+                        "transaction_status": 0,
+                        "transaction_type": log_record.charge_type,
+                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
+                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
                 else:
                     data = {
                         "message": "Request successfully executed",
@@ -542,7 +554,18 @@ class TransactionStatusInquiry(BaseAPIView):
                         "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
                     }
                     return Response(data, status=status.HTTP_200_OK)
-
+                elif log_record.state == RecordState.EXE_REQ.value:
+                    data = {
+                        "message": "Request successfully executed",
+                        "message_fa": "درخواست با موفقیت اجرا شد",
+                        "code": codes.successful,
+                        "transaction_status": 0,
+                        "transaction_type": log_record.charge_type,
+                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
+                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
                 else:
                     data = {
                         "message": "Request successfully executed",
