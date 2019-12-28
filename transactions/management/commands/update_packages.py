@@ -22,7 +22,7 @@ def update_mci_packages():
                 defaults={'name': res['Package_Desc'], 'description': res['Package_Desc'],
                           'amount': int(res['Package_Cost'] or 999), 'system': int(res['Systems'] or 100)},
             )
-            print('created: ', str(created))
+            # print('created: ', str(created))
     else:
         print("************* Error in updating MCCI packages!  ***********")
 
@@ -58,11 +58,15 @@ def get_duration(name):
         return '30'
     elif name.find('یک ماهه') != -1:
         return '30'
-    elif name.find('90 روزه')!= -1:
+    elif name.find('60 روزه') != -1:
+        return '60'
+    elif name.find('90 روزه') != -1:
         return '90'
-    elif name.find('180 روزه')!= -1:
+    elif name.find('120 روزه') != -1:
+        return '120'
+    elif name.find('180 روزه') != -1:
         return '180'
-    elif name.find('360 روزه')!= -1:
+    elif name.find('360 روزه') != -1:
         return '360'
     else:
         print(name)
