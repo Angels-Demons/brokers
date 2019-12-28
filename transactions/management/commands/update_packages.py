@@ -44,10 +44,28 @@ def update_current_mci_package(package, response):
 def get_duration(name):
     if name.find('1 روزه')!= -1:
         return '1'
+    elif name.find('یک روزه')!= -1:
+        return '1'
     elif name.find('7 روزه')!= -1:
         return '7'
+    elif name.find('یک هفته') != -1:
+        return '7'
+    elif name.find('8 روزه')!= -1:
+        return '8'
+    elif name.find('30 روزه') != -1:
+        return '30'
+    elif name.find('سی روزه') != -1:
+        return '30'
+    elif name.find('یک ماهه') != -1:
+        return '30'
+    elif name.find('90 روزه')!= -1:
+        return '90'
+    elif name.find('180 روزه')!= -1:
+        return '180'
+    elif name.find('360 روزه')!= -1:
+        return '360'
     else:
-        return '0'
+        return ''
 
 class Command(BaseCommand):
     help = "Updates MCI Packages"
