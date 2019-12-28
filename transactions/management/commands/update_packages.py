@@ -44,7 +44,7 @@ def update_current_mci_package(package, response):
 def get_duration(name):
     if name.find('1 روزه')!= -1:
         return '1'
-    elif name.find('یک روزه')!= -1:
+    elif name.find('يک روزه')!= -1:
         return '1'
     elif name.find('7 روزه')!= -1:
         return '7'
