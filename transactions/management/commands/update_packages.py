@@ -20,7 +20,8 @@ def update_mci_packages():
                 package_type=int(res['Package_Type']),
                 operator=Operator.MCI.value,
                 defaults={'name': res['Package_Desc'], 'description': res['Package_Desc'],
-                          'amount': int(res['Package_Cost'] or 999), 'system': int(res['Systems'] or 100)},
+                          'amount': int(res['Package_Cost'] or 999), 'system': int(res['Systems'] or 100),
+                          'package_duration': get_duration(res['Package_Desc'])},
             )
             # print('created: ', str(created))
     else:
@@ -72,8 +73,8 @@ def get_duration(name):
     elif name.find('365 روزه') != -1:
         return '365'
     else:
-        print(name)
         return ''
+
 
 class Command(BaseCommand):
     help = "Updates MCI Packages"
