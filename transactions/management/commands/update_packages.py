@@ -35,11 +35,19 @@ def update_current_mci_package(package, response):
             package.amount = int(res['Package_Cost'] or 999)
             package.system = int(res['Systems'] or 100)
             package.active = True
+            package.package_duration = get_duration(res['Package_Desc'])
             package.save()
             return
     package.active = False
     package.save()
 
+def get_duration(name):
+    if name.find('1 روزه')!= -1:
+        return '1'
+    elif name.find('7 روزه')!= -1:
+        return '7'
+    else:
+        return '0'
 
 class Command(BaseCommand):
     help = "Updates MCI Packages"
