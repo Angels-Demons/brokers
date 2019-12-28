@@ -511,7 +511,7 @@ class TransactionStatusInquiry(BaseAPIView):
                         "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
                     }
                     return Response(data, status=status.HTTP_200_OK)
-                elif log_record.state == RecordState.CALLED.value:
+                elif log_record.state == RecordState.EXE_REQ.value:
                     data = {
                         "message": "Request successfully executed",
                         "message_fa": "درخواست با موفقیت اجرا شد",
