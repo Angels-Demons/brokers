@@ -783,7 +783,7 @@ class TestApi58(BaseAPIView):
 
         print("************ Get subscriber Credit")
         exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(9193218398)
-        
+
         # update_mci_packages()
 
         data = {

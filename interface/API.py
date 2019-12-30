@@ -175,7 +175,7 @@ class MCI:
         api_url = self.behsa_url + 'Topup/QueryBalance'
         headers = {'Content-Type': 'application/json', }
         api_username = self.behsa_charge_username
-        data = '{\'TelNum\':' + TelNum + '}'
+        data = '{\'TelNum\':' + str(TelNum) + '}'
         response = requests.post(api_url, headers=headers, data=data,
                                  auth=(api_username, self.behsa_generated_pass(api_username)))
         res = json.loads(response.text)
