@@ -774,12 +774,16 @@ class TestApi58(BaseAPIView):
         # print("************ Get Package Query")
         # exe_response_type_0, exe_response_description_0 = MCI().behsa_package_query()
 
-        print("************ Get Package Credit")
-        exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
+        # print("************ Get Package Credit")
+        # exe_response_type_2, exe_response_description_2 = MCI().behsa_package_credit()
+        #
+        # print("************ Get Charge Credit")
+        # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
-        print("************ Get Charge Credit")
-        exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
+        print("************ Get subscriber Credit")
+        exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(9193218398)
+        
         # update_mci_packages()
 
         data = {
@@ -789,7 +793,7 @@ class TestApi58(BaseAPIView):
             # "exe_response_description_0": exe_response_description_0,
             "exe_response_type_1": exe_response_type_1,
             "exe_response_description_1": exe_response_description_1,
-            "exe_response_type_2": exe_response_type_2,
-            "exe_response_description_2": exe_response_description_2
+            # "exe_response_type_2": exe_response_type_2,
+            # "exe_response_description_2": exe_response_description_2
         }
         return Response(data, status=status.HTTP_200_OK)
