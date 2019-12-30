@@ -756,6 +756,7 @@ class TestApi58(BaseAPIView):
     def get(request):
         try:
             broker = Broker.objects.get(user=request.user)
+            param1 = request.data.get('param1')
         except Exception:
             data = {
                 "message": "Invalid Broker",
@@ -782,7 +783,7 @@ class TestApi58(BaseAPIView):
 
 
         print("************ Get subscriber Credit")
-        exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(9193218398)
+        exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(param1)
 
         # update_mci_packages()
 
