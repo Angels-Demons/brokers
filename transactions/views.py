@@ -260,8 +260,8 @@ class ChargeExeSaleView(BaseAPIView):
         else:
             data = {
                 "message": "Failed to execute request",
-                "message_fa": top_up.call_response_description,
-                "code": top_up.call_response_type,
+                "message_fa": top_up.exe_response_description,
+                "code": top_up.exe_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -468,8 +468,8 @@ class PackageExeSaleView(BaseAPIView):
         else:
             data = {
                 "message": "Failed to execute request",
-                "message_fa": package_record.call_response_description,
-                "code": package_record.call_response_type,
+                "message_fa": package_record.exe_response_description,
+                "code": package_record.exe_response_type,
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -781,7 +781,7 @@ class TestApi58(BaseAPIView):
         # print("************ Get Charge Credit")
         # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
-        
+
         print("************ Get subscriber Credit")
         exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(param1)
         print("************ Get subscriber package")
