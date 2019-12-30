@@ -197,6 +197,32 @@ class MCI:
             logger.info(content)
         return response_type, response_description
 
+    def behsa_subscriber_package_quata(self,TelNum):
+        api_url = self.behsa_url + 'Topup/QueryQuata'
+        headers = {'Content-Type': 'application/json', }
+        api_username = self.behsa_package_username
+        data = '{\'TelNum\':' + str(TelNum) + '}'
+        response = requests.post(api_url, headers=headers, data=data,
+                                 auth=(api_username, self.behsa_generated_pass(api_username)))
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        response_description = res['ResponseDesc']
+
+        if int(response_type) == -2:
+            self.token()
+            response = requests.post(api_url, headers=headers, data=data,
+                                     auth=(api_username, self.behsa_generated_pass(api_username)))
+            res = json.loads(response.text)
+            response_type = res['ResponseType']
+            response_description = res['ResponseDesc']
+        if int(response_type) < 0:
+            logger = config_logging(logging.INFO, 'debug.log', 'debug')
+            logger.propagate = False
+            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
+                response_description)
+            logger.info(content)
+        return response_type, response_description
+
     def behsa_package_credit(self):
         api_url = self.behsa_url + 'Topup/RemainCreditInquiryPackage'
         headers = {'Content-Type': 'application/json', }

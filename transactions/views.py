@@ -781,9 +781,11 @@ class TestApi58(BaseAPIView):
         # print("************ Get Charge Credit")
         # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
-
+        
         print("************ Get subscriber Credit")
         exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(param1)
+        print("************ Get subscriber package")
+        exe_response_type_2, exe_response_description_2 = MCI().behsa_subscriber_package_quata(param1)
 
         # update_mci_packages()
 
@@ -794,6 +796,8 @@ class TestApi58(BaseAPIView):
             # "exe_response_description_0": exe_response_description_0,
             "exe_response_type_1": exe_response_type_1,
             "exe_response_description_1": exe_response_description_1,
+            "exe_response_type_2": exe_response_type_2,
+            "exe_response_description_2": exe_response_description_2,
             # "exe_response_type_2": exe_response_type_2,
             # "exe_response_description_2": exe_response_description_2
         }
