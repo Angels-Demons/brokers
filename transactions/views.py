@@ -156,6 +156,13 @@ class ChargeCallSaleView(BaseAPIView):
                 "provider_id": top_up.provider_id
             }
             return Response(data, status=status.HTTP_200_OK)
+        elif int(call_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": top_up.exe_response_description,
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
                 "message": "Failed to submit request",
@@ -255,6 +262,13 @@ class ChargeExeSaleView(BaseAPIView):
                 "message_fa": "درخواست با موفقیت اجرا شد",
                 "code": codes.successful,
                 # "provider_id": top_up.provider_id
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        elif int(exe_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": top_up.exe_response_description,
+                "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
@@ -366,6 +380,13 @@ class PackageCallSaleView(BaseAPIView):
                 "provider_id": package_record.provider_id
             }
             return Response(data, status=status.HTTP_200_OK)
+        elif int(call_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": package_record.exe_response_description,
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_200_OK)
         else:
             data = {
                 "message": "Failed to submit request",
@@ -463,6 +484,13 @@ class PackageExeSaleView(BaseAPIView):
                 "message": "Request successfully executed",
                 "message_fa": "درخواست با موفقیت اجرا شد",
                 "code": codes.successful,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        elif int(exe_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": package_record.exe_response_description,
+                "code": codes.invalid_parameter,
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
