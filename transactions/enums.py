@@ -102,6 +102,7 @@ class ResponseTypes(Enum):
     STUDENTERROR = -1060
     SYSTEMERROR = -25228
     INVALIDINPUT = 19
+    Error1 = 1264
 
     @staticmethod
     def farsi(value):
@@ -229,6 +230,9 @@ class ResponseTypes(Enum):
             return "خطاي سيستمي، لطفا مجددا تلاش نماييد."
         elif value == 19:
             return "پارامتر ورودي اشتباه است."
+        elif value == 1264:
+            return "error"
+
 
 
 class CardTypes(Enum):
@@ -537,7 +541,9 @@ class Choices:
         (ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value,
          ResponseTypes.farsi(ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value)),
         (ResponseTypes.INVALIPACKAGEAMOUNT.value, ResponseTypes.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value)),
-        (ResponseTypes.INVALIDPACKAGETYPE.value, ResponseTypes.farsi(ResponseTypes.INVALIDPACKAGETYPE.value))
+        (ResponseTypes.INVALIDPACKAGETYPE.value, ResponseTypes.farsi(ResponseTypes.INVALIDPACKAGETYPE.value)),
+        (ResponseTypes.Error1.value, ResponseTypes.farsi(ResponseTypes.Error1.value))
+
     )
 
 
