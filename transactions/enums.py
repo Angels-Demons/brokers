@@ -103,6 +103,7 @@ class ResponseTypes(Enum):
     SYSTEMERROR = -25228
     INVALIDINPUT = 19
     Error1 = 1264
+    NOTMCI = 405610009
 
     @staticmethod
     def farsi(value):
@@ -232,6 +233,8 @@ class ResponseTypes(Enum):
             return "پارامتر ورودي اشتباه است."
         elif value == 1264:
             return "error"
+        elif value == 405610009:
+            return "شماره ارسالی در شبکه همراه اول وجود ندارد."
 
 
 
@@ -542,7 +545,8 @@ class Choices:
          ResponseTypes.farsi(ResponseTypes.POSTPAIDCHARGEINACCESSABLE.value)),
         (ResponseTypes.INVALIPACKAGEAMOUNT.value, ResponseTypes.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value)),
         (ResponseTypes.INVALIDPACKAGETYPE.value, ResponseTypes.farsi(ResponseTypes.INVALIDPACKAGETYPE.value)),
-        (ResponseTypes.Error1.value, ResponseTypes.farsi(ResponseTypes.Error1.value))
+        (ResponseTypes.Error1.value, ResponseTypes.farsi(ResponseTypes.Error1.value)),
+        (ResponseTypes.NOTMCI.value,ResponseTypes.farsi(ResponseTypes.NOTMCI.value))
 
     )
 
