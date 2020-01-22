@@ -367,5 +367,6 @@ class MCI:
 
 class EWays:
 
-    def callsale(self , param1):
+    @staticmethod
+    def callsale(param1):
         return 'Executed : ' + str(param1)

@@ -17,7 +17,7 @@ from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
 
-ACTIVE_DAYS = 60
+ACTIVE_DAYS = 180
 
 
 def expired():
