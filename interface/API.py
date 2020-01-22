@@ -372,38 +372,32 @@ class MCI:
 
 
 class EWays:
+    eways_pass = '19K1*57e51'
+    eways_url_1 = 'http://core.eways.ir/WebService/Request.asmx'
+
+
     def ewaysreqrypei(self,action, eways_url, params):
         headers = {'content-type': 'text/xml'}
 
-        template = Template("""
-                         <req:{{name}}>{{value}}</req:{{name}}>""")
+        template = Template("""<req:{{name}}>{{value}}</req:{{name}}>""")
 
         requestTemp = Template("""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:req="http://NewCore.Eways.ir/Webservice/Request.asmx">
-                <soapenv:Header/>
-                <soapenv:Body>
-                <req:{{action}}>
-                {{parameter}}
-                </req:{{action}}>
-                </soapenv:Body>
-                </soapenv:Envelope>""")
+   <soapenv:Header/>
+   <soapenv:Body>
+      <req:{{action}}>
+{{parameter}}
+      </req:{{action}}>
+   </soapenv:Body>
+</soapenv:Envelope>""")
 
         parameters = ""
         for x in params:
             parameters = parameters + template.render(name=x.name, value=x.value)
         body = requestTemp.render(action=action, parameter=parameters)
-        # return requests.post(self.eways_url, data=self.body, headers=self.headers, verify=False).content
-        return body
+        return requests.post(eways_url, data=body, headers=headers, verify=False).content
 
-    def callsale(self , param1):
-        response = self.ewaysreqrypei('action','URL',[Parameter("SRV_ID_1", "V113"),
-                                                                          Parameter("SRV_ACTION_1", "ADD")])
+    def callsale(self, param1):
+        response = self.ewaysreqrypei('GetProduct', self.eways_url_1, [Parameter("TransactionID", param1),
+                                                                          Parameter("UserName", self.eways_pass)])
         return response
-
-        # equest(self.username, self.password, [Parameter("SRV_ID_1", "V113"),
-        #                                                                  Parameter("SRV_ACTION_1", "ADD"),
-        #                                                                  Parameter("IMSI", simcard.IMSI),
-        #                                                                  Parameter("HLR_ID",
-        #                                                                            self.HLR_ID)]).execute()
-
-        # return 'Executed : ' + str(param1)
 

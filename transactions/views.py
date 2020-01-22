@@ -11,7 +11,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from accounts.models import ChargeType
-from interface.API import MCI , EWays
+from interface.API import MCI, EWays
 from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
@@ -818,7 +818,7 @@ class TestApi58(BaseAPIView):
         # print("************ Get subscriber type")
         # exe_response_type_3, exe_response_description_3 = MCI().behsa_subscriber_type(param1)
         # update_mci_packages()
-        result = EWays.callsale(param1)
+        result = EWays().callsale(param1)
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
