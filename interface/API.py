@@ -372,7 +372,8 @@ class MCI:
 
 
 class EWays:
-    def eways_request_type_I(self,action, eways_url, params):
+    @staticmethod
+    def eways_request_type_I(action, eways_url, params):
         headers = {'content-type': 'text/xml'}
 
         template = Template("""
@@ -394,7 +395,8 @@ class EWays:
         # return requests.post(self.eways_url, data=self.body, headers=self.headers, verify=False).content
         return body
 
-    def callsale(self,param1):
+    @staticmethod
+    def callsale(param1):
         response = eways_request_type_I('action','URL',[Parameter("SRV_ID_1", "V113"),
                                                                           Parameter("SRV_ACTION_1", "ADD")])
         return response
