@@ -12,3 +12,4 @@ pandas==0.25.3
 rest-pandas==1.1.0
 django-filter==2.2.0
 django-jalali-date==0.2.10
+jinja2==2.10.3

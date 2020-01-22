@@ -67,30 +67,32 @@ class ChargeCallSaleView(BaseAPIView):
     def post(request):
         if expired():
             return Response()
+        broker = request.user.broker
+        operator = request.data.get('operator')
+        amount = request.data.get('amount')
+        tell_num = request.data.get('tell_num')
+        tell_charger = request.data.get('tell_charger')
+        data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+        if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
+                                                                             Operator.RIGHTEL.value]:
+            data["message"] = "'operator' is not provided or valid."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not amount:
+            data["message"] = "'amount' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not tell_num:
+            data["message"] = "'tell_num' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not tell_charger:
+            data["message"] = "'tell_charger' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            amount = request.data.get('amount')
-            broker = request.user.broker
-            tell_num = request.data.get('tell_num')
-            operator = request.data.get('operator')
-            tell_charger = request.data.get('tell_charger')
             charge_type = request.data.get('charge_type')
-            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
-            if not amount:
-                data["message"] = "'amount' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not tell_num:
-                data["message"] = "'tell_num' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not tell_charger:
-                data["message"] = "'tell_charger' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             if not charge_type:
                 data["message"] = "'charge_type' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not operator or int(operator) != Operator.MCI.value:
-                data["message"] = "'operator' is not provided or valid."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            operator_access = broker.operatoraccess_set.get(operator=operator)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
                 data = {
                     "message": "Broker does not have access for this action",
@@ -114,7 +116,7 @@ class ChargeCallSaleView(BaseAPIView):
                 broker=broker,
                 tell_num=tell_num,
                 tell_charger=tell_charger,
-                charge_type=charge_type
+                charge_type=charge_type,
             )
         except OperatorAccess.DoesNotExist as e:
             data = {
@@ -141,33 +143,47 @@ class ChargeCallSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
-        call_response_type, call_response_description = MCI().charge_call_sale(
-            top_up.tell_num,
-            top_up.tell_charger,
-            top_up.amount,
-            top_up.charge_type,
-        )
-        success = top_up.after_call(call_response_type, call_response_description)
-        if success:
-            data = {
-                "message": "Request successfully submitted",
-                "message_fa": "درخواست با موفقیت ثبت شد",
-                "code": codes.successful,
-                "provider_id": top_up.provider_id
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        elif int(call_response_type) == 19:
-            data = {
-                "message": "Failed to execute request",
-                "message_fa": top_up.exe_response_description,
-                "code": codes.invalid_parameter,
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        else:
+        if operator == Operator.MCI.value:
+            call_response_type, call_response_description = MCI().charge_call_sale(
+                top_up.tell_num,
+                top_up.tell_charger,
+                top_up.amount,
+                top_up.charge_type,
+            )
+            success = top_up.after_call(call_response_type, call_response_description)
+            if success:
+                data = {
+                    "message": "Request successfully submitted",
+                    "message_fa": "درخواست با موفقیت ثبت شد",
+                    "code": codes.successful,
+                    "provider_id": top_up.provider_id
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            elif int(call_response_type) == 19:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": top_up.exe_response_description,
+                    "code": codes.invalid_parameter,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to submit request",
+                    "message_fa": top_up.call_response_description,
+                    "code": top_up.call_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+
+        ####  should be modified to eways services
+
+        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            # Calling eways GetProduct and update topup
+
             data = {
                 "message": "Failed to submit request",
                 "message_fa": top_up.call_response_description,
                 "code": top_up.call_response_type,
+                "provider_id": top_up.provider_id
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -185,6 +201,10 @@ class ChargeExeSaleView(BaseAPIView):
             bank_code = request.data.get('bank_code')
             card_number = request.data.get('card_number')
             card_type = request.data.get('card_type')
+            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+            if not provider_id:
+                data["message"] = "'charge_type' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             top_up = TopUp.objects.get(provider_id=provider_id, broker=broker)
             if top_up.state == RecordState.CALLED.value:
                 try:
@@ -207,7 +227,17 @@ class ChargeExeSaleView(BaseAPIView):
                     "code": codes.invalid_parameter,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+        except Exception:
+            data = {
+                "message": "Invalid parameters",
+                "message_fa": "خطا: پارامترهای غیر معتبر",
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        operator = top_up.operator
+
+        try:
+            operator_access = broker.operatoraccess_set.get(operator=operator)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
                 data = {
                     "message": "Broker does not have access for this action",
@@ -222,13 +252,6 @@ class ChargeExeSaleView(BaseAPIView):
                 "code": codes.invalid_access,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
-            data = {
-                "message": "Invalid parameters",
-                "message_fa": "خطا: پارامترهای غیر معتبر",
-                "code": codes.invalid_parameter,
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if operator_access.get_credit(top_up=True) < top_up.amount:
             data = {
@@ -238,46 +261,75 @@ class ChargeExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
-        # if broker.active is False:
-        #     data = {
-        #         "message": "Brokers is not active",
-        #         "message_fa": "کارگذار غیرفعال است.",
-        #         "code": codes.inactive_broker,
-        #     }
-        #     return Response(data, status=status.HTTP_200_OK)
+        if operator == Operator.MCI.value:
+            exe_response_type, exe_response_description = MCI().charge_exe_sale(
+                provider_id=top_up.provider_id,
+                bank_code=top_up.bank_code,
+                card_no=top_up.card_number,
+                card_type=top_up.card_type
+            )
+            success = top_up.after_execute(exe_response_type, exe_response_description)
+            if success:
+                # modify change chargin method
+                # broker.charge_for_mcci_transaction(top_up.amount)
+                operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
+                data = {
+                    "message": "Request successfully executed",
+                    "message_fa": "درخواست با موفقیت اجرا شد",
+                    "code": codes.successful,
+                    # "provider_id": top_up.provider_id
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            elif int(exe_response_type) == 19:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": top_up.exe_response_description,
+                    "code": codes.invalid_parameter,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": top_up.exe_response_description,
+                    "code": top_up.exe_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
 
-        exe_response_type, exe_response_description = MCI().charge_exe_sale(
-            provider_id=top_up.provider_id,
-            bank_code=top_up.bank_code,
-            card_no=top_up.card_number,
-            card_type=top_up.card_type
-        )
-        success = top_up.after_execute(exe_response_type, exe_response_description)
-        if success:
-            # modify change chargin method
-            # broker.charge_for_mcci_transaction(top_up.amount)
-            operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
-            data = {
-                "message": "Request successfully executed",
-                "message_fa": "درخواست با موفقیت اجرا شد",
-                "code": codes.successful,
-                # "provider_id": top_up.provider_id
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        elif int(exe_response_type) == 19:
-            data = {
-                "message": "Failed to execute request",
-                "message_fa": top_up.exe_response_description,
-                "code": codes.invalid_parameter,
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        else:
-            data = {
-                "message": "Failed to execute request",
-                "message_fa": top_up.exe_response_description,
-                "code": top_up.exe_response_type,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+        ####  should be modified to eways services
+
+        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            exe_response_type, exe_response_description = MCI().charge_exe_sale(
+                provider_id=top_up.provider_id,
+                bank_code=top_up.bank_code,
+                card_no=top_up.card_number,
+                card_type=top_up.card_type
+            )
+            success = top_up.after_execute(exe_response_type, exe_response_description)
+            if success:
+                # modify change chargin method
+                # broker.charge_for_mcci_transaction(top_up.amount)
+                operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
+                data = {
+                    "message": "Request successfully executed",
+                    "message_fa": "درخواست با موفقیت اجرا شد",
+                    "code": codes.successful,
+                    # "provider_id": top_up.provider_id
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            elif int(exe_response_type) == 19:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": top_up.exe_response_description,
+                    "code": codes.invalid_parameter,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": top_up.exe_response_description,
+                    "code": top_up.exe_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
 
 
 class PackageCallSaleView(BaseAPIView):
@@ -287,29 +339,29 @@ class PackageCallSaleView(BaseAPIView):
     def post(request):
         if expired():
             return Response()
-        try:
-            # amount = int(request.data.get('amount'))
-            broker = request.user.broker
-            operator = request.data.get('operator')
-            tell_num = request.data.get('tell_num')
-            tell_charger = request.data.get('tell_charger')
-            package_type = request.data.get('package_type')
-            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
-            if not tell_num:
-                data["message"] = "'tell_num' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not tell_charger:
-                data["message"] = "'tell_charger' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not package_type:
-                data["message"] = "'package_type' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            if not operator or int(operator) != Operator.MCI.value:
-                data["message"] = "'operator' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            package = Package.objects.get(package_type=package_type, operator=operator)
+        broker = request.user.broker
+        operator = request.data.get('operator')
+        tell_num = request.data.get('tell_num')
+        tell_charger = request.data.get('tell_charger')
+        package_type = request.data.get('package_type')
+        data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+        if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
+                                                                             Operator.RIGHTEL.value]:
+            data["message"] = "'operator' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not tell_num:
+            data["message"] = "'tell_num' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not tell_charger:
+            data["message"] = "'tell_charger' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not package_type:
+            data["message"] = "'package_type' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+        try:
+            package = Package.objects.get(package_type=package_type, operator=operator)
+            operator_access = broker.operatoraccess_set.get(operator=operator)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=False)):
                 data = {
                     "message": "Broker does not have access for this action",
@@ -365,35 +417,68 @@ class PackageCallSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
-        call_response_type, call_response_description = MCI().package_call_sale(
-            package_record.tell_num,
-            package_record.tell_charger,
-            package_record.package.amount,
-            package_record.package.package_type,
-        )
-        success = package_record.after_call(call_response_type, call_response_description)
-        if success:
-            data = {
-                "message": "Request successfully submitted",
-                "message_fa": "درخواست با موفقیت ثبت شد",
-                "code": codes.successful,
-                "provider_id": package_record.provider_id
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        elif int(call_response_type) == 19:
-            data = {
-                "message": "Failed to execute request",
-                "message_fa": package_record.exe_response_description,
-                "code": codes.invalid_parameter,
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        else:
-            data = {
-                "message": "Failed to submit request",
-                "message_fa": package_record.call_response_description,
-                "code": package_record.call_response_type,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+        if operator == Operator.MCI.value:
+            call_response_type, call_response_description = MCI().package_call_sale(
+                package_record.tell_num,
+                package_record.tell_charger,
+                package_record.package.amount,
+                package_record.package.package_type,
+            )
+            success = package_record.after_call(call_response_type, call_response_description)
+            if success:
+                data = {
+                    "message": "Request successfully submitted",
+                    "message_fa": "درخواست با موفقیت ثبت شد",
+                    "code": codes.successful,
+                    "provider_id": package_record.provider_id
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            elif int(call_response_type) == 19:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": package_record.exe_response_description,
+                    "code": codes.invalid_parameter,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to submit request",
+                    "message_fa": package_record.call_response_description,
+                    "code": package_record.call_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+
+        ####  should be modified to eways services
+        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            call_response_type, call_response_description = MCI().package_call_sale(
+                package_record.tell_num,
+                package_record.tell_charger,
+                package_record.package.amount,
+                package_record.package.package_type,
+            )
+            success = package_record.after_call(call_response_type, call_response_description)
+            if success:
+                data = {
+                    "message": "Request successfully submitted",
+                    "message_fa": "درخواست با موفقیت ثبت شد",
+                    "code": codes.successful,
+                    "provider_id": package_record.provider_id
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            elif int(call_response_type) == 19:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": package_record.exe_response_description,
+                    "code": codes.invalid_parameter,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to submit request",
+                    "message_fa": package_record.call_response_description,
+                    "code": package_record.call_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
 
 
 class PackageExeSaleView(BaseAPIView):
@@ -423,7 +508,8 @@ class PackageExeSaleView(BaseAPIView):
                     "code": codes.invalid_parameter,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            operator = package_record.operator
+            operator_access = broker.operatoraccess_set.get(operator=operator)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=False)):
                 data = {
                     "message": "Broker does not have access for this action",
@@ -462,44 +548,70 @@ class PackageExeSaleView(BaseAPIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
-        # if broker.active is False:
-        #     data = {
-        #         "message": "error: Brokers is deactive",
-        #         "message_fa": "کارگذار غیرفعال است.",
-        #         "code": -21,
-        #     }
-        #     return Response(data, status=status.HTTP_200_OK)
+        if operator == Operator.MCI.value:
+            exe_response_type, exe_response_description = MCI().package_exe_sale(
+                provider_id=package_record.provider_id,
+                bank_code=package_record.bank_code,
+                card_no=package_record.card_number,
+                card_type=package_record.card_type
+            )
+            success = package_record.after_execute(exe_response_type, exe_response_description)
+            if success:
+                operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
+                # broker.charge_for_mcci_transaction(package_record.package.amount)
+                data = {
+                    "message": "Request successfully executed",
+                    "message_fa": "درخواست با موفقیت اجرا شد",
+                    "code": codes.successful,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            elif int(exe_response_type) == 19:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": package_record.exe_response_description,
+                    "code": codes.invalid_parameter,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": package_record.exe_response_description,
+                    "code": package_record.exe_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
 
-        exe_response_type, exe_response_description = MCI().package_exe_sale(
-            provider_id=package_record.provider_id,
-            bank_code=package_record.bank_code,
-            card_no=package_record.card_number,
-            card_type=package_record.card_type
-        )
-        success = package_record.after_execute(exe_response_type, exe_response_description)
-        if success:
-            operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
-            # broker.charge_for_mcci_transaction(package_record.package.amount)
-            data = {
-                "message": "Request successfully executed",
-                "message_fa": "درخواست با موفقیت اجرا شد",
-                "code": codes.successful,
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        elif int(exe_response_type) == 19:
-            data = {
-                "message": "Failed to execute request",
-                "message_fa": package_record.exe_response_description,
-                "code": codes.invalid_parameter,
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        else:
-            data = {
-                "message": "Failed to execute request",
-                "message_fa": package_record.exe_response_description,
-                "code": package_record.exe_response_type,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+        ####  should be modified to eways services
+        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            exe_response_type, exe_response_description = MCI().package_exe_sale(
+                provider_id=package_record.provider_id,
+                bank_code=package_record.bank_code,
+                card_no=package_record.card_number,
+                card_type=package_record.card_type
+            )
+            success = package_record.after_execute(exe_response_type, exe_response_description)
+            if success:
+                operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
+                # broker.charge_for_mcci_transaction(package_record.package.amount)
+                data = {
+                    "message": "Request successfully executed",
+                    "message_fa": "درخواست با موفقیت اجرا شد",
+                    "code": codes.successful,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            elif int(exe_response_type) == 19:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": package_record.exe_response_description,
+                    "code": codes.invalid_parameter,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": package_record.exe_response_description,
+                    "code": package_record.exe_response_type,
+                }
+                return Response(data, status=status.HTTP_200_OK)
 
 
 class TransactionStatusInquiry(BaseAPIView):
@@ -513,9 +625,14 @@ class TransactionStatusInquiry(BaseAPIView):
             broker = request.user.broker
             provider_id = request.data.get('provider_id')
             tell_num = request.data.get('TelNum')
-            operator = request.data.get('operator')
+            operator = int(request.data.get('operator'))
             transaction_type = request.data.get('transaction_type')
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+            if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
+                                                                                 Operator.RIGHTEL.value]:
+                data["message"] = "'operator' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            operator_access = broker.operatoraccess_set.get(operator=operator)
             if not operator_access.active:
                 data = {
                     "message": "Broker does not have access for this action",
@@ -524,106 +641,104 @@ class TransactionStatusInquiry(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-            if operator == Operator.MCI.value and transaction_type == 1:
-                log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=Operator.MCI.value)
-                res = MCI().behsa_charge_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
-                if log_record.state == RecordState.EXECUTED.value:
-                    data = {
-                        "message": "Request successfully executed",
-                        "message_fa": "درخواست با موفقیت اجرا شد",
-                        "code": codes.successful,
-                        "transaction_status": 1,
-                        "transaction_type": log_record.charge_type,
-                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
-                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
-                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
-                    }
-                    return Response(data, status=status.HTTP_200_OK)
-                elif log_record.state == RecordState.EXE_REQ.value:
-                    data = {
-                        "message": "Request successfully executed",
-                        "message_fa": "درخواست با موفقیت اجرا شد",
-                        "code": codes.successful,
-                        "transaction_status": 0,
-                        "transaction_type": log_record.charge_type,
-                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
-                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
-                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
-                    }
-                    return Response(data, status=status.HTTP_200_OK)
-                else:
-                    data = {
-                        "message": "Request successfully executed",
-                        "message_fa": "درخواست با موفقیت اجرا شد",
-                        "code": codes.successful,
-                        "transaction_status": -1,
-                        "transaction_type": log_record.charge_type,
-                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
-                            "%Y/%m/%d %H:%M:%S"),
-                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
-                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
-                    }
-                    return Response(data, status=status.HTTP_200_OK)
+            if transaction_type == 1:
+                log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num,
+                                               operator=operator)
+                if operator == Operator.MCI.value:
+                    res = MCI().behsa_charge_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
+                    if log_record.state == RecordState.EXECUTED.value:
+                        data = {
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                            "transaction_status": 1,
+                            "transaction_type": log_record.charge_type,
+                            "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                                "%Y/%m/%d %H:%M:%S"),
+                            "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                            "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
+                    elif log_record.state == RecordState.EXE_REQ.value:
+                        data = {
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                            "transaction_status": 0,
+                            "transaction_type": log_record.charge_type,
+                            "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                                "%Y/%m/%d %H:%M:%S"),
+                            "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                            "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
+                    else:
+                        data = {
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                            "transaction_status": -1,
+                            "transaction_type": log_record.charge_type,
+                            "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                                "%Y/%m/%d %H:%M:%S"),
+                            "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                            "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
 
-            elif operator == Operator.MCI.value and transaction_type == 2:
+                # should be modified with eways services
+                if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+                    pass
+
+            elif transaction_type == 2:
                 log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num,
                                                        operator=Operator.MCI.value)
-                res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
-                if log_record.state == RecordState.EXECUTED.value:
-                    data = {
-                        "message": "Request successfully executed",
-                        "message_fa": "درخواست با موفقیت اجرا شد",
-                        "code": codes.successful,
-                        "transaction_status": 1,
-                        "transaction_type": log_record.package.package_type,
-                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
-                            "%Y/%m/%d %H:%M:%S"),
-                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
-                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
-                    }
-                    return Response(data, status=status.HTTP_200_OK)
-                elif log_record.state == RecordState.EXE_REQ.value:
-                    data = {
-                        "message": "Request successfully executed",
-                        "message_fa": "درخواست با موفقیت اجرا شد",
-                        "code": codes.successful,
-                        "transaction_status": 0,
-                        "transaction_type": log_record.charge_type,
-                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
-                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
-                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
-                    }
-                    return Response(data, status=status.HTTP_200_OK)
-                else:
-                    data = {
-                        "message": "Request successfully executed",
-                        "message_fa": "درخواست با موفقیت اجرا شد",
-                        "code": codes.successful,
-                        "transaction_status": -1,
-                        "transaction_type": log_record.package.package_type,
-                        "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
-                            "%Y/%m/%d %H:%M:%S"),
-                        "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
-                        "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
-                    }
-                    return Response(data, status=status.HTTP_200_OK)
+                if operator == Operator.MCI.value:
+                    res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
+                    if log_record.state == RecordState.EXECUTED.value:
+                        data = {
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                            "transaction_status": 1,
+                            "transaction_type": log_record.package.package_type,
+                            "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                                "%Y/%m/%d %H:%M:%S"),
+                            "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                            "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
+                    elif log_record.state == RecordState.EXE_REQ.value:
+                        data = {
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                            "transaction_status": 0,
+                            "transaction_type": log_record.charge_type,
+                            "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                                "%Y/%m/%d %H:%M:%S"),
+                            "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                            "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
+                    else:
+                        data = {
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                            "transaction_status": -1,
+                            "transaction_type": log_record.package.package_type,
+                            "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
+                                "%Y/%m/%d %H:%M:%S"),
+                            "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                            "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
 
-            # if res['ResponseType'] == 0:
-            #
-            #     data = {
-            #         "message": "Request successfully executed",
-            #         "message_fa": "درخواست با موفقیت اجرا شد",
-            #         "code": codes.successful,
-            #         "response" : str(res)
-            #     }
-            #     return Response(data, status=status.HTTP_200_OK)
-            # else:
-            #     data = {
-            #         "message": "Failed to execute request",
-            #         "message_fa": res['ResponseDesc'],
-            #         "code": res['ResponseType'],
-            #     }
-            #     return Response(data, status=status.HTTP_200_OK)
+                # should be modified with eways services
+                if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+                    pass
+
         except OperatorAccess.DoesNotExist as e:
             data = {
                 "message": "Broker does not have access for this action",
@@ -697,9 +812,9 @@ class BrokerCreditView(BaseAPIView):
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
             "code": codes.successful,
-            "general_credit":general_credit,
-            "topup_credit":topup_credit,
-            "package_credit":package_credit
+            "general_credit": general_credit,
+            "topup_credit": topup_credit,
+            "package_credit": package_credit
         }
         return Response(data, status=status.HTTP_200_OK)
 
@@ -741,9 +856,15 @@ class ActivePackages(BaseAPIView):
 
     @staticmethod
     def get(request):
+        operator = request.GET.get('operator', 1)
+        data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+        if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
+                                                                             Operator.RIGHTEL.value]:
+            data["message"] = "'operator' is not provided or not valid."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         try:
             broker = request.user.broker
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
+            operator_access = broker.operatoraccess_set.get(operator=operator)
             if not operator_access.active:
                 data = {
                     "message": "Broker does not have access for this action",
@@ -812,7 +933,6 @@ class TestApi58(BaseAPIView):
         # print("************ Get Charge Credit")
         # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
-
         # print("************ Get subscriber Credit")
         # exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(param1)
         # print("************ Get subscriber package")
@@ -821,7 +941,7 @@ class TestApi58(BaseAPIView):
         # exe_response_type_3, exe_response_description_3 = MCI().behsa_subscriber_type(param1)
         # update_mci_packages()
         result1 = EWays().call_sale(param1)
-        result2 = EWays().exe_sale(param2,'40','1000',param3)
+        result2 = EWays().exe_sale(param2, '40', '1000', param3)
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
