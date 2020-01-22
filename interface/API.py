@@ -1,7 +1,7 @@
 import base64
 import binascii
 import logging
-
+from jinja2 import Template
 import requests
 import json
 import hashlib
@@ -11,6 +11,12 @@ from accounts.utils import config_logging
 from transactions.models import ProvidersToken, Operator
 
 MCI_token = ""
+
+
+class Parameter:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
 
 
 class MCI:
@@ -366,7 +372,38 @@ class MCI:
 
 
 class EWays:
+    def eways_request_type_I(self,action, eways_url, params):
+        headers = {'content-type': 'text/xml'}
 
-    @staticmethod
-    def callsale(param1):
-        return 'Executed : ' + str(param1)
+        template = Template("""
+                         <req:{{name}}>{{value}}</req:{{name}}>""")
+
+        requestTemp = Template("""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:req="http://NewCore.Eways.ir/Webservice/Request.asmx">
+                <soapenv:Header/>
+                <soapenv:Body>
+                <req:{{action}}>
+                {{parameter}}
+                </req:{{action}}>
+                </soapenv:Body>
+                </soapenv:Envelope>""")
+
+        parameters = ""
+        for x in params:
+            parameters = parameters + template.render(name=x.name, value=x.value)
+        body = requestTemp.render(action=action, parameter=parameters)
+        # return requests.post(self.eways_url, data=self.body, headers=self.headers, verify=False).content
+        return body
+
+    def callsale(self,param1):
+        response = eways_request_type_I('action','URL',[Parameter("SRV_ID_1", "V113"),
+                                                                          Parameter("SRV_ACTION_1", "ADD")])
+        return response
+
+        # equest(self.username, self.password, [Parameter("SRV_ID_1", "V113"),
+        #                                                                  Parameter("SRV_ACTION_1", "ADD"),
+        #                                                                  Parameter("IMSI", simcard.IMSI),
+        #                                                                  Parameter("HLR_ID",
+        #                                                                            self.HLR_ID)]).execute()
+
+        # return 'Executed : ' + str(param1)
+
