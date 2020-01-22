@@ -786,7 +786,9 @@ class TestApi58(BaseAPIView):
             broker = Broker.objects.get(user=request.user)
             param1 = request.data.get('param1')
             param2 = request.data.get('param2')
-        except Exception:
+            param3 = request.data.get('param3')
+        except Exception as e:
+            print(e)
             data = {
                 "message": "Invalid Broker",
                 "message_fa": "خطا: کارگزار نامعتبر است.",
@@ -818,11 +820,13 @@ class TestApi58(BaseAPIView):
         # print("************ Get subscriber type")
         # exe_response_type_3, exe_response_description_3 = MCI().behsa_subscriber_type(param1)
         # update_mci_packages()
-        result = EWays().callsale(param1)
+        result1 = EWays().call_sale(param1)
+        result2 = EWays().exe_sale(param2,'40','1000',param3)
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-            "result": result
+            "result2": result2,
+            "result1": result1,
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1": exe_response_type_1,

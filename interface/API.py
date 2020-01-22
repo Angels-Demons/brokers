@@ -373,31 +373,44 @@ class MCI:
 
 class EWays:
     eways_pass = '19K1*57e51'
+    tag1 = 'req'
+    tag2 = 'tem'
+    xmlns1 ='http://NewCore.Eways.ir/Webservice/Request.asmx'
+    xmlns2 = 'http://tempuri.org/'
     eways_url_1 = 'http://core.eways.ir/WebService/Request.asmx'
+    eways_url_2 = 'http://core.eways.ir/WebService/BackEndRequest.asmx'
 
-
-    def ewaysreqrypei(self,action, eways_url, params):
+    def ewaysreqrypei(self,action, eways_url, params , tag , xlmns):
         headers = {'content-type': 'text/xml'}
 
-        template = Template("""<req:{{name}}>{{value}}</req:{{name}}>""")
+        template = Template("""<{{tag}}:{{name}}>{{value}}</{{tag}}:{{name}}>""")
 
-        requestTemp = Template("""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:req="http://NewCore.Eways.ir/Webservice/Request.asmx">
+        requestTemp = Template("""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:{{tag}}="{{xlmns}}">
    <soapenv:Header/>
    <soapenv:Body>
-      <req:{{action}}>
+      <{{tag}}:{{action}}>
 {{parameter}}
-      </req:{{action}}>
+      </{{tag}}:{{action}}>
    </soapenv:Body>
 </soapenv:Envelope>""")
 
         parameters = ""
         for x in params:
-            parameters = parameters + template.render(name=x.name, value=x.value)
-        body = requestTemp.render(action=action, parameter=parameters)
+            parameters = parameters + template.render(name=x.name, value=x.value , tag = tag)
+        body = requestTemp.render(action=action, parameter=parameters , tag=tag , xlmns = xlmns)
         return requests.post(eways_url, data=body, headers=headers, verify=False).content
 
-    def callsale(self, param1):
-        response = self.ewaysreqrypei('GetProduct', self.eways_url_1, [Parameter("TransactionID", param1),
-                                                                          Parameter("UserName", self.eways_pass)])
+
+
+    def call_sale(self, requestID):
+        response = self.ewaysreqrypei('GetProduct', self.eways_url_1, [Parameter("TransactionID", requestID),
+                                                                          Parameter("UserName", self.eways_pass)],self.tag1 , self.xmlns1)
         return response
 
+    def exe_sale(self, requestID , productType,Count,Mobile):
+        response = self.ewaysreqrypei('RequestPins', self.eways_url_2, [Parameter("RequestID", requestID),
+                                                                       Parameter("SitePassword", self.eways_pass),
+                                                                       Parameter("ProductType", productType),
+                                                                       Parameter("Count", Count),
+                                                                          Parameter("Mobile", Mobile)],self.tag2 , self.xmlns2)
+        return response
