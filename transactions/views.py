@@ -175,10 +175,9 @@ class ChargeCallSaleView(BaseAPIView):
                 return Response(data, status=status.HTTP_200_OK)
 
         ####  should be modified to eways services
-
         if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            top_up.before_call(operator=operator)
             # Calling eways GetProduct and update topup
-
             data = {
                 "message": "Failed to submit request",
                 "message_fa": top_up.call_response_description,

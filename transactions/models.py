@@ -54,6 +54,7 @@ class TopUp(models.Model):
     exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
     exe_response_description = models.CharField(max_length=1023, null=True, blank=True)
     provider_id = models.CharField(max_length=255, null=True, blank=True)
+    uid = models.BigIntegerField(null=True, blank=False, unique=True)
     bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, blank=True)
     card_number = models.CharField(max_length=255, null=True, blank=True)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
@@ -88,6 +89,11 @@ class TopUp(models.Model):
             self.state = RecordState.CALL_ERROR.value
             self.save()
             return False
+
+    def before_call(self, operator):
+        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            self.uid = datetime.timestamp(datetime.now())
+        return
 
     def before_execute(self, bank_code, card_number, card_type):
         self.execution_time = datetime.now()
