@@ -414,3 +414,8 @@ class EWays:
                                                                        Parameter("Count", Count),
                                                                           Parameter("Mobile", Mobile)],self.tag2 , self.xmlns2)
         return response
+
+    def get_status(self, TransactionID,RequestID):
+        response = self.ewaysreqrypei('GetStatus', self.eways_url_1, [Parameter("TransactionID", TransactionID),
+                                                                          Parameter("RequestID", RequestID)],self.tag1 , self.xmlns1)
+        return response
