@@ -364,3 +364,8 @@ class MCI:
         md5hash = hashlib.md5(byte_hash).hexdigest()
         return md5hash.replace("-", "")
 
+
+class EWays:
+
+    def callsale(self , param1):
+        return 'Executed : ' + str(param1)

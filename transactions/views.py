@@ -11,7 +11,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from accounts.views import BaseAPIView
 from accounts.models import ChargeType
-from interface.API import MCI
+from interface.API import MCI , EWays
 from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer
@@ -785,6 +785,7 @@ class TestApi58(BaseAPIView):
         try:
             broker = Broker.objects.get(user=request.user)
             param1 = request.data.get('param1')
+            param2 = request.data.get('param2')
         except Exception:
             data = {
                 "message": "Invalid Broker",
@@ -810,26 +811,26 @@ class TestApi58(BaseAPIView):
         # exe_response_type_1, exe_response_description_1 = MCI().behsa_charge_credit()
 
 
-        print("************ Get subscriber Credit")
-        exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(param1)
-        print("************ Get subscriber package")
-        exe_response_type_2, exe_response_description_2 = MCI().behsa_subscriber_package_quata(param1)
-        print("************ Get subscriber type")
-        exe_response_type_3, exe_response_description_3 = MCI().behsa_subscriber_type(param1)
-
+        # print("************ Get subscriber Credit")
+        # exe_response_type_1, exe_response_description_1 = MCI().behsa_subscriber_charge_credit(param1)
+        # print("************ Get subscriber package")
+        # exe_response_type_2, exe_response_description_2 = MCI().behsa_subscriber_package_quata(param1)
+        # print("************ Get subscriber type")
+        # exe_response_type_3, exe_response_description_3 = MCI().behsa_subscriber_type(param1)
         # update_mci_packages()
-
+        result = EWays.callsale(param1)
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
+            "result": result
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
-            "exe_response_type_1": exe_response_type_1,
-            "exe_response_description_1": exe_response_description_1,
-            "exe_response_type_2": exe_response_type_2,
-            "exe_response_description_2": exe_response_description_2,
-            "exe_response_type_3": exe_response_type_3,
-            "exe_response_description_3": exe_response_description_3,
+            # "exe_response_type_1": exe_response_type_1,
+            # "exe_response_description_1": exe_response_description_1,
+            # "exe_response_type_2": exe_response_type_2,
+            # "exe_response_description_2": exe_response_description_2,
+            # "exe_response_type_3": exe_response_type_3,
+            # "exe_response_description_3": exe_response_description_3,
             # "exe_response_type_2": exe_response_type_2,
             # "exe_response_description_2": exe_response_description_2
         }
