@@ -1,3 +1,5 @@
+xmltodict
+zeep
 djangorestframework-jwt==1.11.0
 requests==2.22.0
 Django==2.2.7

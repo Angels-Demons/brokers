@@ -941,13 +941,13 @@ class TestApi58(BaseAPIView):
         # print("************ Get subscriber type")
         # exe_response_type_3, exe_response_description_3 = MCI().behsa_subscriber_type(param1)
         # update_mci_packages()
-        result1 = EWays().call_sale(param1)
-        result2 = EWays().exe_sale(param2, '40', amount, param3)
+        result1_state, uuid = EWays().call_sale(param1)
+        result2_state,result2 = EWays().exe_sale(param2, '40', amount, param3)
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
             "result2": result2,
-            "result1": result1,
+            "result1": uuid,
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1": exe_response_type_1,

@@ -3,7 +3,9 @@ import binascii
 import logging
 from jinja2 import Template
 import requests
+import xmltodict
 import json
+from zeep import Client,helpers
 import hashlib
 from requests.auth import HTTPBasicAuth
 
@@ -371,51 +373,88 @@ class MCI:
         return md5hash.replace("-", "")
 
 
+# class EWays:
+#     eways_pass = '19K1*57e51'
+#     tag1 = 'req'
+#     tag2 = 'tem'
+#     xmlns1 ='http://NewCore.Eways.ir/Webservice/Request.asmx'
+#     xmlns2 = 'http://tempuri.org/'
+#     eways_url_1 = 'http://core.eways.ir/WebService/Request.asmx'
+#     eways_url_2 = 'http://core.eways.ir/WebService/BackEndRequest.asmx'
+#
+#     def ewaysreqrypei(self,action, eways_url, params , tag , xlmns):
+#         headers = {'content-type': 'text/xml'}
+#
+#         template = Template("""<{{tag}}:{{name}}>{{value}}</{{tag}}:{{name}}>""")
+#
+#         requestTemp = Template("""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:{{tag}}="{{xlmns}}">
+#    <soapenv:Header/>
+#    <soapenv:Body>
+#       <{{tag}}:{{action}}>
+# {{parameter}}
+#       </{{tag}}:{{action}}>
+#    </soapenv:Body>
+# </soapenv:Envelope>""")
+#
+#         parameters = ""
+#         for x in params:
+#             parameters = parameters + template.render(name=x.name, value=x.value , tag = tag)
+#         body = requestTemp.render(action=action, parameter=parameters , tag=tag , xlmns = xlmns)
+#         return requests.post(eways_url, data=body, headers=headers, verify=False).content
+#
+#
+#
+#     def call_sale(self, requestID):
+#         response = self.ewaysreqrypei('GetProduct', self.eways_url_1, [Parameter("TransactionID", requestID),
+#                                                                           Parameter("UserName", self.eways_pass)],self.tag1 , self.xmlns1)
+#         return response
+#
+#     def exe_sale(self, requestID , productType,Count,Mobile):
+#         response = self.ewaysreqrypei('RequestPins', self.eways_url_2, [Parameter("RequestID", requestID),
+#                                                                        Parameter("SitePassword", self.eways_pass),
+#                                                                        Parameter("ProductType", productType),
+#                                                                        Parameter("Count", Count),
+#                                                                           Parameter("Mobile", Mobile)],self.tag2 , self.xmlns2)
+#         return response
+#
+#     def get_status(self, TransactionID,RequestID):
+#         response = self.ewaysreqrypei('GetStatus', self.eways_url_1, [Parameter("TransactionID", TransactionID),
+#                                                                           Parameter("RequestID", RequestID)],self.tag1 , self.xmlns1)
+#         return response
+
 class EWays:
     eways_pass = '19K1*57e51'
-    tag1 = 'req'
-    tag2 = 'tem'
-    xmlns1 ='http://NewCore.Eways.ir/Webservice/Request.asmx'
-    xmlns2 = 'http://tempuri.org/'
-    eways_url_1 = 'http://core.eways.ir/WebService/Request.asmx'
-    eways_url_2 = 'http://core.eways.ir/WebService/BackEndRequest.asmx'
+    eways_url_1 = 'http://core.eways.ir/WebService/Request.asmx?wsdl'
+    eways_url_2 = 'http://core.eways.ir/WebService/BackEndRequest.asmx?wsd'
 
-    def ewaysreqrypei(self,action, eways_url, params , tag , xlmns):
-        headers = {'content-type': 'text/xml'}
+    def call_sale(self, TransactionID):
+        client = Client(self.eways_url_1)
+        response = client.service.GetProduct(TransactionID=TransactionID, UserName=self.eways_pass)
 
-        template = Template("""<{{tag}}:{{name}}>{{value}}</{{tag}}:{{name}}>""")
+        try:
+            res = json.loads(json.dumps(xmltodict.parse(response['Result'])))
+            for i in res['Eways']['Requirements']['Requirement']:
+                if i['@ID'] == 'UUID':
+                    return True, i['#text']
+        except Exception:
+            return False, ''
 
-        requestTemp = Template("""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:{{tag}}="{{xlmns}}">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <{{tag}}:{{action}}>
-{{parameter}}
-      </{{tag}}:{{action}}>
-   </soapenv:Body>
-</soapenv:Envelope>""")
+    def exe_sale(self, requestID, productType, Count,Mobile):
 
-        parameters = ""
-        for x in params:
-            parameters = parameters + template.render(name=x.name, value=x.value , tag = tag)
-        body = requestTemp.render(action=action, parameter=parameters , tag=tag , xlmns = xlmns)
-        return requests.post(eways_url, data=body, headers=headers, verify=False).content
-
-
-
-    def call_sale(self, requestID):
-        response = self.ewaysreqrypei('GetProduct', self.eways_url_1, [Parameter("TransactionID", requestID),
-                                                                          Parameter("UserName", self.eways_pass)],self.tag1 , self.xmlns1)
-        return response
-
-    def exe_sale(self, requestID , productType,Count,Mobile):
-        response = self.ewaysreqrypei('RequestPins', self.eways_url_2, [Parameter("RequestID", requestID),
-                                                                       Parameter("SitePassword", self.eways_pass),
-                                                                       Parameter("ProductType", productType),
-                                                                       Parameter("Count", Count),
-                                                                          Parameter("Mobile", Mobile)],self.tag2 , self.xmlns2)
-        return response
+        client = Client(self.eways_url_2)
+        response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType, Count=Count,
+                                              Mobile=Mobile)
+        try:
+            res = json.loads(json.dumps(helpers.serialize_object(response)))[0]
+            return True, res
+        except Exception:
+            return False, ''
 
     def get_status(self, TransactionID,RequestID):
-        response = self.ewaysreqrypei('GetStatus', self.eways_url_1, [Parameter("TransactionID", TransactionID),
-                                                                          Parameter("RequestID", RequestID)],self.tag1 , self.xmlns1)
-        return response
+        client = Client(self.eways_url_1)
+        response = client.service.GetStatus(TransactionID=TransactionID,RequestID=RequestID)
+        try:
+            res = json.loads(json.dumps(helpers.serialize_object(response)))[0]
+            return True, res
+        except Exception:
+            return False, ''
