@@ -132,6 +132,7 @@ class ChargeCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as e:
             data = {
+                "error_dict": str(e.message_dict),
                 "message": str(e.messages[0]),
                 "message_fa": "خطا: پارامترهای غیر معتبر",
                 "code": codes.invalid_parameter,
