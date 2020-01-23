@@ -907,6 +907,8 @@ class TestApi58(BaseAPIView):
             param1 = request.data.get('param1')
             param2 = request.data.get('param2')
             param3 = request.data.get('param3')
+            amount = request.data.get('amount')
+
         except Exception as e:
             print(e)
             data = {
@@ -940,7 +942,7 @@ class TestApi58(BaseAPIView):
         # exe_response_type_3, exe_response_description_3 = MCI().behsa_subscriber_type(param1)
         # update_mci_packages()
         result1 = EWays().call_sale(param1)
-        result2 = EWays().exe_sale(param2, '40', '1000', param3)
+        result2 = EWays().exe_sale(param2, '40', amount, param3)
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
