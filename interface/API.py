@@ -425,7 +425,7 @@ class MCI:
 class EWays:
     eways_pass = '19K1*57e51'
     eways_url_1 = 'http://core.eways.ir/WebService/Request.asmx?wsdl'
-    eways_url_2 = 'http://core.eways.ir/WebService/BackEndRequest.asmx?wsd'
+    eways_url_2 = "http://core.eways.ir/WebService/BackEndRequest.asmx?wsdl"
 
     def call_sale(self, TransactionID):
         client = Client(self.eways_url_1)

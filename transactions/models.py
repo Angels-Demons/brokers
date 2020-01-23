@@ -93,6 +93,7 @@ class TopUp(models.Model):
     def before_call(self, operator):
         if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
             self.uid = datetime.timestamp(datetime.now())
+            self.save()
         return
 
     def before_execute(self, bank_code, card_number, card_type):
