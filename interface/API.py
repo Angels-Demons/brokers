@@ -442,7 +442,7 @@ class EWays:
     def exe_sale(self, requestID, productType, Count,Mobile):
 
         client = Client(self.eways_url_2)
-        response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType, Count=Count,
+        response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType,Count=Count,
                                               Mobile=Mobile)
         try:
             res = json.loads(json.dumps(helpers.serialize_object(response)))[0]
