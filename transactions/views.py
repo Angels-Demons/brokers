@@ -68,13 +68,18 @@ class ChargeCallSaleView(BaseAPIView):
         if expired():
             return Response()
         broker = request.user.broker
-        operator = request.data.get('operator')
+        operator = int(request.data.get('operator'))
         amount = request.data.get('amount')
         tell_num = request.data.get('tell_num')
         tell_charger = request.data.get('tell_charger')
         data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
         if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
                                                                              Operator.RIGHTEL.value]:
+            # print(operator)
+            # print(not operator)
+            # print(not isinstance(operator, int))
+            # print(operator not in [Operator.MCI.value, Operator.MTN.value,
+            #                                                                  Operator.RIGHTEL.value])
             data["message"] = "'operator' is not provided or valid."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         if not amount:
