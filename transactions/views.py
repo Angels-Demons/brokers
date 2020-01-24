@@ -943,7 +943,7 @@ class TestApi58(BaseAPIView):
         # update_mci_packages()
         # result1_state, uuid = EWays().call_sale(param1)
         # result2_state,result2 = EWays().exe_sale(param2, '40', amount, param3)
-        result = EWays().exe_sale_test(param1,40,5000,param2)
+        result = EWays().exe_sale_test(param1,40,5000,int(param2))
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
