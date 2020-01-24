@@ -460,6 +460,8 @@ class EWays:
         print(response)
         print(response['Status'])
         print(type(response))
+        if not callsale:
+            return 5 ,str(response)
         try:
             if response['Status'] in[0, 40, 114, 400, 500, 600, 700, 1100]:
                 if callsale:
@@ -469,7 +471,7 @@ class EWays:
                             return codes.successful, i['#text']
                 else:
                     return codes.successful, response['Message']
-            elif response['Status'] in [36, 37, 42, 404, 405, 406, 408, 501, 502, 504, 507, 508, 604, 605, 606, 608, 609, 804, 809, -2, -3]:
+            elif response['Status'] in [36, 37, 42, 404, 405, 406, 501, 502, 504, 507, 508, 604, 605, 606, 608, 609, 804, 809, -2, -3]:
                 return ResponseTypes.SYSTEMERROR.value, response['Message']
             elif response['Status'] in [509]:
                 return ResponseTypes.ERRORCHARGE.value,response['Message']
