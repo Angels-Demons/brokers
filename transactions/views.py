@@ -344,7 +344,8 @@ class PackageCallSaleView(BaseAPIView):
         tell_num = request.data.get('tell_num')
         tell_charger = request.data.get('tell_charger')
         package_type = request.data.get('package_type')
-        data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+
+        data = {"message": '', "message_fa": "پارامترهای ارسالی نادرست است", "code": codes.invalid_parameter}
         if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
                                                                              Operator.RIGHTEL.value]:
             data["message"] = "'operator' is not provided."
@@ -416,7 +417,8 @@ class PackageCallSaleView(BaseAPIView):
                 "code": codes.insufficient_balance,
             }
             return Response(data, status=status.HTTP_200_OK)
-
+        call_response_type = -1
+        call_response_description = ''
         if operator == Operator.MCI.value:
             call_response_type, call_response_description = MCI().package_call_sale(
                 package_record.tell_num,
@@ -424,61 +426,33 @@ class PackageCallSaleView(BaseAPIView):
                 package_record.package.amount,
                 package_record.package.package_type,
             )
-            success = package_record.after_call(call_response_type, call_response_description)
-            if success:
-                data = {
-                    "message": "Request successfully submitted",
-                    "message_fa": "درخواست با موفقیت ثبت شد",
-                    "code": codes.successful,
-                    "provider_id": package_record.provider_id
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            elif int(call_response_type) == 19:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": package_record.exe_response_description,
-                    "code": codes.invalid_parameter,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to submit request",
-                    "message_fa": package_record.call_response_description,
-                    "code": package_record.call_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        elif operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            package_record.before_call(operator=operator)
+            call_response_type, call_response_description = EWays().call_sale(int(package_record.uid))
 
-        ####  should be modified to eways services
-        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
-            call_response_type, call_response_description = MCI().package_call_sale(
-                package_record.tell_num,
-                package_record.tell_charger,
-                package_record.package.amount,
-                package_record.package.package_type,
-            )
-            success = package_record.after_call(call_response_type, call_response_description)
-            if success:
-                data = {
-                    "message": "Request successfully submitted",
-                    "message_fa": "درخواست با موفقیت ثبت شد",
-                    "code": codes.successful,
-                    "provider_id": package_record.provider_id
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            elif int(call_response_type) == 19:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": package_record.exe_response_description,
-                    "code": codes.invalid_parameter,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to submit request",
-                    "message_fa": package_record.call_response_description,
-                    "code": package_record.call_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        success = package_record.after_call(call_response_type, call_response_description)
+        if success:
+            data = {
+                "message": "Request successfully submitted",
+                "message_fa": "درخواست با موفقیت ثبت شد",
+                "code": codes.successful,
+                "provider_id": package_record.provider_id
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        elif int(call_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": package_record.exe_response_description,
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            data = {
+                "message": "Failed to submit request",
+                "message_fa": package_record.call_response_description,
+                "code": package_record.call_response_type,
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
 
 class PackageExeSaleView(BaseAPIView):
@@ -547,7 +521,8 @@ class PackageExeSaleView(BaseAPIView):
                 "code": codes.insufficient_balance,
             }
             return Response(data, status=status.HTTP_200_OK)
-
+        exe_response_type = -1
+        exe_response_description = ''
         if operator == Operator.MCI.value:
             exe_response_type, exe_response_description = MCI().package_exe_sale(
                 provider_id=package_record.provider_id,
@@ -555,63 +530,34 @@ class PackageExeSaleView(BaseAPIView):
                 card_no=package_record.card_number,
                 card_type=package_record.card_type
             )
-            success = package_record.after_execute(exe_response_type, exe_response_description)
-            if success:
-                operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
-                # broker.charge_for_mcci_transaction(package_record.package.amount)
-                data = {
-                    "message": "Request successfully executed",
-                    "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": codes.successful,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            elif int(exe_response_type) == 19:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": package_record.exe_response_description,
-                    "code": codes.invalid_parameter,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": package_record.exe_response_description,
-                    "code": package_record.exe_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        elif operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+            exe_response_type, exe_response_description = EWays().exe_sale(
+                package_record.provider_id, package_record.package.package_type, 1, package_record.tell_charger)
+        success = package_record.after_execute(exe_response_type, exe_response_description)
+        if success:
+            operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
+            # broker.charge_for_mcci_transaction(package_record.package.amount)
+            data = {
+                "message": "Request successfully executed",
+                "message_fa": "درخواست با موفقیت اجرا شد",
+                "code": codes.successful,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        elif int(exe_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": package_record.exe_response_description,
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": package_record.exe_response_description,
+                "code": package_record.exe_response_type,
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
-        ####  should be modified to eways services
-        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
-            exe_response_type, exe_response_description = MCI().package_exe_sale(
-                provider_id=package_record.provider_id,
-                bank_code=package_record.bank_code,
-                card_no=package_record.card_number,
-                card_type=package_record.card_type
-            )
-            success = package_record.after_execute(exe_response_type, exe_response_description)
-            if success:
-                operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
-                # broker.charge_for_mcci_transaction(package_record.package.amount)
-                data = {
-                    "message": "Request successfully executed",
-                    "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": codes.successful,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            elif int(exe_response_type) == 19:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": package_record.exe_response_description,
-                    "code": codes.invalid_parameter,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": package_record.exe_response_description,
-                    "code": package_record.exe_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
 
 
 class TransactionStatusInquiry(BaseAPIView):
@@ -943,11 +889,11 @@ class TestApi58(BaseAPIView):
         # update_mci_packages()
         # result1_state, uuid = EWays().call_sale(param1)
         # result2_state,result2 = EWays().exe_sale(param2, '40', amount, param3)
-        result = EWays().exe_sale_test(param1,40,5000,int(param2))
+        # result = EWays().exe_sale_test(param1,40,5000,int(param2))
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-            "result": str(result),
+            # "result": str(result),
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1": exe_response_type_1,

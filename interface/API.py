@@ -433,19 +433,13 @@ class EWays:
         response = client.service.GetProduct(TransactionID=TransactionID, UserName=self.eways_pass)
         return self.eways_response_mapper(response, True)
 
-    def exe_sale(self, requestID, productType, Count,Mobile):
+    def exe_sale(self, requestID, productType, Count, Mobile):
 
         client = Client(self.eways_url_2)
         response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType,Count=Count,
                                               Mobile=Mobile)
         return self.eways_response_mapper(response[0], False)
 
-    def exe_sale_test(self, requestID, productType, Count,Mobile):
-
-        client = Client(self.eways_url_2)
-        response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType,Count=Count,
-                                              Mobile=Mobile)
-        return response[0]
 
     def get_status(self, TransactionID,RequestID):
         client = Client(self.eways_url_1)
@@ -457,11 +451,6 @@ class EWays:
             return False, ''
 
     def eways_response_mapper(self, response, callsale):
-        print(response)
-        print(response['Status'])
-        print(type(response))
-        if not callsale:
-            return 5 ,str(response)
         try:
             if response['Status'] in[0, 40, 114, 400, 500, 600, 700, 1100]:
                 if callsale:
