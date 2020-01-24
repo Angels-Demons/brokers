@@ -68,18 +68,15 @@ class ChargeCallSaleView(BaseAPIView):
         if expired():
             return Response()
         broker = request.user.broker
-        operator = int(request.data.get('operator'))
+        operator = request.data.get('operator')
         amount = request.data.get('amount')
         tell_num = request.data.get('tell_num')
         tell_charger = request.data.get('tell_charger')
-        data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+        charge_type = request.data.get('charge_type')
+
+        data = {"message": '', "message_fa": "پارامترهای ارسالی نادرست است", "code": codes.invalid_parameter}
         if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
                                                                              Operator.RIGHTEL.value]:
-            # print(operator)
-            # print(not operator)
-            # print(not isinstance(operator, int))
-            # print(operator not in [Operator.MCI.value, Operator.MTN.value,
-            #                                                                  Operator.RIGHTEL.value])
             data["message"] = "'operator' is not provided or valid."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         if not amount:
@@ -91,11 +88,10 @@ class ChargeCallSaleView(BaseAPIView):
         if not tell_charger:
             data["message"] = "'tell_charger' is not provided."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not charge_type:
+            data["message"] = "'charge_type' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         try:
-            charge_type = request.data.get('charge_type')
-            if not charge_type:
-                data["message"] = "'charge_type' is not provided."
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             operator_access = broker.operatoraccess_set.get(operator=operator)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
                 data = {
@@ -155,50 +151,53 @@ class ChargeCallSaleView(BaseAPIView):
                 top_up.amount,
                 top_up.charge_type,
             )
-            success = top_up.after_call(call_response_type, call_response_description)
-            if success:
-                data = {
-                    "message": "Request successfully submitted",
-                    "message_fa": "درخواست با موفقیت ثبت شد",
-                    "code": codes.successful,
-                    "provider_id": top_up.provider_id
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            elif int(call_response_type) == 19:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": top_up.exe_response_description,
-                    "code": codes.invalid_parameter,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to submit request",
-                    "message_fa": top_up.call_response_description,
-                    "code": top_up.call_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-
-        ####  should be modified to eways services
-        if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+        elif operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
             top_up.before_call(operator=operator)
-            call_response_state,call_response_description = EWays().call_sale(int(top_up.uid))
-            success = top_up.after_call(0, call_response_description)
-            if success:
-                data = {
-                    "message": "Request successfully submitted",
-                    "message_fa": "درخواست با موفقیت ثبت شد",
-                    "code": codes.successful,
-                    "provider_id": top_up.provider_id
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": top_up.exe_response_description,
-                    "code": codes.invalid_parameter,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+            call_response_type, call_response_description = EWays().call_sale(int(top_up.uid))
+
+        success = top_up.after_call(call_response_type, call_response_description)
+        if success:
+            data = {
+                "message": "Request successfully submitted",
+                "message_fa": "درخواست با موفقیت ثبت شد",
+                "code": codes.successful,
+                "provider_id": top_up.provider_id
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        elif int(call_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": top_up.exe_response_description,
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = {
+                "message": "Failed to submit request",
+                "message_fa": top_up.call_response_description,
+                "code": top_up.call_response_type,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+
+        # if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+        #     top_up.before_call(operator=operator)
+        #     call_response_type, call_response_description = EWays().call_sale(int(top_up.uid))
+        #     success = top_up.after_call(call_response_type, call_response_description)
+        #     if success:
+        #         data = {
+        #             "message": "Request successfully submitted",
+        #             "message_fa": "درخواست با موفقیت ثبت شد",
+        #             "code": codes.successful,
+        #             "provider_id": top_up.provider_id
+        #         }
+        #         return Response(data, status=status.HTTP_200_OK)
+        #     else:
+        #         data = {
+        #             "message": "Failed to execute request",
+        #             "message_fa": top_up.exe_response_description,
+        #             "code": codes.invalid_parameter,
+        #         }
+        #         return Response(data, status=status.HTTP_200_OK)
 
 
 class ChargeExeSaleView(BaseAPIView):
@@ -214,7 +213,8 @@ class ChargeExeSaleView(BaseAPIView):
             bank_code = request.data.get('bank_code')
             card_number = request.data.get('card_number')
             card_type = request.data.get('card_type')
-            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+
+            data = {"message": '', "message_fa": "پارامترهای ارسالی نادرست است", "code": codes.invalid_parameter}
             if not provider_id:
                 data["message"] = "'charge_type' is not provided."
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -290,7 +290,6 @@ class ChargeExeSaleView(BaseAPIView):
                     "message": "Request successfully executed",
                     "message_fa": "درخواست با موفقیت اجرا شد",
                     "code": codes.successful,
-                    # "provider_id": top_up.provider_id
                 }
                 return Response(data, status=status.HTTP_200_OK)
             elif int(exe_response_type) == 19:
@@ -299,7 +298,7 @@ class ChargeExeSaleView(BaseAPIView):
                     "message_fa": top_up.exe_response_description,
                     "code": codes.invalid_parameter,
                 }
-                return Response(data, status=status.HTTP_200_OK)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
                 data = {
                     "message": "Failed to execute request",
@@ -308,20 +307,17 @@ class ChargeExeSaleView(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_200_OK)
 
-        ####  should be modified to eways services
-
         if top_up.operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
-            exe_response_state,exe_response_description = EWays().exe_sale(top_up.provider_id, int(top_up.charge_type), int(top_up.amount),int(top_up.tell_charger))
-            # exe_response_state,exe_response_description = EWays().exe_sale("97414b1a-9c9c-48bb-b422-38652679c6c5", 40, 5000,9336402518 )
-            print('here.........')
+            exe_response_type, exe_response_description = EWays().exe_sale(top_up.provider_id, int(top_up.charge_type),
+                                                                           int(top_up.amount), int(top_up.tell_charger))
             print(exe_response_description)
-            success = top_up.after_execute(0, 'ok')
+            success = top_up.after_execute(exe_response_type, exe_response_description)
             if success:
                 operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
                 data = {
                     "message": "Request successfully executed",
                     "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": str(exe_response_description),
+                    "code": codes.successful,
                 }
                 return Response(data, status=status.HTTP_200_OK)
             else:

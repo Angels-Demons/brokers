@@ -54,7 +54,7 @@ class TopUp(models.Model):
     exe_response_type = models.SmallIntegerField(choices=Choices.response_types_choices, null=True, blank=True)
     exe_response_description = models.CharField(max_length=1023, null=True, blank=True)
     provider_id = models.CharField(max_length=255, null=True, blank=True)
-    uid = models.BigIntegerField(null=True, blank=True, unique=True)
+    uid = models.BigIntegerField(null=True, blank=True)
     bank_code = models.PositiveSmallIntegerField(choices=Choices.bank_codes, null=True, blank=True)
     card_number = models.CharField(max_length=255, null=True, blank=True)
     card_type = models.PositiveSmallIntegerField(choices=Choices.card_types, null=True, blank=True)
@@ -92,7 +92,8 @@ class TopUp(models.Model):
 
     def before_call(self, operator):
         if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
-            self.uid = datetime.timestamp(datetime.now())
+            self.uid = int('1'+str(self.id % 147483647))
+            # self.uid = datetime.timestamp(datetime.now())
             self.save()
         return
 

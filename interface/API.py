@@ -11,6 +11,7 @@ from requests.auth import HTTPBasicAuth
 
 from accounts.utils import config_logging
 from transactions.models import ProvidersToken, Operator
+from transactions.enums import ResponceCodeTypes as codes , ResponseTypes
 
 MCI_token = ""
 
@@ -430,14 +431,7 @@ class EWays:
     def call_sale(self, TransactionID):
         client = Client(self.eways_url_1)
         response = client.service.GetProduct(TransactionID=TransactionID, UserName=self.eways_pass)
-
-        try:
-            res = json.loads(json.dumps(xmltodict.parse(response['Result'])))
-            for i in res['Eways']['Requirements']['Requirement']:
-                if i['@ID'] == 'UUID':
-                    return True, i['#text']
-        except Exception:
-            return False, ''
+        return self.call_response_mapper(response)
 
     def exe_sale(self, requestID, productType, Count,Mobile):
 
@@ -458,3 +452,24 @@ class EWays:
             return True, res
         except Exception:
             return False, ''
+
+    def call_response_mapper(self, response):
+        try:
+            if response['Status'] == 0:
+                res = json.loads(json.dumps(xmltodict.parse(response['Result'])))
+                for i in res['Eways']['Requirements']['Requirement']:
+                    if i['@ID'] == 'UUID':
+                        return codes.successful, i['#text']
+            elif response['Status'] == 1:
+                return ResponseTypes.SYSTEMERROR.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value)
+            elif response['Status'] == 2:
+                return codes.invalid_access, response['Message']
+            elif response['Status'] == 3:
+                return codes.invalid_parameter, response['Message']
+            elif response['Status'] == 4:
+                return ResponseTypes.REFERTODESC.value, response['Message']
+            else:
+                return ResponseTypes.SYSTEMERROR.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value) + ' : ' + \
+                       str(response['Status']) + ' : ' + response['Message']
+        except Exception:
+            return ResponseTypes.SYSTEMERROR.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value)
