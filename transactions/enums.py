@@ -8,6 +8,9 @@ class ChargeType(Enum):
     JAVANAN = 1004
     BANOVAN = 1005
     MTN_DIRECT = 40
+    MTN_SPECIAL = 41
+    RIGHTEL_DIRECT = 60
+    RIGHTEL_SPECIAL = 61
 
     @staticmethod
     def farsi(value):
@@ -23,7 +26,12 @@ class ChargeType(Enum):
             return "بانوان"
         elif value == 40:
             return "مستقیم ایرانسل"
-
+        elif value == 41:
+            return "شگفت انگیز ایرانسل"
+        elif value == 60:
+            return "مستقیم رایتل"
+        elif value == 61:
+            return "شورانگیز رایتل"
 
 class Operator(Enum):
     MCI = 1
@@ -416,7 +424,9 @@ class Choices:
         (ChargeType.JAVANAN.value, ChargeType.farsi(ChargeType.JAVANAN.value)),
         (ChargeType.BANOVAN.value, ChargeType.farsi(ChargeType.BANOVAN.value)),
         (ChargeType.MTN_DIRECT.value, ChargeType.farsi(ChargeType.MTN_DIRECT.value)),
-
+        (ChargeType.MTN_SPECIAL.value, ChargeType.farsi(ChargeType.MTN_SPECIAL.value)),
+        (ChargeType.RIGHTEL_DIRECT.value, ChargeType.farsi(ChargeType.RIGHTEL_DIRECT.value)),
+        (ChargeType.RIGHTEL_SPECIAL.value, ChargeType.farsi(ChargeType.RIGHTEL_SPECIAL.value)),
     )
 
     record_states = (
