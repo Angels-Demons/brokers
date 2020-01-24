@@ -452,9 +452,10 @@ class EWays:
 
     def eways_response_mapper(self, response, callsale):
         print(response)
+        print(response['Status'])
         print(type(response))
         try:
-            if response['Status'] in(0, 40, 114, 400, 500, 600, 700, 1100, ):
+            if response['Status'] in[0, 40, 114, 400, 500, 600, 700, 1100]:
                 if callsale:
                     res = json.loads(json.dumps(xmltodict.parse(response['Result'])))
                     for i in res['Eways']['Requirements']['Requirement']:
@@ -462,12 +463,13 @@ class EWays:
                             return codes.successful, i['#text']
                 else:
                     return codes.successful, response['Message']
-            elif response['Status'] in(36, 37, 42, 404, 405, 406, 408, 501, 502, 504, 507, 508, 604, 605, 606, 608, 609, 804, 809, -2, -3):
+            elif response['Status'] in [36, 37, 42, 404, 405, 406, 408, 501, 502, 504, 507, 508, 604, 605, 606, 608, 609, 804, 809, -2, -3]:
                 return ResponseTypes.SYSTEMERROR.value, response['Message']
-            elif response['Status'] in (509, ):
+            elif response['Status'] in [509]:
                 return ResponseTypes.ERRORCHARGE.value,response['Message']
             else:
                 return ResponseTypes.REFERTODESC.value, str(response['Status']) + ' : ' + response['Message']
-        except Exception:
-            return ResponseTypes.SYSTEMERROR.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value)
+        except Exception as e:
+            print(e)
+            return ResponseTypes.REFERTODESC.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value)
 
