@@ -273,7 +273,8 @@ class ChargeExeSaleView(BaseAPIView):
                 "code": codes.insufficient_balance,
             }
             return Response(data, status=status.HTTP_200_OK)
-
+        exe_response_type = -1
+        exe_response_description = ''
         if top_up.operator == Operator.MCI.value:
             exe_response_type, exe_response_description = MCI().charge_exe_sale(
                 provider_id=top_up.provider_id,
@@ -281,52 +282,54 @@ class ChargeExeSaleView(BaseAPIView):
                 card_no=top_up.card_number,
                 card_type=top_up.card_type
             )
-            success = top_up.after_execute(exe_response_type, exe_response_description)
-            if success:
-                # modify change chargin method
-                # broker.charge_for_mcci_transaction(top_up.amount)
-                operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
-                data = {
-                    "message": "Request successfully executed",
-                    "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": codes.successful,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            elif int(exe_response_type) == 19:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": top_up.exe_response_description,
-                    "code": codes.invalid_parameter,
-                }
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": top_up.exe_response_description,
-                    "code": top_up.exe_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-
-        if top_up.operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+        elif top_up.operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
             exe_response_type, exe_response_description = EWays().exe_sale(top_up.provider_id, int(top_up.charge_type),
                                                                            int(top_up.amount), int(top_up.tell_charger))
-            print(exe_response_description)
-            success = top_up.after_execute(exe_response_type, exe_response_description)
-            if success:
-                operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
-                data = {
-                    "message": "Request successfully executed",
-                    "message_fa": "درخواست با موفقیت اجرا شد",
-                    "code": codes.successful,
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                data = {
-                    "message": "Failed to execute request",
-                    "message_fa": top_up.exe_response_description,
-                    "code": top_up.exe_response_type,
-                }
-                return Response(data, status=status.HTTP_200_OK)
+        success = top_up.after_execute(exe_response_type, exe_response_description)
+        if success:
+            # modify change chargin method
+            # broker.charge_for_mcci_transaction(top_up.amount)
+            operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
+            data = {
+                "message": "Request successfully executed",
+                "message_fa": "درخواست با موفقیت اجرا شد",
+                "code": codes.successful,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        elif int(exe_response_type) == 19:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": top_up.exe_response_description,
+                "code": codes.invalid_parameter,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = {
+                "message": "Failed to execute request",
+                "message_fa": top_up.exe_response_description,
+                "code": top_up.exe_response_type,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+
+        # if top_up.operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+        #     exe_response_type, exe_response_description = EWays().exe_sale(top_up.provider_id, int(top_up.charge_type),
+        #                                                                    int(top_up.amount), int(top_up.tell_charger))
+        #     success = top_up.after_execute(exe_response_type, exe_response_description)
+        #     if success:
+        #         operator_access.charge(amount=top_up.amount, top_up=True, record=top_up)
+        #         data = {
+        #             "message": "Request successfully executed",
+        #             "message_fa": "درخواست با موفقیت اجرا شد",
+        #             "code": codes.successful,
+        #         }
+        #         return Response(data, status=status.HTTP_200_OK)
+        #     else:
+        #         data = {
+        #             "message": "Failed to execute request",
+        #             "message_fa": top_up.exe_response_description,
+        #             "code": top_up.exe_response_type,
+        #         }
+        #         return Response(data, status=status.HTTP_200_OK)
 
 
 class PackageCallSaleView(BaseAPIView):
@@ -908,7 +911,6 @@ class TestApi58(BaseAPIView):
             amount = request.data.get('amount')
 
         except Exception as e:
-            print(e)
             data = {
                 "message": "Invalid Broker",
                 "message_fa": "خطا: کارگزار نامعتبر است.",

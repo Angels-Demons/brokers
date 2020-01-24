@@ -431,18 +431,15 @@ class EWays:
     def call_sale(self, TransactionID):
         client = Client(self.eways_url_1)
         response = client.service.GetProduct(TransactionID=TransactionID, UserName=self.eways_pass)
-        return self.call_response_mapper(response)
+        return self.eways_response_mapper(response, True)
 
     def exe_sale(self, requestID, productType, Count,Mobile):
 
         client = Client(self.eways_url_2)
         response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType,Count=Count,
                                               Mobile=Mobile)
-        try:
-            res = json.loads(json.dumps(helpers.serialize_object(response)))[0]
-            return True, res
-        except Exception:
-            return False, ''
+        return self.eways_response_mapper(response[0], False)
+
 
     def get_status(self, TransactionID,RequestID):
         client = Client(self.eways_url_1)
@@ -453,23 +450,24 @@ class EWays:
         except Exception:
             return False, ''
 
-    def call_response_mapper(self, response):
+    def eways_response_mapper(self, response, callsale):
+        print(response)
+        print(type(response))
         try:
-            if response['Status'] == 0:
-                res = json.loads(json.dumps(xmltodict.parse(response['Result'])))
-                for i in res['Eways']['Requirements']['Requirement']:
-                    if i['@ID'] == 'UUID':
-                        return codes.successful, i['#text']
-            elif response['Status'] == 1:
-                return ResponseTypes.SYSTEMERROR.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value)
-            elif response['Status'] == 2:
-                return codes.invalid_access, response['Message']
-            elif response['Status'] == 3:
-                return codes.invalid_parameter, response['Message']
-            elif response['Status'] == 4:
-                return ResponseTypes.REFERTODESC.value, response['Message']
+            if response['Status'] in(0, 40, 114, 400, 500, 600, 700, 1100, ):
+                if callsale:
+                    res = json.loads(json.dumps(xmltodict.parse(response['Result'])))
+                    for i in res['Eways']['Requirements']['Requirement']:
+                        if i['@ID'] == 'UUID':
+                            return codes.successful, i['#text']
+                else:
+                    return codes.successful, response['Message']
+            elif response['Status'] in(36, 37, 42, 404, 405, 406, 408, 501, 502, 504, 507, 508, 604, 605, 606, 608, 609, 804, 809, -2, -3):
+                return ResponseTypes.SYSTEMERROR.value, response['Message']
+            elif response['Status'] in (509, ):
+                return ResponseTypes.ERRORCHARGE.value,response['Message']
             else:
-                return ResponseTypes.SYSTEMERROR.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value) + ' : ' + \
-                       str(response['Status']) + ' : ' + response['Message']
+                return ResponseTypes.REFERTODESC.value, str(response['Status']) + ' : ' + response['Message']
         except Exception:
             return ResponseTypes.SYSTEMERROR.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value)
+
