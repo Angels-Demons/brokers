@@ -440,6 +440,12 @@ class EWays:
                                               Mobile=Mobile)
         return self.eways_response_mapper(response[0], False)
 
+    def exe_sale_test(self, requestID, productType, Count,Mobile):
+
+        client = Client(self.eways_url_2)
+        response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType,Count=Count,
+                                              Mobile=Mobile)
+        return response[0]
 
     def get_status(self, TransactionID,RequestID):
         client = Client(self.eways_url_1)
