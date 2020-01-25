@@ -8,6 +8,7 @@ import json
 from zeep import Client,helpers
 import hashlib
 from requests.auth import HTTPBasicAuth
+from transactions.models import Package
 
 from accounts.utils import config_logging
 from transactions.models import ProvidersToken, Operator
@@ -470,3 +471,89 @@ class EWays:
             print(e)
             return ResponseTypes.REFERTODESC.value, ResponseTypes.farsi(ResponseTypes.SYSTEMERROR.value)
 
+    def update_packages(self):
+        client = Client(self.eways_url_1)
+        response = client.service.GetProduct(TransactionID=1, UserName=self.eways_pass)
+        res = json.loads(json.dumps(xmltodict.parse(response['Result'])))
+        operator = -1
+        simcard = -1
+        duration = -1
+
+        for i in res['Eways']['Products']['Operator']:
+            if i['@OID'] == 'TMTN' or i['@OID'] == 'TRIGHTEL':
+                if i['@OID'] == 'TMTN':
+                    operator = 2
+                elif i['@OID'] == 'TRIGHTEL':
+                    operator = 3
+                print(i['@OID'])
+                for j in i['PINs']['PIN']:
+                    if j['CID'] == '33' or j['CID'] == '62':
+                        for k in j['SimCard']:
+                            simId = int(k['@SID'])
+                            if simId == 1:
+                                simcard = 1
+                            elif simId == 2:
+                                simcard = 0
+                            elif simId == 3:
+                                simcard = 4
+                            elif simId == 8:
+                                simcard = 5
+                            elif simId == 9:
+                                simcard = 3
+                            for l in k['GROUP']:
+                                gId = int(l['@GID'])
+                                if gId == 54:
+                                    duration = 365
+                                elif gId == 10:
+                                    duration = 180
+                                elif gId == 9:
+                                    duration = 90
+                                elif gId == 110:
+                                    duration = 30
+                                elif gId == 3:
+                                    duration = 30
+                                elif gId == 2:
+                                    duration = 7
+                                elif gId == 54:
+                                    duration = 365
+                                elif gId == 118:
+                                    duration = 58
+                                elif gId == 111:
+                                    duration = 120
+                                elif gId == 8:
+                                    duration = 60
+                                elif gId == 11:
+                                    duration = 15
+                                elif gId == 1:
+                                    duration = 1
+                                elif gId == 6:
+                                    duration = 0
+                                elif gId == 114:
+                                    duration = 56
+                                elif gId == 12:
+                                    duration = 3
+                                elif gId == 95:
+                                    duration = 57
+                                    obj, created = Package.objects.get_or_create(
+                                        package_type=int(m['@PID']),
+                                        operator=operator,
+                                        defaults={'name': m['@PackageName'], 'description': m['@PackageName'],
+                                                  'amount': int(m['@Price'] or 999),
+                                                  'PackageCostWithVat': int(m['@PricePaid'] or 999),
+                                                  'system': simcard,
+                                                  'package_duration': duration},
+                                    )
+                                    continue
+                                elif gId == 93:
+                                    duration = 59
+                                for m in l['PACKAGE']:
+                                    print(m)
+                                    obj, created = Package.objects.get_or_create(
+                                        package_type=int(m['@PID']),
+                                        operator=operator,
+                                        defaults={'name': m['@PackageName'], 'description': m['@PackageName'],
+                                                  'amount': int(m['@Price'] or 999),
+                                                  'PackageCostWithVat': int(m['@PricePaid'] or 999),
+                                                  'system': simcard,
+                                                  'package_duration': duration},
+                                    )

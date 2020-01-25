@@ -14,7 +14,7 @@ from accounts.models import ChargeType
 from interface.API import MCI, EWays
 from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
-from transactions.serializers import PackageSerializer
+from transactions.serializers import PackageSerializer, OperatorAccessSerializer
 from transactions.enums import ResponceCodeTypes as codes, Operator
 
 ACTIVE_DAYS = 180
@@ -715,14 +715,9 @@ class BrokerCreditView(BaseAPIView):
     def get(request):
         try:
             broker = request.user.broker
-            operator_access = broker.operatoraccess_set.get(operator=Operator.MCI.value)
-            if not operator_access.active:
-                data = {
-                    "message": "Broker does not have access for this action",
-                    "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
-                    "code": codes.invalid_access,
-                }
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            acceses = broker.operatoraccess_set.filter(active=True)
+            serialized_data = OperatorAccessSerializer(acceses,many=True).data
+            print(serialized_data)
         except OperatorAccess.DoesNotExist as e:
             data = {
                 "message": "Broker does not have access for this action",
@@ -730,7 +725,8 @@ class BrokerCreditView(BaseAPIView):
                 "code": codes.invalid_access,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
+        except Exception as e:
+            print(e)
             data = {
                 "message": "Invalid Broker",
                 "message_fa": "خطا: کارگزار نامعتبر است.",
@@ -745,22 +741,24 @@ class BrokerCreditView(BaseAPIView):
                 "code": codes.inactive_broker,
             }
             return Response(data, status=status.HTTP_200_OK)
-        general_credit = 0
-        topup_credit = 0
-        package_credit = 0
-        if operator_access.general_credit_access:
-            general_credit = operator_access.get_credit(top_up=True)
-        else:
-            topup_credit = operator_access.get_credit(top_up=True)
-            package_credit = operator_access.get_credit(top_up=False)
+
+        # general_credit = 0
+        # topup_credit = 0
+        # package_credit = 0
+        # if operator_access.general_credit_access:
+        #     general_credit = operator_access.get_credit(top_up=True)
+        # else:
+        #     topup_credit = operator_access.get_credit(top_up=True)
+        #     package_credit = operator_access.get_credit(top_up=False)
 
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
             "code": codes.successful,
-            "general_credit": general_credit,
-            "topup_credit": topup_credit,
-            "package_credit": package_credit
+            "credit" : serialized_data
+            # "general_credit": general_credit,
+            # "topup_credit": topup_credit,
+            # "package_credit": package_credit
         }
         return Response(data, status=status.HTTP_200_OK)
 
@@ -890,6 +888,7 @@ class TestApi58(BaseAPIView):
         # result1_state, uuid = EWays().call_sale(param1)
         # result2_state,result2 = EWays().exe_sale(param2, '40', amount, param3)
         # result = EWays().exe_sale_test(param1,40,5000,int(param2))
+        EWays().update_packages()
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
