@@ -535,11 +535,11 @@ class EWays:
                                 elif gId == 95:
                                     duration = 57
                                     obj, created = Package.objects.get_or_create(
-                                        package_type=int(m['@PID']),
+                                        package_type=int(l['@PID']),
                                         operator=operator,
-                                        defaults={'name': m['@PackageName'], 'description': m['@PackageName'],
-                                                  'amount': int(m['@Price'] or 999),
-                                                  'PackageCostWithVat': int(m['@PricePaid'] or 999),
+                                        defaults={'name': l['@PackageName'], 'description': l['@PackageName'],
+                                                  'amount': int(l['@Price'] or 999),
+                                                  'PackageCostWithVat': int(l['@PricePaid'] or 999),
                                                   'system': simcard,
                                                   'package_duration': duration},
                                     )
