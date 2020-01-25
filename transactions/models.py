@@ -169,6 +169,7 @@ class Package(models.Model):
     active = models.BooleanField(default=True)
     description = models.CharField(max_length=255, default='')
     amount = models.PositiveIntegerField()
+    PackageCostWithVat = models.PositiveIntegerField(default=0)
     package_duration = models.CharField(max_length=10,default='')
     system = models.PositiveIntegerField(default=2)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
