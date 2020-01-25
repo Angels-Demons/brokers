@@ -434,11 +434,11 @@ class EWays:
         response = client.service.GetProduct(TransactionID=TransactionID, UserName=self.eways_pass)
         return self.eways_response_mapper(response, True)
 
-    def exe_sale(self, requestID, productType, Count, Mobile):
+    def exe_sale(self, requestID, productType, Count, Mobile, OptionalParam=''):
 
         client = Client(self.eways_url_2)
         response = client.service.RequestPins(RequestID=requestID,SitePassword=self.eways_pass, ProductType=productType,Count=Count,
-                                              Mobile=Mobile)
+                                              Mobile=Mobile, OptionalParam=OptionalParam)
         return self.eways_response_mapper(response[0], False)
 
 

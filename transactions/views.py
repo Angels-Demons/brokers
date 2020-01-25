@@ -530,9 +530,12 @@ class PackageExeSaleView(BaseAPIView):
                 card_no=package_record.card_number,
                 card_type=package_record.card_type
             )
-        elif operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+        elif operator == Operator.MTN.value:
             exe_response_type, exe_response_description = EWays().exe_sale(
-                package_record.provider_id, package_record.package.package_type, 1, package_record.tell_charger)
+                package_record.provider_id, 33, 1, package_record.tell_charger, package_record.package.package_type)
+        elif operator == Operator.RIGHTEL.value:
+            exe_response_type, exe_response_description = EWays().exe_sale(
+                package_record.provider_id, 62, 1, package_record.tell_charger, package_record.package.package_type)
         success = package_record.after_execute(exe_response_type, exe_response_description)
         if success:
             operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
