@@ -891,23 +891,23 @@ class TestApi58(BaseAPIView):
         # result1_state, uuid = EWays().call_sale(param1)
         # result2_state,result2 = EWays().exe_sale(param2, '40', amount, param3)
         # result = EWays().exe_sale_test(param1,40,5000,int(param2))
-        print(1)
-        package_record = PackageRecord.objects.get(provider_id=param1)
-        # print('package_record.provider_id'+':'+str(package_record.provider_id))
-        # print('package_record.package.PackageCostWithVat'+':'+str(package_record.package.PackageCostWithVat))
-        # print('package_record.tell_charger'+':'+str(package_record.tell_charger))
-        # print('package_record.package.package_type' + ':' + str(package_record.package.package_type))
+        # print(1)
+        # package_record = PackageRecord.objects.get(provider_id=param1)
+        # # print('package_record.provider_id'+':'+str(package_record.provider_id))
+        # # print('package_record.package.PackageCostWithVat'+':'+str(package_record.package.PackageCostWithVat))
+        # # print('package_record.tell_charger'+':'+str(package_record.tell_charger))
+        # # print('package_record.package.package_type' + ':' + str(package_record.package.package_type))
+        #
+        #
+        # exe_response_type, exe_response_description = EWays().exe_sale(
+        #     package_record.provider_id, '33', package_record.package.PackageCostWithVat, package_record.tell_charger,
+        #     package_record.package.package_type)
 
-
-        exe_response_type, exe_response_description = EWays().exe_sale(
-            package_record.provider_id, '33', package_record.package.PackageCostWithVat, package_record.tell_charger,
-            package_record.package.package_type)
-
-        # EWays().update_packages()
+        EWays().update_packages()
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-            "result": str(exe_response_description),
+            # "result": str(exe_response_description),
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
             # "exe_response_type_1": exe_response_type_1,
