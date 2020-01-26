@@ -15,7 +15,7 @@ from interface.API import MCI, EWays
 from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer, OperatorAccessSerializer
-from transactions.enums import ResponceCodeTypes as codes, Operator
+from transactions.enums import ResponceCodeTypes as codes, Operator , ChargeType as chargecode
 
 ACTIVE_DAYS = 180
 
@@ -91,6 +91,20 @@ class ChargeCallSaleView(BaseAPIView):
         if not charge_type:
             data["message"] = "'charge_type' is not provided."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if operator == Operator.MTN.value and charge_type == chargecode.MOSTAGHIM:
+            charge_type = chargecode.MTN_DIRECT
+        elif operator == Operator.MTN.value and charge_type == chargecode.FOGHOLAADE:
+            charge_type = chargecode.MTN_SPECIAL
+        elif operator == Operator.RIGHTEL.value and charge_type == chargecode.MOSTAGHIM:
+            charge_type = chargecode.RIGHTEL_DIRECT
+        elif operator == Operator.RIGHTEL.value and charge_type == chargecode.FOGHOLAADE:
+            charge_type = chargecode.RIGHTEL_SPECIAL
+        elif operator == Operator.MCI.value:
+            pass
+        else:
+            data["message"] = "'charge_type' is not valid."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             operator_access = broker.operatoraccess_set.get(operator=operator)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
