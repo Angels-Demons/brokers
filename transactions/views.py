@@ -91,20 +91,21 @@ class ChargeCallSaleView(BaseAPIView):
         if not charge_type:
             data["message"] = "'charge_type' is not provided."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        if operator == Operator.MTN.value and charge_type == chargecode.MOSTAGHIM:
-            charge_type = chargecode.MTN_DIRECT
-        elif operator == Operator.MTN.value and charge_type == chargecode.FOGHOLAADE:
-            charge_type = chargecode.MTN_SPECIAL
-        elif operator == Operator.RIGHTEL.value and charge_type == chargecode.MOSTAGHIM:
-            charge_type = chargecode.RIGHTEL_DIRECT
-        elif operator == Operator.RIGHTEL.value and charge_type == chargecode.FOGHOLAADE:
-            charge_type = chargecode.RIGHTEL_SPECIAL
+        if operator == Operator.MTN.value and charge_type == chargecode.MOSTAGHIM.value:
+            charge_type = chargecode.MTN_DIRECT.value
+        elif operator == Operator.MTN.value and charge_type == chargecode.FOGHOLAADE.value:
+            charge_type = chargecode.MTN_SPECIAL.value
+        elif operator == Operator.RIGHTEL.value and charge_type == chargecode.MOSTAGHIM.value:
+            charge_type = chargecode.RIGHTEL_DIRECT.value
+        elif operator == Operator.RIGHTEL.value and charge_type == chargecode.FOGHOLAADE.value:
+            charge_type = chargecode.RIGHTEL_SPECIAL.value
         elif operator == Operator.MCI.value:
             pass
         else:
+            print('here')
             data["message"] = "'charge_type' is not valid."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             operator_access = broker.operatoraccess_set.get(operator=operator)
             if (not operator_access.active) or (not operator_access.can_sell(top_up=True)):
