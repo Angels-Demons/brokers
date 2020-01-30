@@ -211,7 +211,7 @@ class PackageRecord(models.Model):
             operator=operator,
             tell_charger=tell_charger,
             package_id=package.pk,
-            amount=package.amount
+            amount=amount
         )
         package_record.full_clean()
         package_record.save()
