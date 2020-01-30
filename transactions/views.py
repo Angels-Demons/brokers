@@ -409,7 +409,7 @@ class PackageCallSaleView(BaseAPIView):
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     package_amount = package.amount
-            if operator in (Operator.MTN.value, Operator.RIGHTEL.value) and package_amount != package.PackageCostWithVat:
+            if operator in (Operator.MTN.value, Operator.RIGHTEL.value) and int(package_amount) != package.PackageCostWithVat:
                 data = {
                     "message": "Failed to execute request",
                     "message_fa": ResponseTypes.INVALIPACKAGEAMOUNT.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value),
