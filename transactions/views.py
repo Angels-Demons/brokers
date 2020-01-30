@@ -15,7 +15,7 @@ from interface.API import MCI, EWays
 from accounts.models import Broker, OperatorAccess
 from transactions.models import TopUp, PackageRecord, RecordState, Package
 from transactions.serializers import PackageSerializer, OperatorAccessSerializer
-from transactions.enums import ResponceCodeTypes as codes, Operator , ChargeType as chargecode
+from transactions.enums import ResponceCodeTypes as codes, Operator , ChargeType as chargecode , ResponseTypes
 
 ACTIVE_DAYS = 180
 
@@ -359,6 +359,7 @@ class PackageCallSaleView(BaseAPIView):
         tell_num = request.data.get('tell_num')
         tell_charger = request.data.get('tell_charger')
         package_type = request.data.get('package_type')
+        package_amount = request.data.get("amount")
 
         data = {"message": '', "message_fa": "پارامترهای ارسالی نادرست است", "code": codes.invalid_parameter}
         if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
@@ -373,6 +374,9 @@ class PackageCallSaleView(BaseAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         if not package_type:
             data["message"] = "'package_type' is not provided."
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not package_amount:
+            data["message"] = "'package_amount' is not provided."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -395,12 +399,31 @@ class PackageCallSaleView(BaseAPIView):
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             except Package.DoesNotExist:
                 pass
+            if operator == Operator.MCI.value:
+                if int(package_amount) != package.amount*1.09:
+                    data = {
+                        "message": "Failed to execute request",
+                        "message_fa": ResponseTypes.INVALIDAMOUNT.farsi(ResponseTypes.INVALIDAMOUNT.value),
+                        "code": ResponseTypes.INVALIDAMOUNT.value,
+                    }
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    package_amount = package.amount
+            if operator in (Operator.MTN.value, Operator.RIGHTEL.value) and package_amount != package.PackageCostWithVat:
+                data = {
+                    "message": "Failed to execute request",
+                    "message_fa": ResponseTypes.INVALIDAMOUNT.farsi(ResponseTypes.INVALIDAMOUNT.value),
+                    "code": ResponseTypes.INVALIDAMOUNT.value,
+                }
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
             package_record = PackageRecord.create(
                 broker=broker,
                 operator=operator,
                 tell_num=tell_num,
                 tell_charger=tell_charger,
-                package=package
+                package=package,
+                amount=int(package_amount)
             )
         except ValidationError as e:
             data = {
@@ -438,7 +461,7 @@ class PackageCallSaleView(BaseAPIView):
             call_response_type, call_response_description = MCI().package_call_sale(
                 package_record.tell_num,
                 package_record.tell_charger,
-                package_record.package.amount,
+                package_record.amount,
                 package_record.package.package_type,
             )
         elif operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
@@ -539,6 +562,7 @@ class PackageExeSaleView(BaseAPIView):
         exe_response_type = -1
         exe_response_description = ''
         if operator == Operator.MCI.value:
+            package_amount = package_record.amount
             exe_response_type, exe_response_description = MCI().package_exe_sale(
                 provider_id=package_record.provider_id,
                 bank_code=package_record.bank_code,
@@ -546,14 +570,16 @@ class PackageExeSaleView(BaseAPIView):
                 card_type=package_record.card_type
             )
         elif operator == Operator.MTN.value:
+            package_amount = package_record.package.amount
             exe_response_type, exe_response_description = EWays().exe_sale(
-                package_record.provider_id, '33', int(package_record.package.PackageCostWithVat), package_record.tell_charger, package_record.package.package_type)
+                package_record.provider_id, '33', int(package_record.amount), package_record.tell_charger, package_record.package.package_type)
         elif operator == Operator.RIGHTEL.value:
+            package_amount = package_record.package.amount
             exe_response_type, exe_response_description = EWays().exe_sale(
-                package_record.provider_id, '62', int(package_record.package.PackageCostWithVat), package_record.tell_charger, package_record.package.package_type)
+                package_record.provider_id, '62', int(package_record.amount), package_record.tell_charger, package_record.package.package_type)
         success = package_record.after_execute(exe_response_type, exe_response_description)
         if success:
-            operator_access.charge(amount=package_record.package.amount, top_up=False, record=package_record)
+            operator_access.charge(amount=package_amount, top_up=False, record=package_record)
             # broker.charge_for_mcci_transaction(package_record.package.amount)
             data = {
                 "message": "Request successfully executed",
