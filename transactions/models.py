@@ -204,7 +204,7 @@ class PackageRecord(models.Model):
         return "Package record " + str(self.id)
 
     @staticmethod
-    def create(broker, tell_num, tell_charger, package,operator):
+    def create(broker, tell_num, tell_charger, package,operator, amount):
         package_record = PackageRecord(
             broker=broker,
             tell_num=tell_num,
