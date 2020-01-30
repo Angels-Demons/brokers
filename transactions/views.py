@@ -403,8 +403,8 @@ class PackageCallSaleView(BaseAPIView):
                 if int(package_amount) != package.amount*1.09:
                     data = {
                         "message": "Failed to execute request",
-                        "message_fa": ResponseTypes.INVALIDAMOUNT.farsi(ResponseTypes.INVALIDAMOUNT.value),
-                        "code": ResponseTypes.INVALIDAMOUNT.value,
+                        "message_fa": ResponseTypes.INVALIPACKAGEAMOUNT.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value),
+                        "code": ResponseTypes.INVALIPACKAGEAMOUNT.value,
                     }
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
                 else:
@@ -412,8 +412,8 @@ class PackageCallSaleView(BaseAPIView):
             if operator in (Operator.MTN.value, Operator.RIGHTEL.value) and package_amount != package.PackageCostWithVat:
                 data = {
                     "message": "Failed to execute request",
-                    "message_fa": ResponseTypes.INVALIDAMOUNT.farsi(ResponseTypes.INVALIDAMOUNT.value),
-                    "code": ResponseTypes.INVALIDAMOUNT.value,
+                    "message_fa": ResponseTypes.INVALIPACKAGEAMOUNT.farsi(ResponseTypes.INVALIPACKAGEAMOUNT.value),
+                    "code": ResponseTypes.INVALIPACKAGEAMOUNT.value,
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
