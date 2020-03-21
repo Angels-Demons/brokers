@@ -442,6 +442,12 @@ class EWays:
                                               Mobile=Mobile, OptionalParam=OptionalParam)
         return self.eways_response_mapper(response[0], False)
 
+    def get_balance(self):
+        client = Client(self.eways_url_2)
+        response = client.service.GetBalance(SitePassword=self.eways_pass)
+        print(response)
+        return response,0;
+
 
     def get_status(self, TransactionID,RequestID):
         client = Client(self.eways_url_1)
