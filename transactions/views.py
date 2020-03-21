@@ -941,20 +941,20 @@ class TestApi58(BaseAPIView):
         #     package_record.provider_id, '33', package_record.package.PackageCostWithVat, package_record.tell_charger,
         #     package_record.package.package_type)
 
-        # EWays().update_packages()
+        EWays().update_packages()
 
 
-        resp_code , resp_desc = MCI().package_call_sale(
-                param1,
-                param2,
-                param3,
-                param4,
-            )
+        # resp_code , resp_desc = MCI().package_call_sale(
+        #         param1,
+        #         param2,
+        #         param3,
+        #         param4,
+        #     )
         data = {
             "message": "Request successfully executed",
             "message_fa": "درخواست با موفقیت اجرا شد",
-            "code":resp_code,
-            "desc":resp_desc
+            # "code":resp_code,
+            # "desc":resp_desc
             # "result": str(exe_response_description),
             # "exe_response_type_0": exe_response_type_0,
             # "exe_response_description_0": exe_response_description_0,
