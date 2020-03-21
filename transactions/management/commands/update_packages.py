@@ -1,7 +1,7 @@
 
 from django.core.management import BaseCommand
 
-from interface.API import MCI
+from interface.API import MCI , EWays
 from transactions.enums import Operator
 from transactions.models import Package
 
@@ -86,4 +86,11 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        update_mci_packages()
+        try:
+            update_mci_packages()
+        except:
+            pass
+        try:
+            EWays().update_packages()
+        except:
+            pass
