@@ -2,6 +2,7 @@ import base64
 import binascii
 import logging
 from jinja2 import Template
+from django.db.models import Q
 import requests
 import xmltodict
 import json
@@ -478,7 +479,8 @@ class EWays:
         operator = -1
         simcard = -1
         duration = -1
-
+        p_dictionary = {}
+        package_list = []
         for i in res['Eways']['Products']['Operator']:
             if i['@OID'] == 'TMTN' or i['@OID'] == 'TRIGHTEL':
                 if i['@OID'] == 'TMTN':
@@ -534,26 +536,83 @@ class EWays:
                                     duration = 3
                                 elif gId == 95:
                                     duration = 57
-                                    obj, created = Package.objects.get_or_create(
-                                        package_type=int(l['PACKAGE']['@PID']),
-                                        operator=operator,
-                                        defaults={'name': l['PACKAGE']['@PackageName'], 'description': l['PACKAGE']['@PackageName'],
-                                                  'amount': int(l['PACKAGE']['@Price'] or 999),
-                                                  'PackageCostWithVat': int(l['PACKAGE']['@PricePaid'] or 999),
-                                                  'system': simcard,
-                                                  'package_duration': duration},
-                                    )
+
+                                    p_dictionary = {}
+                                    p_dictionary['package_type'] = int(l['PACKAGE']['@PID'])
+                                    p_dictionary['operator'] = operator
+                                    p_dictionary['name'] = l['PACKAGE']['@PackageName']
+                                    p_dictionary['description'] = l['PACKAGE']['@PackageName']
+                                    p_dictionary['amount'] = int(l['PACKAGE']['@Price'] or 999)
+                                    p_dictionary['PackageCostWithVat'] = int(l['PACKAGE']['@PricePaid'] or 999)
+                                    p_dictionary['system'] = simcard
+                                    p_dictionary['package_duration'] = duration
+                                    package_list.append(p_dictionary)
+
+                                    # obj, created = Package.objects.get_or_create(
+                                    #     package_type=int(l['PACKAGE']['@PID']),
+                                    #     operator=operator,
+                                    #     defaults={'name': l['PACKAGE']['@PackageName'], 'description': l['PACKAGE']['@PackageName'],
+                                    #               'amount': int(l['PACKAGE']['@Price'] or 999),
+                                    #               'PackageCostWithVat': int(l['PACKAGE']['@PricePaid'] or 999),
+                                    #               'system': simcard,
+                                    #               'package_duration': duration},
+                                    # )
                                     continue
                                 elif gId == 93:
                                     duration = 59
                                 for m in l['PACKAGE']:
-                                    print(m)
-                                    obj, created = Package.objects.get_or_create(
-                                        package_type=int(m['@PID']),
-                                        operator=operator,
-                                        defaults={'name': m['@PackageName'], 'description': m['@PackageName'],
-                                                  'amount': int(m['@Price'] or 999),
-                                                  'PackageCostWithVat': int(m['@PricePaid'] or 999),
-                                                  'system': simcard,
-                                                  'package_duration': duration},
-                                    )
+
+                                    p_dictionary = {}
+                                    p_dictionary['package_type'] = int(m['@PID'])
+                                    p_dictionary['operator'] = operator
+                                    p_dictionary['name'] = m['@PackageName']
+                                    p_dictionary['description'] = m['@PackageName']
+                                    p_dictionary['amount'] = int(m['@Price'] or 999)
+                                    p_dictionary['PackageCostWithVat'] = int(m['@PricePaid'] or 999)
+                                    p_dictionary['system'] = simcard
+                                    p_dictionary['package_duration'] = duration
+                                    package_list.append(p_dictionary)
+
+                                    # obj, created = Package.objects.get_or_create(
+                                    #     package_type=int(m['@PID']),
+                                    #     operator=operator,
+                                    #     defaults={'name': m['@PackageName'], 'description': m['@PackageName'],
+                                    #               'amount': int(m['@Price'] or 999),
+                                    #               'PackageCostWithVat': int(m['@PricePaid'] or 999),
+                                    #               'system': simcard,
+                                    #               'package_duration': duration},
+                                    # )
+
+        print(package_list)
+        all_eways_package = Package.objects.filter(Q(operator=Operator.MTN.value)|Q(operator=Operator.RIGHTEL.value))
+        # Update current packages
+        for package in all_eways_package:
+            self.update_current_eways_package(package, package_list)
+        # Add new packages
+        for pack in package_list:
+            obj, created = Package.objects.get_or_create(
+                package_type=pack['package_type'],
+                operator=pack['operator'],
+                defaults={'name': pack['name'], 'description': pack['description'],
+                          'amount': pack['amount'],
+                          'PackageCostWithVat': pack['PackageCostWithVat'],
+                          'system': pack['system'],
+                          'package_duration': pack['package_duration']},
+            )
+
+
+    @staticmethod
+    def update_current_eways_package(package, response):
+        for res in response:
+            if int(res['package_type']) == int(package.package_type):
+                package.name = res['name']
+                package.description = res['description']
+                package.amount = res['amount']
+                package.PackageCostWithVat = res['PackageCostWithVat']
+                package.system = res['system']
+                package.active = True
+                package.package_duration = res['package_duration']
+                package.save()
+                return
+        package.active = False
+        package.save()
