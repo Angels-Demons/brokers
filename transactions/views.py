@@ -934,11 +934,11 @@ class TestApi58(BaseAPIView):
 
 
 
-            log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
+            log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
 
             data = {
                 "message": "Delete It",
-                "message_fa": str(MCI().behsa_charge_status_test(provider_id=provider_id, TelNum=tell_num, Bank=log_record.bank_code)),
+                "message_fa": str(MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=log_record.bank_code)),
                 "code": codes.service_error,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
