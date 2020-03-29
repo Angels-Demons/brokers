@@ -687,8 +687,7 @@ class TransactionStatusInquiry(BaseAPIView):
                 #     pass
 
             elif transaction_type == 2:
-                log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num,
-                                                       operator=Operator.MCI.value)
+                log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num,operator=operator)
                 if operator in [Operator.MCI.value,Operator.MTN.value, Operator.RIGHTEL.value]:
                     # res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
                     if log_record.state == RecordState.EXECUTED.value:
