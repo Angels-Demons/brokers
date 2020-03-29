@@ -568,6 +568,7 @@ class Choices:
 
 class ResponceCodeTypes:
     successful = 0
+    service_error = -1
     invalid_parameter = -10
     provider_error = -11
     insufficient_balance = -12

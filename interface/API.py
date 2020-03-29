@@ -345,6 +345,39 @@ class MCI:
             logger.info(content)
         return res
 
+    def behsa_charge_status_test(self, provider_id, TelNum, Bank):
+        api_url = self.behsa_url + 'Topup/ChargeStatusInquery'
+        headers = {'Content-Type': 'application/json', }
+        api_username = self.behsa_charge_username
+        data = '{\'ProviderId\':' + str(provider_id) + ',\'Bank\':' + str(Bank) + ',\'BrokerId\': ' + str(
+            api_username) + ',\'TelNum\':' + str(TelNum) + '}'
+        response = requests.post(api_url, headers=headers, data=data,
+                                 auth=(api_username, self.behsa_generated_pass(api_username)))
+        return response
+        ##############
+        res = json.loads(response.text)
+        response_type = res['ResponseType']
+        response_desc = res['ResponseDesc']
+        if int(response_type) == -2:
+            self.token()
+            response = requests.post(api_url, headers=headers, data=data,
+                                     auth=(api_username, self.behsa_generated_pass(api_username)))
+            res = json.loads(response.text)
+            response_type = res['ResponseType']
+            response_desc = res['ResponseDesc']
+        if int(response_type) < 0:
+            logger = config_logging(logging.INFO, 'debug.log', 'debug')
+            logger.propagate = False
+            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
+                res['ResponseDesc'])
+            logger.info(content)
+
+        if int(response_type) == 0:
+            return int(response_type), response_desc, int(res['ChargeStatus']), res['ChargeDate'], res['ChargeTime']
+        else:
+            return int(response_type), response_desc
+
+
     def behsa_package_status(self, provider_id, TelNum, Bank):
         api_url = self.behsa_url + 'Topup/PackageActivationStatus'
         headers = {'Content-Type': 'application/json', }
@@ -445,7 +478,6 @@ class EWays:
     def get_balance(self):
         client = Client(self.eways_url_2)
         response = client.service.GetBalance(SitePassword=self.eways_pass)
-        print(response)
         return response,0;
 
 
