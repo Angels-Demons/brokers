@@ -614,7 +614,17 @@ class TransactionStatusInquiry(BaseAPIView):
             tell_num = request.data.get('TelNum')
             operator = int(request.data.get('operator'))
             transaction_type = request.data.get('transaction_type')
-            data = {"code": codes.invalid_parameter, "message_fa": "خطا: ارسال نشدن همه پارامترها"}
+            data = {"message": '', "message_fa": "پارامترهای ارسالی نادرست است", "code": codes.invalid_parameter}
+            if not provider_id:
+                data["message"] = "'provider_id' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not tell_num:
+                data["message"] = "'tell_num' is not provided."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            if not transaction_type or transaction_type not in [1, 2]:
+                data["message"] = "'transaction_type' is not provided or valid."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
             if not operator or not isinstance(operator, int) or operator not in [Operator.MCI.value, Operator.MTN.value,
                                                                                  Operator.RIGHTEL.value]:
                 data["message"] = "'operator' is not provided or valid."
@@ -629,9 +639,8 @@ class TransactionStatusInquiry(BaseAPIView):
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
             if transaction_type == 1:
-                log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num,
-                                               operator=operator)
-                if operator == Operator.MCI.value:
+                log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num,operator=operator)
+                if operator  in [Operator.MCI.value,Operator.MTN.value, Operator.RIGHTEL.value]:
                     # res = MCI().behsa_charge_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
                     if log_record.state == RecordState.EXECUTED.value:
                         data = {
@@ -651,7 +660,7 @@ class TransactionStatusInquiry(BaseAPIView):
                             "message": "Request successfully executed",
                             "message_fa": "درخواست با موفقیت اجرا شد",
                             "code": codes.successful,
-                            "transaction_status": 0,
+                            "transaction_status": -1,
                             "transaction_type": log_record.charge_type,
                             "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
                                 "%Y/%m/%d %H:%M:%S"),
@@ -674,14 +683,14 @@ class TransactionStatusInquiry(BaseAPIView):
                         return Response(data, status=status.HTTP_200_OK)
 
                 # should be modified with eways services
-                if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
-                    pass
+                # if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+                #     pass
 
             elif transaction_type == 2:
                 log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num,
                                                        operator=Operator.MCI.value)
-                if operator == Operator.MCI.value:
-                    res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
+                if operator in [Operator.MCI.value,Operator.MTN.value, Operator.RIGHTEL.value]:
+                    # res = MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=TopUp.bank_code)
                     if log_record.state == RecordState.EXECUTED.value:
                         data = {
                             "message": "Request successfully executed",
@@ -700,7 +709,7 @@ class TransactionStatusInquiry(BaseAPIView):
                             "message": "Request successfully executed",
                             "message_fa": "درخواست با موفقیت اجرا شد",
                             "code": codes.successful,
-                            "transaction_status": 0,
+                            "transaction_status": -1,
                             "transaction_type": log_record.charge_type,
                             "execution_time": "" if log_record.execution_time is None else log_record.execution_time.strftime(
                                 "%Y/%m/%d %H:%M:%S"),
@@ -723,8 +732,8 @@ class TransactionStatusInquiry(BaseAPIView):
                         return Response(data, status=status.HTTP_200_OK)
 
                 # should be modified with eways services
-                if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
-                    pass
+                # if operator in [Operator.MTN.value, Operator.RIGHTEL.value]:
+                #     pass
 
         except OperatorAccess.DoesNotExist as e:
             data = {
