@@ -353,7 +353,7 @@ class MCI:
             api_username) + ',\'TelNum\':' + str(TelNum) + '}'
         response = requests.post(api_url, headers=headers, data=data,
                                  auth=(api_username, self.behsa_generated_pass(api_username)))
-        return response
+        return response.text
         ##############
         res = json.loads(response.text)
         response_type = res['ResponseType']
