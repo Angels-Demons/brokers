@@ -348,8 +348,7 @@ class MCI:
         api_url = self.behsa_url + 'Topup/ChargeStatusInquery'
         headers = {'Content-Type': 'application/json', }
         api_username = self.behsa_charge_username
-        data = '{\'ProviderId\':' + str(provider_id) + ',\'Bank\':' + str(Bank) + ',\'BrokerId\': ' + str(
-            api_username) + ',\'TelNum\':' + str(TelNum) + '}'
+        data = '{\'ProviderId\':' + str(provider_id) + ',\'BankCode\':' + str(Bank) + ',\'BrokerId\': ' +  api_username + ',\'TelNum\':' + str(TelNum) + '}'
         response = requests.post(api_url, headers=headers, data=data,
                                  auth=(api_username, self.behsa_generated_pass(api_username)))
         return response.text
