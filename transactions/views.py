@@ -933,7 +933,7 @@ class TestApi58(BaseAPIView):
 
 
 
-            log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
+            log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
 
             data = {
                 "message": "Delete It",
