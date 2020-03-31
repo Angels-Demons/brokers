@@ -900,6 +900,7 @@ class TestApi58(BaseAPIView):
         try:
             broker = request.user.broker
             provider_id = request.data.get('provider_id')
+            param1 = request.data.get('param1')
             tell_num = request.data.get('TelNum')
             operator = int(request.data.get('operator'))
             transaction_type = request.data.get('transaction_type')
@@ -927,20 +928,61 @@ class TestApi58(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
-
-
-
             log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
-
             data = {
                 "message": "Delete It",
-                "message_fa": str(MCI().behsa_charge_status_test(provider_id=provider_id, TelNum=tell_num, Bank=log_record.bank_code)),
+                "message_fa": str(MCI().behsa_charge_status_test(provider_id=provider_id, TelNum=tell_num, Bank=param1 if log_record.bank_code is None else log_record.bank_code)),
                 "code": codes.service_error,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+            if transaction_type == 1:
+                log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
+            elif transaction_type == 2:
+                log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
+
+            if log_record.state not in [RecordState.EXE_REQ.value, RecordState.EXECUTED.value, RecordState.EXECUTE_ERROR.value]:
+                data = {
+                    "transaction_status": -1,
+                    "transaction_type": log_record.charge_type,
+                    "execution_time": "" if log_record.timestamp is None else log_record.timestamp.strftime(
+                        "%Y/%m/%d %H:%M:%S"),
+                    "exe_response_code": "",
+                    "exe_response_description": "",
+                    "message": "Request successfully executed",
+                    "message_fa": "درخواست با موفقیت اجرا شد",
+                    "code": codes.successful
+                }
+                return Response(data, status=status.HTTP_200_OK)
+
+            if transaction_type == 1:
+                if operator == Operator.MCI.value:
+                    pass
+                else:
+                    pass
+            else:
+                if operator == Operator.MCI.value:
+                    pass
+                else:
+                    pass
+
+            data = {
+                "message": "Service is not available now, please try again later",
+                "message_fa": "خطا: به شرح خطای اعلامی رجوع گردد",
+                "code": codes.service_error,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+            # log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
+            #
+            # data = {
+            #     "message": "Delete It",
+            #     "message_fa": str(MCI().behsa_charge_status_test(provider_id=provider_id, TelNum=tell_num, Bank=log_record.bank_code)),
+            #     "code": codes.service_error,
+            # }
+            # return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
             if transaction_type == 1:
                 # log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num,
@@ -1082,6 +1124,13 @@ class TestApi58(BaseAPIView):
                 "message": "Broker does not have access for this action",
                 "message_fa": "خطا: کاربر دسترسی لازم برای این عملیات را ندارد.",
                 "code": codes.invalid_access,
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except (TopUp.DoesNotExist, PackageRecord.DoesNotExist) as e:
+            data = {
+                "message": "Transaction not found.",
+                "message_fa": "تراکنش با مشخصات ارسالی یافت نشد.",
+                "code": ResponseTypes.INVALIDCHARGE.value,
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as e:
