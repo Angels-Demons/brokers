@@ -928,20 +928,21 @@ class TestApi58(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-            log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
-            data = {
-                "message": "Delete It",
-                "message_fa": str(MCI().behsa_charge_status_test(provider_id=provider_id, TelNum=tell_num, Bank=param1 if log_record.bank_code is None else log_record.bank_code)),
-                "code": codes.service_error,
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            # log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
+            # data = {
+            #     "message": "Delete It",
+            #     "message_fa": str(MCI().behsa_charge_status_test(provider_id=provider_id, TelNum=tell_num, Bank=param1 if log_record.bank_code is None else log_record.bank_code)),
+            #     "code": codes.service_error,
+            # }
+            # return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
             if transaction_type == 1:
                 log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
             elif transaction_type == 2:
                 log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
 
-            if log_record.state not in [RecordState.EXE_REQ.value, RecordState.EXECUTED.value, RecordState.EXECUTE_ERROR.value]:
+            if log_record.state not in [RecordState.EXE_REQ.value, RecordState.EXECUTED.value, RecordState.EXECUTE_ERROR.value
+                ,RecordState.EXECUTED_E.value, RecordState.EXECUTED_R.value]:
                 data = {
                     "transaction_status": -1,
                     "transaction_type": log_record.charge_type,
@@ -957,7 +958,76 @@ class TestApi58(BaseAPIView):
 
             if transaction_type == 1:
                 if operator == Operator.MCI.value:
-                    pass
+                    res_type, res_desc, res_status, res_datetime = MCI().behsa_charge_status_test(
+                        provider_id=provider_id, TelNum=tell_num, Bank=0 if log_record.bank_code is None
+                        else log_record.bank_code)
+                    if res_type == -1029:
+                        # charge not found
+                        if log_record.state in [RecordState.EXECUTED.value,RecordState.EXECUTED_R.value]:
+                            log_record.state = RecordState.EXECUTE_E.value
+                            log_record.save()
+                        elif log_record.state == RecordState.EXE_REQ.value:
+                            log_record.state = RecordState.EXECUTE_ERROR.value
+                            log_record.save()
+                        data = {
+                            "transaction_status": -1,
+                            "transaction_type": log_record.charge_type,
+                            "execution_time": log_record.timestamp.strftime("%Y/%m/%d %H:%M:%S") if
+                            log_record.execution_time is None else
+                            log_record.execution_time.strftime("%Y/%m/%d %H:%M:%S"),
+                            "exe_response_code": res_type,
+                            "exe_response_description": res_desc,
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
+                    elif res_type == 0:
+                        # charge found
+                        if res_status == 1:
+                            if log_record.state in [RecordState.EXECUTED.value, RecordState.EXECUTED_R.value]:
+                                pass
+                            elif log_record.state == RecordState.EXE_REQ.value:
+                                operator_access.charge(amount=log_record.amount, top_up=True, record=log_record)
+                                log_record.state = RecordState.EXECUTED_R.value
+                                log_record.save()
+                            elif log_record.state == RecordState.EXECUTE_ERROR.value:
+                                operator_access.charge(amount=log_record.amount, top_up=True, record=log_record)
+                                log_record.state = RecordState.E_EXECUTED.value
+                                log_record.save()
+                        elif res_status == -1:
+                            if log_record.state in [RecordState.EXECUTE_ERROR.value, RecordState.EXECUTED_E.value]:
+                                pass
+                            elif log_record.state in [RecordState.EXECUTED.value, RecordState.EXECUTED_R.value]:
+                                log_record.state = RecordState.EXECUTED_E.value
+                                log_record.save()
+                            elif log_record.state == RecordState.EXE_REQ.value:
+                                log_record.state = RecordState.EXECUTE_ERROR.value
+                                log_record.save()
+                        data = {
+                            "transaction_status": res_status,
+                            "transaction_type": log_record.charge_type,
+                            "execution_time": res_datetime,
+                            "exe_response_code": "" if log_record.exe_response_type is None else log_record.exe_response_type,
+                            "exe_response_description": "" if log_record.exe_response_description is None else log_record.exe_response_description,
+                            "message": "Request successfully executed",
+                            "message_fa": "درخواست با موفقیت اجرا شد",
+                            "code": codes.successful,
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
+                    else:
+                        data = {
+                            "message": res_desc,
+                            "message_fa": "خطا؛ به شرح خطای اعلامی رجوع گردد",
+                            "code": res_type,
+                            "transaction_status": "",
+                            "transaction_type": log_record.charge_type,
+                            "execution_time": "",
+                            "exe_response_code": "",
+                            "exe_response_description": ""
+                        }
+                        return Response(data, status=status.HTTP_200_OK)
+
                 else:
                     pass
             else:
