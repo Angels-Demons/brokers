@@ -443,6 +443,10 @@ class Choices:
         (RecordState.EXE_REQ.value, RecordState.EXE_REQ.name),
         (RecordState.EXECUTED.value, RecordState.EXECUTED.name),
         (RecordState.EXECUTE_ERROR.value, RecordState.EXECUTE_ERROR.name),
+        (RecordState.EXECUTED_R.value, RecordState.EXECUTED_R.name),
+        (RecordState.EXECUTED_E.value, RecordState.EXECUTED_E.name),
+        (RecordState.E_EXECUTED.value, RecordState.E_EXECUTED.name),
+
     )
 
     operators = (
