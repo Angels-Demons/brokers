@@ -928,14 +928,6 @@ class TestApi58(BaseAPIView):
                 }
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-            # log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
-            # data = {
-            #     "message": "Delete It",
-            #     "message_fa": str(MCI().behsa_package_status(provider_id=provider_id, TelNum=tell_num, Bank=param1 if log_record.bank_code is None else log_record.bank_code)),
-            #     "code": codes.service_error,
-            # }
-            # return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
             if transaction_type == 1:
                 log_record = TopUp.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
             elif transaction_type == 2:
@@ -945,7 +937,7 @@ class TestApi58(BaseAPIView):
                 ,RecordState.EXECUTED_E.value, RecordState.E_EXECUTED.value]:
                 data = {
                     "transaction_status": -1,
-                    "transaction_type": log_record.charge_type,
+                    "transaction_type": log_record.charge_type if transaction_type ==1 else log_record.package.package_type,
                     "execution_time": "" if log_record.timestamp is None else log_record.timestamp.strftime(
                         "%Y/%m/%d %H:%M:%S"),
                     "exe_response_code": "",
