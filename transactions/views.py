@@ -984,7 +984,7 @@ class TestApi58(BaseAPIView):
                         return Response(data, status=status.HTTP_200_OK)
                     elif res_type == 0:
                         # charge found
-                        if res_status == 1:
+                        if int(res_status) == 1:
                             if log_record.state in [RecordState.EXECUTED.value, RecordState.E_EXECUTED.value]:
                                 pass
                             elif log_record.state == RecordState.EXE_REQ.value:
@@ -995,7 +995,7 @@ class TestApi58(BaseAPIView):
                                 operator_access.charge(amount=log_record.amount, top_up=True, record=log_record)
                                 log_record.state = RecordState.E_EXECUTED.value
                                 log_record.save()
-                        elif res_status == -1:
+                        elif int(res_status) == -1:
                             if log_record.state in [RecordState.EXECUTE_ERROR.value, RecordState.EXECUTED_E.value]:
                                 pass
                             elif log_record.state in [RecordState.EXECUTED.value]:
