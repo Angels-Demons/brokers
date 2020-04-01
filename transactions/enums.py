@@ -387,7 +387,7 @@ class RecordState(Enum):
     EXECUTED = 5
     EXECUTE_ERROR = 6
     EXECUTED_E = 8
-    EXECUTED_R = 9
+    # EXECUTED_R = 9
     E_EXECUTED = 10
     #EXECUTED_E : Executed Transaction with error status in status query request
     #EXECUTED_R : Executed Transaction with EXE_REQ status
@@ -443,7 +443,6 @@ class Choices:
         (RecordState.EXE_REQ.value, RecordState.EXE_REQ.name),
         (RecordState.EXECUTED.value, RecordState.EXECUTED.name),
         (RecordState.EXECUTE_ERROR.value, RecordState.EXECUTE_ERROR.name),
-        (RecordState.EXECUTED_R.value, RecordState.EXECUTED_R.name),
         (RecordState.EXECUTED_E.value, RecordState.EXECUTED_E.name),
         (RecordState.E_EXECUTED.value, RecordState.E_EXECUTED.name),
 

@@ -942,7 +942,7 @@ class TestApi58(BaseAPIView):
                 log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
 
             if log_record.state not in [RecordState.EXE_REQ.value, RecordState.EXECUTED.value, RecordState.EXECUTE_ERROR.value
-                ,RecordState.EXECUTED_E.value, RecordState.EXECUTED_R.value,RecordState.E_EXECUTED.value]:
+                ,RecordState.EXECUTED_E.value, RecordState.E_EXECUTED.value]:
                 data = {
                     "transaction_status": -1,
                     "transaction_type": log_record.charge_type,
@@ -963,7 +963,7 @@ class TestApi58(BaseAPIView):
                         else log_record.bank_code)
                     if res_type == -1029:
                         # charge not found
-                        if log_record.state in [RecordState.EXECUTED.value,RecordState.EXECUTED_R.value]:
+                        if log_record.state in [RecordState.EXECUTED.value]:
                             log_record.state = RecordState.EXECUTE_E.value
                             log_record.save()
                         elif log_record.state == RecordState.EXE_REQ.value:
@@ -985,12 +985,11 @@ class TestApi58(BaseAPIView):
                     elif res_type == 0:
                         # charge found
                         if res_status == 1:
-                            if log_record.state in [RecordState.EXECUTED.value, RecordState.EXECUTED_R.value,
-                                                    RecordState.E_EXECUTED.value]:
+                            if log_record.state in [RecordState.EXECUTED.value, RecordState.E_EXECUTED.value]:
                                 pass
                             elif log_record.state == RecordState.EXE_REQ.value:
                                 operator_access.charge(amount=log_record.amount, top_up=True, record=log_record)
-                                log_record.state = RecordState.EXECUTED_R.value
+                                log_record.state = RecordState.EXECUTED.value
                                 log_record.save()
                             elif log_record.state == RecordState.EXECUTE_ERROR.value:
                                 operator_access.charge(amount=log_record.amount, top_up=True, record=log_record)
@@ -999,7 +998,7 @@ class TestApi58(BaseAPIView):
                         elif res_status == -1:
                             if log_record.state in [RecordState.EXECUTE_ERROR.value, RecordState.EXECUTED_E.value]:
                                 pass
-                            elif log_record.state in [RecordState.EXECUTED.value, RecordState.EXECUTED_R.value]:
+                            elif log_record.state in [RecordState.EXECUTED.value]:
                                 log_record.state = RecordState.EXECUTED_E.value
                                 log_record.save()
                             elif log_record.state == RecordState.EXE_REQ.value:
