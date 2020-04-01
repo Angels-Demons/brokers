@@ -942,7 +942,7 @@ class TestApi58(BaseAPIView):
                 log_record = PackageRecord.objects.get(provider_id=provider_id, tell_num=tell_num, operator=operator)
 
             if log_record.state not in [RecordState.EXE_REQ.value, RecordState.EXECUTED.value, RecordState.EXECUTE_ERROR.value
-                ,RecordState.EXECUTED_E.value, RecordState.EXECUTED_R.value]:
+                ,RecordState.EXECUTED_E.value, RecordState.EXECUTED_R.value,RecordState.E_EXECUTED.value]:
                 data = {
                     "transaction_status": -1,
                     "transaction_type": log_record.charge_type,
@@ -985,7 +985,8 @@ class TestApi58(BaseAPIView):
                     elif res_type == 0:
                         # charge found
                         if res_status == 1:
-                            if log_record.state in [RecordState.EXECUTED.value, RecordState.EXECUTED_R.value]:
+                            if log_record.state in [RecordState.EXECUTED.value, RecordState.EXECUTED_R.value,
+                                                    RecordState.E_EXECUTED.value]:
                                 pass
                             elif log_record.state == RecordState.EXE_REQ.value:
                                 operator_access.charge(amount=log_record.amount, top_up=True, record=log_record)
