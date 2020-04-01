@@ -376,7 +376,6 @@ class MCI:
             api_username) + ',\'TelNum\':' + str(TelNum) + '}'
         response = requests.post(api_url, headers=headers, data=data,
                                  auth=(api_username, self.behsa_generated_pass(api_username)))
-        return response.text
         res = json.loads(response.text)
         response_type = res['ResponseType']
         if int(response_type) == -2:
@@ -384,14 +383,7 @@ class MCI:
             response = requests.post(api_url, headers=headers, data=data,
                                      auth=(api_username, self.behsa_generated_pass(api_username)))
             res = json.loads(response.text)
-            response_type = res['ResponseType']
-        if int(response_type) < 0:
-            logger = config_logging(logging.INFO, 'debug.log', 'debug')
-            logger.propagate = False
-            content = '***Behsa error*** ResponseType: ' + str(response_type) + ', ResponseDesc: ' + str(
-                res['ResponseDesc'])
-            logger.info(content)
-        return res
+        return int(res['ResponseType']), res['ResponseDesc']
 
     @staticmethod
     def behsa_hash(hash_string):
